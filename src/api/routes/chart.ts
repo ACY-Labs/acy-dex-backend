@@ -11,31 +11,21 @@ export default (app: Router) => {
 
   const logger: Logger = Container.get("logger");
 
-  route.get(
-    "/:interval",
+  route.post(
+    "/swap/:token0/:token1/:interval",
     async (req: Request, res: Response, next: NextFunction) => {
-      logger.debug("Calling chart GET endpoint with param: %o", req.params);
+      logger.debug(
+        "Calling chart POST endpoint /swap/:token0/:token1/:interval with param: %o",
+        req.params
+      );
       try {
         const chartServiceInstance = Container.get(ChartService);
-        const data = await chartServiceInstance.someGetter(
+        const data = await chartServiceInstance.getSwapRate(
+          req.params["token0"],
+          req.params["token1"],
           req.params["interval"]
         );
         return res.status(201).json(data);
-      } catch (e) {
-        logger.error("🔥 error: %o", e);
-        return next(e);
-      }
-    }
-  );
-
-  route.post(
-    "/:interval",
-    async (req: Request, res: Response, next: NextFunction) => {
-      logger.debug("Calling chart POST endpoint with param: %o", req.params);
-      try {
-        const chartServiceInstance = Container.get(ChartService);
-        await chartServiceInstance.someSetter(req.params["interval"]);
-        return res.status(201).json({ status: "OK" });
       } catch (e) {
         logger.error("🔥 error: %o", e);
         return next(e);

@@ -2,16 +2,27 @@ import mongoose from "mongoose";
 
 const Rate = new mongoose.Schema(
   {
-    end_date: {
+    token0: {
       type: String,
-      required: [true, new Date().toString()],
+      required: [true],
+      index: true,
+    },
+    token1: {
+      type: String,
+      required: [true],
       index: true,
     },
     interval: {
       type: String,
       required: [true, "15M"],
     },
-    rates: [Number],
+    swaps: [
+      {
+        time: Date,
+        token0: String,
+        token1: String,
+      },
+    ],
   },
   { timestamps: true }
 );

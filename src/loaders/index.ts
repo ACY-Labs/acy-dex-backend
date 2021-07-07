@@ -1,6 +1,7 @@
 import expressLoader from "./express";
 import mongooseLoader from "./mongoose";
 import dependencyInjectorLoader from "./dependencyInjector";
+import clients from "./clients";
 import Logger from "./logger";
 
 export default async ({ expressApp }) => {
@@ -25,6 +26,7 @@ export default async ({ expressApp }) => {
       // salaryModel,
       // whateverModel
     ],
+    clients,
   });
   Logger.info("✌️ Dependency Injector loaded");
 
