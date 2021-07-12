@@ -1,24 +1,22 @@
 import { Container } from "typedi";
 import LoggerInstance from "./logger";
 import config from "../config";
-import GQLClient from "../clients/GQLclients";
+import Web3 from "web3";
 
 export default ({
   mongoConnection, // for agenda
   models,
-  clients,
 }: {
   mongoConnection;
   models: { name: string; model: any }[];
-  clients: Array<GQLClient>;
 }) => {
   try {
     models.forEach((m) => {
       Container.set(m.name, m.model);
     });
-    clients.forEach((c) => {
-      Container.set(c.name, c);
-    });
+
+    let Web3Instance: Web3 = new Web3(config.rpcURL);
+    Container.set("web3", Web3Instance);
 
     Container.set("logger", LoggerInstance);
   } catch (e) {

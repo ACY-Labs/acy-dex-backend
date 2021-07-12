@@ -1,14 +1,11 @@
 import { Service, Inject } from "typedi";
-import { request } from "graphql-request";
-import gql from "graphql-tag";
 
 @Service()
 export default class ChartService {
   constructor(
     @Inject("rateModel") private rateModel,
     @Inject("logger") private logger,
-    @Inject("blockClient") private blockClient,
-    @Inject("client") private client
+    @Inject("web3") private web3
   ) {}
 
   public format(data) {
@@ -60,17 +57,7 @@ export default class ChartService {
   ) {
     this.logger.debug(`Updating swap rates`);
 
-    let str = `
-    {
-      pairs {
-        id
-      }
-    }
-    `;
-
-    const query = gql(str);
-
-    await this.client.query(query).then((data) => console.log(data));
+    // LOGIC TO GET SWAP HISTORY
 
     await this.rateModel.create({
       token0,

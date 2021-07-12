@@ -1,7 +1,7 @@
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
 // Set the NODE_ENV to 'development' by default
-process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+process.env.NODE_ENV = process.env.NODE_ENV || "development";
 
 const envFound = dotenv.config();
 if (envFound.error) {
@@ -24,14 +24,14 @@ export default {
   /**
    * Used by winston logger
    */
-   logs: {
-    level: process.env.LOG_LEVEL || 'silly',
+  logs: {
+    level: process.env.LOG_LEVEL || "silly",
   },
-  
+  rpcURL: process.env.WEB3_RPC_URL,
   /**
    * API configs
    */
   api: {
-    prefix: '/api',
-  }
-}
+    prefix: "/api",
+  },
+};
