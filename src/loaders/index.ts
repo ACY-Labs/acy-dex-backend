@@ -12,16 +12,16 @@ export default async ({ expressApp }) => {
    * I know this is controversial but will provide a lot of flexibility at the time
    * of writing unit tests, just go and check how beautiful they are!
    */
-  const rateModel = {
-    name: "rateModel",
+  const pairModel = {
+    name: "pairModel",
     // Notice the require syntax and the '.default'
-    model: require("../models/rate").default,
+    model: require("../models/pair").default,
   };
 
   await dependencyInjectorLoader({
     mongoConnection,
     models: [
-      rateModel,
+      pairModel,
       // salaryModel,
       // whateverModel
     ],
