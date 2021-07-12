@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const Rate = new mongoose.Schema(
+const Pair = new mongoose.Schema(
   {
     token0: {
       type: String,
@@ -19,8 +19,7 @@ const Rate = new mongoose.Schema(
     swaps: [
       {
         time: Date,
-        token0: String,
-        token1: String,
+        rate: Number,
       },
     ],
   },
@@ -28,4 +27,4 @@ const Rate = new mongoose.Schema(
 );
 
 // convert to model
-export default mongoose.model("Rate", Rate);
+export default mongoose.model("Pair", Pair);
