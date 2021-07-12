@@ -16,40 +16,31 @@ npm run debug
 
 ### Usage
 
-API endpoint: `/api/chart/swap/ETH/WBTC/15M`
+#### WETH-USDC
+
+`/api/chart/swap/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/15M`
 
 ```
 
 {
   "data": {
-    "_id": "60eae504f53d14223cad0f2f",
-    "token0": "ETH",
-    "token1": "WBTC",
+    "_id": "60ec7ef53f78858ab8dc04c8",
+    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "token1": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
     "interval": "15M",
     "swaps": [
       {
-        "_id": "60eae504f53d14223cad0f30",
-        "time": "2018-12-24T02:33:30.000Z",
-        "token0": "1",
-        "token1": "2"
+        "_id": "60ec7ef53f78858ab8dc04c9",
+        "rate": 2.0867689956219157e-9,
+        "time": "2021-07-12T15:11:33.000Z"
       },
       {
-        "_id": "60eae504f53d14223cad0f31",
-        "time": "2019-11-24T02:33:30.000Z",
-        "token0": "3",
-        "token1": "1"
+        "_id": "60ec7ef53f78858ab8dc04ca",
+        "rate": 2.0988811006641615e-9,
+        "time": "2021-07-12T15:13:27.000Z"
       },
-      {
-        "_id": "60eae504f53d14223cad0f32",
-        "time": "2020-12-24T02:33:30.000Z",
-        "token0": "10",
-        "token1": "5"
-      }
-    ],
-    "createdAt": "2021-07-11T12:33:08.802Z",
-    "updatedAt": "2021-07-11T12:33:08.802Z",
-    "__v": 0
+      ...
+    ]
   }
 }
 ```
-

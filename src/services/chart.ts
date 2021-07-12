@@ -42,7 +42,7 @@ export default class ChartService {
         .exec();
     }
 
-    // TODO: check if timestamp is within accepted range
+    // TODO: check if last updated_at is within accepted range
 
     return data;
   }
@@ -79,8 +79,6 @@ export default class ChartService {
   }
 
   public async processSwaps(swaps) {
-    console.log(swaps);
-    let keys = ["amount0In", "amount0Out", "amount1In", "amount1Out"];
     let total_swaps = swaps.length;
     let block_number_to_timestamp_tasks = [];
 
@@ -99,7 +97,11 @@ export default class ChartService {
       );
     }
 
+    // wait for parallel async tasks to join
     let res = await Promise.allSettled(block_number_to_timestamp_tasks);
+
+    // The key order here guarantees non-zero amount by agent 0 will come before agent 1's
+    let keys = ["amount0In", "amount0Out", "amount1In", "amount1Out"];
 
     for (let i = 0; i < total_swaps; i++) {
       let temp = {};
@@ -109,8 +111,12 @@ export default class ChartService {
           swapAmounts.push(swaps[i][key]);
         }
       }
+      // Division of raw amounts to get the rate
       temp["rate"] = parseFloat(swapAmounts[0]) / parseFloat(swapAmounts[1]);
+
+      // JS Date requires timestamp accurate to millisecond
       temp["time"] = new Date(res[i].value * 1000);
+
       swaps[i] = temp;
     }
 
@@ -135,10 +141,7 @@ export default class ChartService {
       INIT_CODE_HASH
     );
 
-    console.log(pairAddress);
     let contract = new this.web3.eth.Contract(PAIR_CONTRACT_ABI, pairAddress);
-
-    // LOGIC TO GET SWAP HISTORY
 
     // timestamp now in seconds
     const now = Math.floor(new Date().getTime() / 1000);
@@ -192,10 +195,8 @@ export default class ChartService {
       extracted_swaps[Math.floor(i / step)] = _swap;
     }
 
-    // 4. write a helper function to get the rate & date
+    // get the rate & time using in and out amounts
     let processed_swaps = await this.processSwaps(extracted_swaps);
-
-    // 5. return result
 
     await this.pairModel.create({
       token0,
