@@ -7,8 +7,11 @@ import {
   PAIR_CONTRACT_ABI,
   DEFAULT_INTERVAL_COUNT,
   DEFAULT_DATAPOINT_COUNT,
+  ERC20_ABI,
+  DEFAULT_PARALLEL_COUNT,
 } from "../constants";
 import { getBlockByTime, timestampToDate } from "../util";
+import BigNumber from "bignumber.js";
 
 @Service()
 export default class ChartService {
@@ -20,8 +23,21 @@ export default class ChartService {
 
   public format(data) {
     // do nothing for now
-    // TODO: format accordingly to frontend requirement
-    return data;
+    let _data = {
+      token0: data.token0,
+      token1: data.token1,
+      interval: data.interval,
+      swaps: data.swaps,
+    };
+
+    _data["swaps"] = _data["swaps"].map((item) => {
+      return {
+        rate: item["rate"],
+        time: item["time"],
+      };
+    });
+
+    return _data;
   }
 
   public async checkCachedAndIsValid(
@@ -78,27 +94,25 @@ export default class ChartService {
     return now;
   }
 
-  public async processSwaps(swaps) {
+  public async processSwaps(swaps, [decimal0, decimal1]) {
     let total_swaps = swaps.length;
     let block_number_to_timestamp_tasks = [];
 
     for (let i = 0; i < total_swaps; i++) {
       block_number_to_timestamp_tasks.push(
-        this.web3.eth
-          .getBlock(swaps[i].blockNumber)
-          .then((res) => {
-            return res.timestamp;
-          })
-          .catch((e) => {
-            console.log(swaps[i]);
-            console.log("Failed");
-            return 0;
-          })
+        this.web3.eth.getBlock(swaps[i].blockNumber)
       );
     }
 
     // wait for parallel async tasks to join
     let res = await Promise.allSettled(block_number_to_timestamp_tasks);
+    res = res
+      .filter((item) => {
+        return item.status === "fulfilled";
+      })
+      .map((item) => {
+        return item.value.timestamp;
+      });
 
     // The key order here guarantees non-zero amount by agent 0 will come before agent 1's
     let keys = ["amount0In", "amount0Out", "amount1In", "amount1Out"];
@@ -111,11 +125,20 @@ export default class ChartService {
           swapAmounts.push(swaps[i][key]);
         }
       }
-      // Division of raw amounts to get the rate
-      temp["rate"] = parseFloat(swapAmounts[0]) / parseFloat(swapAmounts[1]);
+      // Division of actual amounts to get the rate
+
+      let actualAmount0: BigNumber = new BigNumber(swapAmounts[0]).div(
+        new BigNumber(`1e+${decimal0}`)
+      );
+
+      let actualAmount1: BigNumber = new BigNumber(swapAmounts[1]).div(
+        new BigNumber(`1e+${decimal1}`)
+      );
+
+      temp["rate"] = actualAmount0.div(actualAmount1).toNumber();
 
       // JS Date requires timestamp accurate to millisecond
-      temp["time"] = new Date(res[i].value * 1000);
+      temp["time"] = new Date(Number(res[i]) * 1000);
 
       swaps[i] = temp;
     }
@@ -162,14 +185,37 @@ export default class ChartService {
     `);
 
     // start from the block and look for all swap events
-    let option = {
-      fromBlock: block.number,
-      toBlock: "latest",
-    };
+    // optimization: parallelize block queries
+    let startBlockNumber = block.number;
+    let tempEndBlockNumber = await this.web3.eth.getBlockNumber();
 
-    // TODO optimization: get events parallely using different options with different block ranges
-    // TODO join the async operations
-    let swaps = await contract.getPastEvents("Swap", option);
+    let _step = Math.floor(
+      (tempEndBlockNumber - startBlockNumber) / DEFAULT_PARALLEL_COUNT
+    );
+
+    let get_events_tasks = [];
+    for (let i = 0; i < DEFAULT_PARALLEL_COUNT; i++) {
+      let option = {
+        fromBlock: startBlockNumber,
+        toBlock:
+          i === DEFAULT_PARALLEL_COUNT - 1
+            ? "latest"
+            : startBlockNumber + _step,
+      };
+      startBlockNumber += _step + 1;
+
+      get_events_tasks.push(contract.getPastEvents("Swap", option));
+    }
+
+    let swaps = await Promise.allSettled(get_events_tasks);
+    swaps = swaps
+      .filter((item) => {
+        return item.status === "fulfilled";
+      })
+      .map((item) => {
+        return item.value;
+      })
+      .flat(1);
 
     // stores 100 data points to be served to frontend
     let extracted_swaps = new Array(DEFAULT_DATAPOINT_COUNT);
@@ -178,6 +224,12 @@ export default class ChartService {
     let step = 1;
     if (total_swaps > DEFAULT_DATAPOINT_COUNT) {
       step = Math.floor(total_swaps / DEFAULT_DATAPOINT_COUNT);
+
+      // if length in (100,200)
+      if (step == 1) {
+        // get latest 100 data points
+        swaps = swaps.slice(-1 * DEFAULT_DATAPOINT_COUNT);
+      }
     }
 
     // iterate through returned array and save blockNumber & .returnValues (contains amountIn amountOut)
@@ -195,8 +247,16 @@ export default class ChartService {
       extracted_swaps[Math.floor(i / step)] = _swap;
     }
 
+    let token0Contract = new this.web3.eth.Contract(ERC20_ABI, _token0);
+    let token1Contract = new this.web3.eth.Contract(ERC20_ABI, _token1);
+    let decimal0 = await token0Contract.methods.decimals().call();
+    let decimal1 = await token1Contract.methods.decimals().call();
+
     // get the rate & time using in and out amounts
-    let processed_swaps = await this.processSwaps(extracted_swaps);
+    let processed_swaps = await this.processSwaps(extracted_swaps, [
+      decimal0,
+      decimal1,
+    ]);
 
     await this.pairModel.create({
       token0,
