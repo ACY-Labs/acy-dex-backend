@@ -8,9 +8,13 @@ import {
   DEFAULT_INTERVAL_COUNT,
   DEFAULT_DATAPOINT_COUNT,
   ERC20_ABI,
-  DEFAULT_PARALLEL_COUNT,
+  DEFAULT_CONSECUTIVE_BLOCK_COUNT,
 } from "../constants";
-import { getBlockByTime, timestampToDate } from "../util";
+import {
+  getBlockByTime,
+  timestampToDate,
+  getAsyncTasksValidResults,
+} from "../util";
 import BigNumber from "bignumber.js";
 
 @Service()
@@ -85,13 +89,29 @@ export default class ChartService {
     };
   }
 
-  public getStartingTimestamp(now, interval_length) {
+  public getTimestampsWithInterval(now, interval_length) {
+    let intervals = new Array(DEFAULT_INTERVAL_COUNT);
+    let step = 15 * 60;
     switch (interval_length) {
       case "15M":
-        now -= 15 * 60 * DEFAULT_INTERVAL_COUNT;
+        step = 15 * 60;
+        break;
+      case "1H":
+        step = 60 * 60;
+        break;
+      case "4H":
+        step = 4 * 60 * 60;
+        break;
+      case "1D":
+        step = 24 * 60 * 60;
+        break;
     }
 
-    return now;
+    for (let i = DEFAULT_INTERVAL_COUNT - 1; i >= 0; i--) {
+      intervals[DEFAULT_INTERVAL_COUNT - i - 1] = now - step * i;
+    }
+
+    return intervals;
   }
 
   public async processSwaps(swaps, [decimal0, decimal1]) {
@@ -105,7 +125,7 @@ export default class ChartService {
     }
 
     // wait for parallel async tasks to join
-    let res = await Promise.allSettled(block_number_to_timestamp_tasks);
+    let res: any = await Promise.allSettled(block_number_to_timestamp_tasks);
     res = res
       .filter((item) => {
         return item.status === "fulfilled";
@@ -169,71 +189,64 @@ export default class ChartService {
     // timestamp now in seconds
     const now = Math.floor(new Date().getTime() / 1000);
 
-    // get starting timestamp in seconds
-    const start = this.getStartingTimestamp(now, interval);
+    // get array of timestamp in seconds
+    const timestamps = this.getTimestampsWithInterval(now, interval);
 
-    // find nearest block to the timestamp
-    let block = await getBlockByTime(start);
+    // find nearest blocks to list of timestamps
+    let find_block_tasks = [];
+    for (let i = 0; i < DEFAULT_INTERVAL_COUNT; i++) {
+      find_block_tasks.push(getBlockByTime(timestamps[i]));
+    }
+    let blocks: any = await getAsyncTasksValidResults(find_block_tasks);
 
-    console.log(`
+    console.log("---------- BLOCKS ----------");
+    for (let i = 0; i < blocks.length; i++) {
+      console.log(`
       Now: ${timestampToDate(now)}
-      Start: ${timestampToDate(start)}
-      Difference: ${Math.floor((now - start) / 3600)} hours ${Math.floor(
-      (((now - start) / 3600) % 1) * 60
-    )} minutes
-      Block time: ${timestampToDate(block.timestamp)}
+      Start: ${timestampToDate(timestamps[i])}
+      Difference: ${Math.floor(
+        (now - blocks[i].timestamp) / 3600
+      )} hours ${Math.floor(
+        (((now - blocks[i].timestamp) / 3600) % 1) * 60
+      )} minutes
+      Block time: ${timestampToDate(blocks[i].timestamp)}
     `);
-
-    // start from the block and look for all swap events
-    // optimization: parallelize block queries
-    let startBlockNumber = block.number;
-    let tempEndBlockNumber = await this.web3.eth.getBlockNumber();
-
-    let _step = Math.floor(
-      (tempEndBlockNumber - startBlockNumber) / DEFAULT_PARALLEL_COUNT
-    );
-
+    }
+    // parallelize block queries
     let get_events_tasks = [];
-    for (let i = 0; i < DEFAULT_PARALLEL_COUNT; i++) {
+    let blocks_count = blocks.length;
+
+    for (let i = 0; i < blocks_count; i++) {
       let option = {
-        fromBlock: startBlockNumber,
-        toBlock:
-          i === DEFAULT_PARALLEL_COUNT - 1
-            ? "latest"
-            : startBlockNumber + _step,
+        fromBlock: blocks[i].number - DEFAULT_CONSECUTIVE_BLOCK_COUNT,
+        toBlock: i === blocks_count - 1 ? "latest" : blocks[i].number,
       };
-      startBlockNumber += _step + 1;
+      console.log(`option for block ${i}`);
+      console.log(option);
 
       get_events_tasks.push(contract.getPastEvents("Swap", option));
     }
 
-    let swaps = await Promise.allSettled(get_events_tasks);
+    let swaps: any = await Promise.allSettled(get_events_tasks);
     swaps = swaps
       .filter((item) => {
         return item.status === "fulfilled";
       })
       .map((item) => {
-        return item.value;
+        // item is an array of swaps, last one has the largest swap, which means is the latest
+        return item.value.pop();
+      })
+      .filter((item) => {
+        return item !== undefined;
       })
       .flat(1);
 
     // stores 100 data points to be served to frontend
-    let extracted_swaps = new Array(DEFAULT_DATAPOINT_COUNT);
+    let extracted_swaps = [];
     let total_swaps = swaps.length;
 
-    let step = 1;
-    if (total_swaps > DEFAULT_DATAPOINT_COUNT) {
-      step = Math.floor(total_swaps / DEFAULT_DATAPOINT_COUNT);
-
-      // if length in (100,200)
-      if (step == 1) {
-        // get latest 100 data points
-        swaps = swaps.slice(-1 * DEFAULT_DATAPOINT_COUNT);
-      }
-    }
-
     // iterate through returned array and save blockNumber & .returnValues (contains amountIn amountOut)
-    for (let i = 0; i < total_swaps; i += step) {
+    for (let i = 0; i < total_swaps; i++) {
       let { amount0In, amount0Out, amount1In, amount1Out } =
         swaps[i].returnValues;
       let _swap = {
@@ -244,7 +257,7 @@ export default class ChartService {
         amount1Out,
       };
 
-      extracted_swaps[Math.floor(i / step)] = _swap;
+      extracted_swaps.push(_swap);
     }
 
     let token0Contract = new this.web3.eth.Contract(ERC20_ABI, _token0);

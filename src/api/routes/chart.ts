@@ -12,18 +12,18 @@ export default (app: Router) => {
   const logger: Logger = Container.get("logger");
 
   route.post(
-    "/swap/:token0/:token1/:interval",
+    "/swap",
     async (req: Request, res: Response, next: NextFunction) => {
       logger.debug(
-        "Calling chart POST endpoint /swap/:token0/:token1/:interval with param: %o",
-        req.params
+        "Calling chart POST endpoint /swap with query: %o",
+        req.query
       );
       try {
         const chartServiceInstance = Container.get(ChartService);
         const data = await chartServiceInstance.getSwapRate(
-          req.params["token0"],
-          req.params["token1"],
-          req.params["interval"]
+          req.query.token0,
+          req.query.token1,
+          req.query.interval
         );
         return res.status(201).json(data);
       } catch (e) {

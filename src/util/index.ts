@@ -17,7 +17,7 @@ export async function getBlockByTime(
   // decreasing average block size will decrease precision and also
   // decrease the amount of requests made in order to find the closest
   // block
-  let averageBlockTime = 17 * 1.5;
+  let averageBlockTime = 10 * 1.5;
 
   // get current block number
   const currentBlockNumber = await web3.eth.getBlockNumber();
@@ -91,13 +91,22 @@ export async function getBlockByTime(
 
   console.log("tgt timestamp   ->", targetTimestamp);
   console.log("tgt date        ->", timestampToDate(targetTimestamp));
-  console.log("");
-
   console.log("block timestamp ->", block.timestamp);
   console.log("block date      ->", timestampToDate(block.timestamp));
-  console.log("");
-
   console.log("requests made   ->", requestsMade);
 
   return block;
+}
+
+export async function getAsyncTasksValidResults(tasks) {
+  let results: any = await Promise.allSettled(tasks);
+  results = results
+    .filter((item) => {
+      return item.status === "fulfilled";
+    })
+    .map((item) => {
+      return item.value;
+    });
+
+  return results;
 }
