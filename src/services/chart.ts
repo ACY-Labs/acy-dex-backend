@@ -1,4 +1,4 @@
-import { Service, Inject } from "typedi";
+import { Service, Inject, Container } from "typedi";
 import { getCreate2Address } from "@ethersproject/address";
 import { pack, keccak256 } from "@ethersproject/solidity";
 import {
@@ -118,21 +118,27 @@ export default class ChartService {
     let total_swaps = swaps.length;
     let block_number_to_timestamp_tasks = [];
 
+    let cache = Container.get("cache");
+    console.log(cache);
+    let swap_timestamps = new Array(total_swaps);
     for (let i = 0; i < total_swaps; i++) {
-      block_number_to_timestamp_tasks.push(
-        this.web3.eth.getBlock(swaps[i].blockNumber)
-      );
+      let cachedValue = cache[`b_${swaps[i].blockNumber}`];
+      if (cachedValue) swap_timestamps[i] = cachedValue;
+      else {
+        block_number_to_timestamp_tasks.push(
+          this.web3.eth.getBlock(swaps[i].blockNumber).then((res) => {
+            return { index: i, timestamp: res.timestamp };
+          })
+        );
+      }
     }
 
-    // wait for parallel async tasks to join
-    let res: any = await Promise.allSettled(block_number_to_timestamp_tasks);
-    res = res
-      .filter((item) => {
-        return item.status === "fulfilled";
-      })
-      .map((item) => {
-        return item.value.timestamp;
-      });
+    let delayed_timestamps: any = await getAsyncTasksValidResults(
+      block_number_to_timestamp_tasks
+    );
+    delayed_timestamps.forEach((item) => {
+      swap_timestamps[item["index"]] = item["timestamp"];
+    });
 
     // The key order here guarantees non-zero amount by agent 0 will come before agent 1's
     let keys = ["amount0In", "amount0Out", "amount1In", "amount1Out"];
@@ -158,7 +164,7 @@ export default class ChartService {
       temp["rate"] = actualAmount0.div(actualAmount1).toNumber();
 
       // JS Date requires timestamp accurate to millisecond
-      temp["time"] = new Date(Number(res[i]) * 1000);
+      temp["time"] = new Date(Number(swap_timestamps[i]) * 1000);
 
       swaps[i] = temp;
     }

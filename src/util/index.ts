@@ -41,6 +41,10 @@ export async function getBlockByTime(
     block = await web3.eth.getBlock(blockNumber);
     requestsMade += 1;
   }
+  let cache = Container.get("cache");
+  cache[`t_${targetTimestamp}`] = block.number;
+  cache[`b_${block.number}`] = targetTimestamp;
+  Container.set("cache", cache);
 
   // If we were to use lower and upper limits
   // if we undershoot the day

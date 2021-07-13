@@ -16,8 +16,8 @@ export default ({
     });
 
     let Web3Instance: Web3 = new Web3(config.rpcURL);
+    Container.set("cache", {});
     Container.set("web3", Web3Instance);
-
     Container.set("logger", LoggerInstance);
   } catch (e) {
     LoggerInstance.error("🔥 Error on dependency injector loader: %o", e);
