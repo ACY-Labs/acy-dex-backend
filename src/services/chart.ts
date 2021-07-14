@@ -5,10 +5,19 @@ import {
   FACTORY_ADDRESS,
   INIT_CODE_HASH,
   PAIR_CONTRACT_ABI,
-  DEFAULT_INTERVAL_COUNT,
-  DEFAULT_CACHE_TIMEOUT_SECONDS,
   ERC20_ABI,
+  DEFAULT_CACHE_TIMEOUT_SECONDS,
   DEFAULT_CONSECUTIVE_BLOCK_COUNT,
+  INTERVAL_15M_STEP,
+  INTERVAL_1H_STEP,
+  INTERVAL_4H_STEP,
+  INTERVAL_1D_STEP,
+  INTERVAL_1M_STEP,
+  INTERVAL_15M_COUNT,
+  INTERVAL_1H_COUNT,
+  INTERVAL_4H_COUNT,
+  INTERVAL_1D_COUNT,
+  INTERVAL_1M_COUNT,
 } from "../constants";
 import { getBlockByTime, getAsyncTasksValidResults } from "../util";
 import BigNumber from "bignumber.js";
@@ -26,7 +35,7 @@ export default class ChartService {
     let _data = {
       token0: data.token0,
       token1: data.token1,
-      interval: data.interval,
+      range: data.range,
       swaps: data.swaps,
     };
 
@@ -43,18 +52,16 @@ export default class ChartService {
   public async checkCachedAndIsValid(
     token0: string,
     token1: string,
-    interval: string
+    range: string
   ) {
     this.logger.debug("start checkCachedAndIsValid");
     let need_update = false;
-    let data = await this.pairModel
-      .findOne({ token0, token1, interval })
-      .exec();
+    let data = await this.pairModel.findOne({ token0, token1, range }).exec();
 
     if (!data) {
       // swap and recheck
       data = await this.pairModel
-        .findOne({ token0: token1, token1: token0, interval })
+        .findOne({ token0: token1, token1: token0, range })
         .exec();
     }
     if (data) {
@@ -77,58 +84,66 @@ export default class ChartService {
     return [data, need_update];
   }
 
-  public async getSwapRate(token0: string, token1: string, interval: string) {
-    this.logger.debug(`Chart data interval ${interval} getter called`);
+  public async getSwapRate(token0: string, token1: string, range: string) {
+    this.logger.debug(`Chart data range ${range}`);
 
     // if data is cached
     let [data, need_update] = await this.checkCachedAndIsValid(
       token0,
       token1,
-      interval
+      range
     );
     if (data) return this.format(data);
 
     // make query
-    await this.updateSwapData(token0, token1, interval, need_update);
+    await this.updateSwapData(token0, token1, range, need_update);
 
     // re-get the data
     [data, need_update] = await this.checkCachedAndIsValid(
       token0,
       token1,
-      interval
+      range
     );
 
     // data should be ready
     return this.format(data);
   }
 
-  public getTimestampsWithInterval(now, interval_length) {
-    this.logger.debug("start getTimestampsWithInterval");
-    let intervals = new Array(DEFAULT_INTERVAL_COUNT);
-    let step = 15 * 60;
-    switch (interval_length) {
+  public getTimestampsWithRange(now, range) {
+    this.logger.debug("start getTimestampsWithRange");
+    let step = INTERVAL_15M_STEP;
+    let interval_count = INTERVAL_15M_COUNT;
+
+    switch (range) {
       case "15M":
-        step = 15 * 60;
+        step = INTERVAL_15M_STEP;
+        interval_count = INTERVAL_15M_COUNT;
         break;
       case "1H":
-        step = 60 * 60;
+        step = INTERVAL_1H_STEP;
+        interval_count = INTERVAL_1H_COUNT;
         break;
       case "4H":
-        step = 4 * 60 * 60;
+        step = INTERVAL_4H_STEP;
+        interval_count = INTERVAL_4H_COUNT;
         break;
       case "1D":
-        step = 24 * 60 * 60;
+        step = INTERVAL_1D_STEP;
+        interval_count = INTERVAL_1D_COUNT;
         break;
       case "1M":
-        step = 30 * 24 * 60 * 60;
+        step = INTERVAL_1M_STEP;
+        interval_count = INTERVAL_1M_COUNT;
         break;
     }
 
-    for (let i = DEFAULT_INTERVAL_COUNT - 1; i >= 0; i--) {
-      intervals[DEFAULT_INTERVAL_COUNT - i - 1] = now - step * i;
+    let intervals = new Array(interval_count);
+    console.log(step, interval_count);
+    for (let i = interval_count - 1; i >= 0; i--) {
+      intervals[interval_count - i - 1] = now - step * i;
     }
 
-    this.logger.debug("end getTimestampsWithInterval");
+    this.logger.debug("end getTimestampsWithRange");
     return intervals;
   }
 
@@ -194,7 +209,8 @@ export default class ChartService {
   public async getBlocksFromTimestamps(timestamps) {
     this.logger.debug(`start get blocks from timestamps`);
     let find_block_tasks = [];
-    for (let i = 0; i < DEFAULT_INTERVAL_COUNT; i++) {
+    let timestamp_count = timestamps.length;
+    for (let i = 0; i < timestamp_count; i++) {
       find_block_tasks.push(getBlockByTime(timestamps[i]));
     }
     let blocks: any = await getAsyncTasksValidResults(find_block_tasks);
@@ -241,7 +257,7 @@ export default class ChartService {
   public async updateSwapData(
     token0: string,
     token1: string,
-    interval: string,
+    range: string,
     updateExisting = false
   ) {
     this.logger.debug(`start updateSwapData ${token0}/${token1}`);
@@ -263,7 +279,7 @@ export default class ChartService {
     const now = Math.floor(new Date().getTime() / 1000);
 
     // get array of timestamp in seconds
-    const timestamps = this.getTimestampsWithInterval(now, interval);
+    const timestamps = this.getTimestampsWithRange(now, range);
 
     // find nearest blocks to list of timestamps
     let blocks: any = await this.getBlocksFromTimestamps(timestamps);
@@ -305,7 +321,7 @@ export default class ChartService {
         {
           token0,
           token1,
-          interval,
+          range,
         },
         { swaps: processed_swaps }
       );
@@ -313,7 +329,7 @@ export default class ChartService {
       await this.pairModel.create({
         token0,
         token1,
-        interval,
+        range,
         swaps: processed_swaps,
       });
     }

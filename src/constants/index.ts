@@ -661,9 +661,24 @@ export const ERC20_ABI = [
   },
 ];
 
-export const DEFAULT_INTERVAL_COUNT = 10;
-
-// tweak this for speed
+// tweak for trade between speed and precision
 export const DEFAULT_CONSECUTIVE_BLOCK_COUNT = 5;
-
 export const DEFAULT_CACHE_TIMEOUT_SECONDS = 10;
+
+const minute = 60;
+const hour = 60 * minute;
+const day = 24 * hour;
+const month = 30 * day;
+
+export const INTERVAL_15M_STEP = minute;
+export const INTERVAL_1H_STEP = 5 * minute;
+export const INTERVAL_4H_STEP = 15 * minute;
+export const INTERVAL_1D_STEP = hour;
+export const INTERVAL_1M_STEP = day;
+
+export const INTERVAL_15M_COUNT =
+  Math.floor((15 * minute) / INTERVAL_15M_STEP) + 1;
+export const INTERVAL_1H_COUNT = Math.floor(hour / INTERVAL_1H_STEP) + 1;
+export const INTERVAL_4H_COUNT = Math.floor((4 * hour) / INTERVAL_4H_STEP) + 1;
+export const INTERVAL_1D_COUNT = Math.floor(day / INTERVAL_1D_STEP) + 1;
+export const INTERVAL_1M_COUNT = Math.floor(month / INTERVAL_1M_STEP) + 1;

@@ -23,7 +23,7 @@ export default (app: Router) => {
         const data = await chartServiceInstance.getSwapRate(
           req.query.token0,
           req.query.token1,
-          req.query.interval
+          req.query.range
         );
         return res.status(201).json(data);
       } catch (e) {

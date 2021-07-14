@@ -12,7 +12,7 @@ const Pair = new mongoose.Schema(
       required: [true],
       index: true,
     },
-    interval: {
+    range: {
       type: String,
       required: [true, "15M"],
     },
