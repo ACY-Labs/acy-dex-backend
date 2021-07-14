@@ -662,7 +662,6 @@ export const ERC20_ABI = [
 ];
 
 export const DEFAULT_INTERVAL_COUNT = 10;
-export const DEFAULT_DATAPOINT_COUNT = 100;
 
 // tweak this for speed
 export const DEFAULT_CONSECUTIVE_BLOCK_COUNT = 5;

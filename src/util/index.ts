@@ -8,16 +8,21 @@ export function timestampToDate(timestamp) {
   return date.utc().format();
 }
 
-export async function getBlockByTime(
-  targetTimestamp
-  //   lowerLimitStamp,
-  //   higherLimitStamp
-) {
+export async function getBlockByTime(targetTimestamp) {
   let web3: Web3 = Container.get("web3");
+
+  let cache = Container.get("cache");
+
+  // seems not making an impact
+  // if (cache[`t_${targetTimestamp}`]) {
+  //   console.log("CACHE USED IN getBlockByTime");
+  //   return cache[`t_${targetTimestamp}`];
+  // }
+
   // decreasing average block size will decrease precision and also
   // decrease the amount of requests made in order to find the closest
   // block
-  let averageBlockTime = 10 * 1.5;
+  let averageBlockTime = 15;
 
   // get current block number
   const currentBlockNumber = await web3.eth.getBlockNumber();
@@ -41,63 +46,17 @@ export async function getBlockByTime(
     block = await web3.eth.getBlock(blockNumber);
     requestsMade += 1;
   }
-  let cache = Container.get("cache");
+
   cache[`t_${targetTimestamp}`] = block.number;
   cache[`b_${block.number}`] = targetTimestamp;
   Container.set("cache", cache);
 
-  // If we were to use lower and upper limits
-  // if we undershoot the day
-  /* if (lowerLimitStamp && block.timestamp < lowerLimitStamp) {
-    while (block.timestamp < lowerLimitStamp) {
-      blockNumber += 1;
-
-      block = await web3.eth.getBlock(blockNumber);
-      requestsMade += 1;
-    }
-  }
-
-  if (higherLimitStamp) {
-    // if we ended with a block higher than we can
-    // walk block by block to find the correct one
-    if (block.timestamp >= higherLimitStamp) {
-      while (block.timestamp >= higherLimitStamp) {
-        blockNumber -= 1;
-
-        block = await web3.eth.getBlock(blockNumber);
-        requestsMade += 1;
-      }
-    }
-
-    // if we ended up with a block lower than the upper limit
-    // walk block by block to make sure it's the correct one
-    if (block.timestamp < higherLimitStamp) {
-      while (block.timestamp < higherLimitStamp) {
-        blockNumber += 1;
-
-        if (blockNumber > currentBlockNumber) break;
-
-        const tempBlock = await web3.eth.getBlock(blockNumber);
-
-        // can't be equal or higher than upper limit as we want
-        // to find the last block before that limit
-        if (tempBlock.timestamp >= higherLimitStamp) {
-          break;
-        }
-
-        block = tempBlock;
-
-        requestsMade += 1;
-      }
-    }
-    
-  } */
-
-  console.log("tgt timestamp   ->", targetTimestamp);
-  console.log("tgt date        ->", timestampToDate(targetTimestamp));
-  console.log("block timestamp ->", block.timestamp);
-  console.log("block date      ->", timestampToDate(block.timestamp));
-  console.log("requests made   ->", requestsMade);
+  // debug info for discrepancy between requested timeframe and block timeframe
+  // console.log("tgt timestamp   ->", targetTimestamp);
+  // console.log("tgt date        ->", timestampToDate(targetTimestamp));
+  // console.log("block timestamp ->", block.timestamp);
+  // console.log("block date      ->", timestampToDate(block.timestamp));
+  // console.log("requests made   ->", requestsMade);
 
   return block;
 }
