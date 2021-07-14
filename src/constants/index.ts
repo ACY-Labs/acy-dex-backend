@@ -666,3 +666,5 @@ export const DEFAULT_DATAPOINT_COUNT = 100;
 
 // tweak this for speed
 export const DEFAULT_CONSECUTIVE_BLOCK_COUNT = 5;
+
+export const DEFAULT_CACHE_TIMEOUT_SECONDS = 10;

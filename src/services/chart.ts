@@ -6,15 +6,11 @@ import {
   INIT_CODE_HASH,
   PAIR_CONTRACT_ABI,
   DEFAULT_INTERVAL_COUNT,
-  DEFAULT_DATAPOINT_COUNT,
+  DEFAULT_CACHE_TIMEOUT_SECONDS,
   ERC20_ABI,
   DEFAULT_CONSECUTIVE_BLOCK_COUNT,
 } from "../constants";
-import {
-  getBlockByTime,
-  timestampToDate,
-  getAsyncTasksValidResults,
-} from "../util";
+import { getBlockByTime, getAsyncTasksValidResults } from "../util";
 import BigNumber from "bignumber.js";
 
 @Service()
@@ -26,7 +22,6 @@ export default class ChartService {
   ) {}
 
   public format(data) {
-    // do nothing for now
     let _data = {
       token0: data.token0,
       token1: data.token1,
@@ -49,40 +44,58 @@ export default class ChartService {
     token1: string,
     interval: string
   ) {
+    let need_update = false;
     let data = await this.pairModel
       .findOne({ token0, token1, interval })
       .exec();
 
     if (!data) {
       // swap and recheck
-      let _token0 = token1;
-      let _token1 = token0;
       data = await this.pairModel
-        .findOne({ token0: _token0, token1: _token1, interval })
+        .findOne({ token0: token1, token1: token0, interval })
         .exec();
     }
+    if (data) {
+      let last_updated_time: any = new Date(data.updatedAt);
+      let now: any = new Date();
+      let seconds_elapsed: any = (now - last_updated_time) / 1000;
 
-    // TODO: check if last updated_at is within accepted range
+      console.log(
+        `updated at = ${last_updated_time}, now = ${now}, diff = ${seconds_elapsed}s`
+      );
 
-    return data;
+      if (seconds_elapsed > DEFAULT_CACHE_TIMEOUT_SECONDS) {
+        data = null;
+        need_update = true;
+      }
+    }
+
+    return [data, need_update];
   }
 
   public async getSwapRate(token0: string, token1: string, interval: string) {
     this.logger.debug(`Chart data interval ${interval} getter called`);
 
     // if data is cached
-    let data = await this.checkCachedAndIsValid(token0, token1, interval);
+    let [data, need_update] = await this.checkCachedAndIsValid(
+      token0,
+      token1,
+      interval
+    );
     if (data) {
       return {
         data: this.format(data),
       };
     }
-
     // make query
-    await this.updateSwapData(token0, token1, interval);
+    await this.updateSwapData(token0, token1, interval, need_update);
 
     // re-get the data
-    data = await this.checkCachedAndIsValid(token0, token1, interval);
+    [data, need_update] = await this.checkCachedAndIsValid(
+      token0,
+      token1,
+      interval
+    );
 
     return {
       data: this.format(data),
@@ -105,6 +118,9 @@ export default class ChartService {
       case "1D":
         step = 24 * 60 * 60;
         break;
+      case "1M":
+        step = 30 * 24 * 60 * 60;
+        break;
     }
 
     for (let i = DEFAULT_INTERVAL_COUNT - 1; i >= 0; i--) {
@@ -119,7 +135,6 @@ export default class ChartService {
     let block_number_to_timestamp_tasks = [];
 
     let cache = Container.get("cache");
-    console.log(cache);
     let swap_timestamps = new Array(total_swaps);
     for (let i = 0; i < total_swaps; i++) {
       let cachedValue = cache[`b_${swaps[i].blockNumber}`];
@@ -175,7 +190,8 @@ export default class ChartService {
   public async updateSwapData(
     token0: string,
     token1: string,
-    interval: string
+    interval: string,
+    updateExisting = false
   ) {
     this.logger.debug(`Updating swap rates for pair ${token0}/${token1}`);
 
@@ -205,19 +221,19 @@ export default class ChartService {
     }
     let blocks: any = await getAsyncTasksValidResults(find_block_tasks);
 
-    console.log("---------- BLOCKS ----------");
-    for (let i = 0; i < blocks.length; i++) {
-      console.log(`
-      Now: ${timestampToDate(now)}
-      Start: ${timestampToDate(timestamps[i])}
-      Difference: ${Math.floor(
-        (now - blocks[i].timestamp) / 3600
-      )} hours ${Math.floor(
-        (((now - blocks[i].timestamp) / 3600) % 1) * 60
-      )} minutes
-      Block time: ${timestampToDate(blocks[i].timestamp)}
-    `);
-    }
+    // console.log("---------- BLOCKS ----------");
+    // for (let i = 0; i < blocks.length; i++) {
+    //   console.log(`
+    //   Now: ${timestampToDate(now)}
+    //   Start: ${timestampToDate(timestamps[i])}
+    //   Difference: ${Math.floor(
+    //     (now - blocks[i].timestamp) / 3600
+    //   )} hours ${Math.floor(
+    //     (((now - blocks[i].timestamp) / 3600) % 1) * 60
+    //   )} minutes
+    //   Block time: ${timestampToDate(blocks[i].timestamp)}
+    // `);
+    // }
     // parallelize block queries
     let get_events_tasks = [];
     let blocks_count = blocks.length;
@@ -227,8 +243,8 @@ export default class ChartService {
         fromBlock: blocks[i].number - DEFAULT_CONSECUTIVE_BLOCK_COUNT,
         toBlock: i === blocks_count - 1 ? "latest" : blocks[i].number,
       };
-      console.log(`option for block ${i}`);
-      console.log(option);
+      // console.log(`option for block ${i}`);
+      // console.log(option);
 
       get_events_tasks.push(contract.getPastEvents("Swap", option));
     }
@@ -247,7 +263,6 @@ export default class ChartService {
       })
       .flat(1);
 
-    // stores 100 data points to be served to frontend
     let extracted_swaps = [];
     let total_swaps = swaps.length;
 
@@ -277,11 +292,22 @@ export default class ChartService {
       decimal1,
     ]);
 
-    await this.pairModel.create({
-      token0,
-      token1,
-      interval,
-      swaps: processed_swaps,
-    });
+    if (updateExisting) {
+      await this.pairModel.updateOne(
+        {
+          token0,
+          token1,
+          interval,
+        },
+        { swaps: processed_swaps }
+      );
+    } else {
+      await this.pairModel.create({
+        token0,
+        token1,
+        interval,
+        swaps: processed_swaps,
+      });
+    }
   }
 }
