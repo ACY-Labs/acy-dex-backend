@@ -1,6 +1,19 @@
 version: "3"
 
 services:
+  backend:
+    container_name: acy_backend
+    build: .
+    ports:
+      - "6000:3000"
+    depends_on:
+      - mongodb
+    volumes:
+      - ./src:/code/src
+    networks:
+      - web_network
+      - db_network
+    command: npm run debug
   mongodb:
     container_name: mongodb
     restart: always
@@ -15,6 +28,14 @@ services:
     volumes:
       - ./mongodb/:/docker-entrypoint-initdb.d/
       - mongo-volume:/data/db
+    networks:
+      - db_network
 
 volumes:
   mongo-volume:
+
+networks:
+  web_network:
+    driver: bridge
+  db_network:
+    driver: bridge
