@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import routes from "../api";
 import config from "../config";
+import morgan from "morgan";
 
 export default ({ app }: { app: express.Application }) => {
   /**
@@ -19,6 +20,9 @@ export default ({ app }: { app: express.Application }) => {
   // Useful if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
   // It shows the real origin IP in the heroku or Cloudwatch logs
   app.enable("trust proxy");
+
+  // logs the incoming requests
+  app.use(morgan("dev"));
 
   // The magic package that prevents frontend developers going nuts
   // Alternate description:
