@@ -10,6 +10,7 @@ services:
       - mongodb
     volumes:
       - ./src:/code/src
+      - ./node_modules:/code/node_modules
     networks:
       - web_network
       - db_network
