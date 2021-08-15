@@ -4,6 +4,9 @@ import ChartService from "../../services/chart";
 import { Logger } from "winston";
 import { cacheMiddleware } from "../../middleware";
 const { createProxyMiddleware } = require("http-proxy-middleware");
+import apicache from "apicache";
+
+let cache = apicache.middleware;
 
 const route = Router();
 
@@ -13,7 +16,7 @@ export default (app: Router) => {
   // route prefix
   app.use(
     "/mev",
-    cacheMiddleware(10),
+    cache("5 minutes"),
     createProxyMiddleware({
       target: API_SERVICE_URL,
       changeOrigin: true,
