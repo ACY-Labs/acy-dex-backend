@@ -8,8 +8,10 @@ var cacheMiddleware = (duration) => {
 
     let cachedBody = mcache.get(key);
     if (cachedBody) {
-      console.log("MEV proxy: using cached data");
-      res.send(cachedBody);
+      console.log("Using cache for =>> ", req.originalUrl);
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.write(cachedBody);
+      res.end();
     } else {
       var _end = res.end;
       var _write = res.write;
