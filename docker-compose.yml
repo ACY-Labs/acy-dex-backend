@@ -15,7 +15,7 @@ services:
     networks:
       - web_network
       - db_network
-    command: npm run debug
+    command: npm run deploy
   mongodb:
     container_name: mongodb
     restart: always
