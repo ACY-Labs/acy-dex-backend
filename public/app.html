@@ -52,6 +52,20 @@
         z-index: 2;
       }
 
+      @media (max-width: 768px) {
+        #slider {
+          margin-left: -150px;
+          width: 300px;
+        }
+      }
+
+      @media (max-width: 560px) {
+        #slider {
+          margin-left: -120px;
+          width: 250px;
+        }
+      }
+
       #layouts {
         position: absolute;
         right: 50px;
@@ -120,6 +134,10 @@
       html.is-white .footer a {
         color: #121212;
       }
+
+      .logo {
+        max-width: 30px;
+      }
     </style>
 
     <!--vendor includes-->
@@ -165,24 +183,54 @@
       <br />
 
       <div id="buttons" style="display: none">
-        <button type="button" id="play" class="btn btn-primary">
-          <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
-        </button>
-
-        <button type="button" id="expand" class="btn btn-primary">
-          <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-        </button>
-
-        <button type="button" id="repeat" class="btn btn-primary">
-          <span
-            class="glyphicon glyphicon-repeat text-muted"
-            aria-hidden="true"
-          ></span>
-        </button>
+        <img
+          src="icons/播放灰.png"
+          id="play"
+          class="logo"
+          onclick="negatePlaying()"
+          onmouseover="hover(this,0);"
+          onmouseout="unhover(this,0);"
+        />
+        <img
+          src="icons/加号灰.png"
+          id="expand"
+          class="logo"
+          onmouseover="hover(this,1);"
+          onmouseout="unhover(this,1);"
+        />
+        <img
+          src="icons/刷新灰.png"
+          id="repeat"
+          class="logo"
+          onmouseover="hover(this,2);"
+          onmouseout="unhover(this,2);"
+        />
       </div>
     </div>
 
     <script>
+      let oriUrls = [
+        "icons/播放灰.png",
+        "icons/加号灰.png",
+        "icons/刷新灰.png",
+      ];
+      let hoverUrls = ["icons/播放.png", "icons/加.png", "icons/刷新.png"];
+      let playing = false;
+      function negatePlaying() {
+        playing = !playing;
+      }
+      function hover(element, index) {
+        if (playing && index === 0)
+          element.setAttribute("src", "icons/暂停.png");
+        else element.setAttribute("src", hoverUrls[index]);
+      }
+
+      function unhover(element, index) {
+        if (playing && index === 0)
+          element.setAttribute("src", "icons/暂停灰.png");
+        else element.setAttribute("src", oriUrls[index]);
+      }
+
       $(document).ready(function () {
         //        var csvfile = "examples/output.csv";
         //        $.get(csvfile, function (file) {

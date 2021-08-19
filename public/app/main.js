@@ -409,7 +409,6 @@ function pick() {
 }
 
 function countDataArrayItems(dataArray) {
-  console.log(dataArray);
   var counter = 0;
 
   for (var i = 0; i < dataArray.length; i++) {
