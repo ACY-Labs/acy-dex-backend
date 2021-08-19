@@ -24,6 +24,9 @@ export default ({ app }: { app: express.Application }) => {
   // logs the incoming requests
   app.use(morgan("dev"));
 
+  // serve static files under the directory public
+  app.use(express.static("public"));
+
   // The magic package that prevents frontend developers going nuts
   // Alternate description:
   // Enable Cross Origin Resource Sharing to all origins by default
