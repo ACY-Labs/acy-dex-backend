@@ -182,12 +182,14 @@
       </div>
       <br />
 
+      <audio id="audio" src="/bgm.mp3"></audio>
+
       <div id="buttons" style="display: none">
         <img
           src="icons/播放灰.png"
           id="play"
           class="logo"
-          onclick="negatePlaying()"
+          onclick="play();negatePlaying();"
           onmouseover="hover(this,0);"
           onmouseout="unhover(this,0);"
         />
@@ -216,9 +218,17 @@
       ];
       let hoverUrls = ["icons/播放.png", "icons/加.png", "icons/刷新.png"];
       let playing = false;
+
+      function play() {
+        var audio = document.getElementById("audio");
+        if (!playing) audio.play();
+        else audio.pause();
+      }
+
       function negatePlaying() {
         playing = !playing;
       }
+
       function hover(element, index) {
         if (playing && index === 0)
           element.setAttribute("src", "icons/暂停.png");
