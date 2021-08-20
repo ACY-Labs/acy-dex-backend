@@ -170,11 +170,10 @@
           onmouseout="unhover(this,1);"
         />
         <img
-          src="icons/刷新灰.png"
+          src="icons/刷新.png"
           id="repeat"
           class="logo"
-          onmouseover="hover(this,2);"
-          onmouseout="unhover(this,2);"
+          onclick="replay(this);"
         />
       </div>
     </div>
@@ -218,6 +217,7 @@
       ];
       let hoverUrls = ["icons/播放.png", "icons/加.png", "icons/刷新.png"];
       let playing = false;
+      var replayOn = true;
 
       function play() {
         var audio = document.getElementById("audio");
@@ -229,6 +229,12 @@
         playing = !playing;
       }
 
+      function replay(element) {
+        if (replayOn) unhover(element, 2);
+        else hover(element, 2);
+
+        replayOn = !replayOn;
+      }
       function hover(element, index) {
         if (playing && index === 0)
           element.setAttribute("src", "icons/暂停.png");
