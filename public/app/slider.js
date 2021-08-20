@@ -148,8 +148,6 @@ function Slider() {
     step = diff / stepSize;
 
     sliderObject.update({
-      hide_min_max: false,
-      hide_from_to: false,
       min: tMin,
       max: tMax,
       from: currentMin,
