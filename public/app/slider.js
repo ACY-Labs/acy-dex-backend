@@ -59,8 +59,9 @@ function Slider() {
 
   function togglePlay() {
     if (playing) {
-      $("#play").prop("src", "icons/暂停.png");
       playing = !playing;
+      if (!playing) $("#play").prop("src", "icons/播放灰.png");
+      else $("#play").prop("src", "icons/暂停.png");
     } else {
       if (currentMax === tMax) {
         // this order matters
@@ -185,6 +186,7 @@ function Slider() {
             currentMax = tMin + (currentMax - currentMin);
             currentMin = tMin;
           } else {
+            window.done = true;
             togglePlay();
           }
 

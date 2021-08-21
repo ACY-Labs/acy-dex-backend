@@ -158,8 +158,8 @@
           src="icons/播放灰.png"
           id="play"
           class="logo"
-          onclick="play();negatePlaying();"
-          onmouseover="hover(this,0);"
+          onclick="play();negatePlaying();unhover(this,0);"
+          onmouseenter="hover(this,0);"
           onmouseout="unhover(this,0);"
         />
         <img
@@ -220,6 +220,7 @@
       var replayOn = true;
 
       function play() {
+        window.done = false;
         var audio = document.getElementById("audio");
         if (!playing) audio.play();
         else audio.pause();
@@ -236,12 +237,14 @@
         replayOn = !replayOn;
       }
       function hover(element, index) {
+        if (window.done) playing = false;
         if (playing && index === 0)
           element.setAttribute("src", "icons/暂停.png");
         else element.setAttribute("src", hoverUrls[index]);
       }
 
       function unhover(element, index) {
+        if (window.done) playing = false;
         if (playing && index === 0)
           element.setAttribute("src", "icons/暂停灰.png");
         else element.setAttribute("src", oriUrls[index]);
@@ -263,19 +266,33 @@
         //                    }
         //
 
-        g.edges = Object.fromEntries(
-          Object.entries(cannedGraph.edges).filter(([key, value]) => {
-            var regExp = /[a-zA-Z]/g;
-            return !regExp.test(key);
-          })
-        );
+        g.edges = cannedGraph.edges;
 
-        g.nodes = Object.fromEntries(
-          Object.entries(cannedGraph.nodes).filter(([key, value]) => {
-            var regExp = /[a-zA-Z]/g;
-            return !regExp.test(key);
-          })
-        );
+        g.nodes = cannedGraph.nodes;
+
+        // let keys = Object.keys(g.nodes);
+        // let nodes = [];
+        // for (let key of keys) {
+        //   g.nodes[key]["ip"] = key;
+        //   nodes.push(g.nodes[key]);
+        // }
+        // function compare(a, b) {
+        //   let aEdgesCount = a.edges.length;
+        //   let bEdgesCount = b.edges.length;
+        //   if (aEdgesCount < bEdgesCount) {
+        //     return 1;
+        //   }
+        //   if (aEdgesCount > bEdgesCount) {
+        //     return -1;
+        //   }
+        //   return 0;
+        // }
+
+        // let sorted = nodes.sort(compare);
+
+        // for (let node of sorted) {
+        //   document.write(node.ip + "<br/>");
+        // }
 
         g.settings = cannedGraph.settings;
         //
