@@ -420,6 +420,8 @@
     function onMouseDown(event) {
       if (scope.enabled === false) return;
 
+      event.preventDefault();
+
       if (event.button === scope.mouseButtons.ORBIT) {
         if (scope.enableRotate === false) return;
 
@@ -449,6 +451,8 @@
 
     function onMouseMove(event) {
       if (scope.enabled === false) return;
+
+      event.preventDefault();
 
       var element =
         scope.domElement === document
@@ -518,6 +522,7 @@
       )
         return;
 
+      event.preventDefault();
       event.stopPropagation();
 
       var delta = 0;
@@ -615,6 +620,7 @@
     function touchmove(event) {
       if (scope.enabled === false) return;
 
+      event.preventDefault();
       event.stopPropagation();
 
       var element =
