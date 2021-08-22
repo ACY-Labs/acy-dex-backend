@@ -199,8 +199,8 @@ function Slider() {
           //});
         } else {
           // adjust these for slider speed
-          currentMin += step / 5.5;
-          currentMax += step / 5.5;
+          currentMin += step / 9.35;
+          currentMax += step / 9.35;
         }
 
         sliderObject.update({

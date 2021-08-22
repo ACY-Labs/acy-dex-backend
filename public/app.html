@@ -133,16 +133,17 @@
         top: 20px;
         left: 20px;
         z-index: 100;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       }
 
       @keyframes fadeInOut {
         0% {
           opacity: 0;
         }
-        25% {
+        50% {
           opacity: 100;
         }
-        50% {
+        75% {
           opacity: 0;
         }
 
@@ -153,7 +154,7 @@
 
       .animation {
         animation-name: fadeInOut;
-        animation-duration: 3s;
+        animation-duration: 5s;
         animation-iteration-count: infinite;
         animation-fill-mode: forwards;
       }
@@ -172,6 +173,9 @@
         #slider {
           margin-left: -120px;
           width: 250px;
+        }
+        #keyword {
+          font-size: 25px;
         }
       }
     </style>
@@ -279,8 +283,8 @@
       ];
       let lastIndex = -1;
       let lastKeywordIndex = 0;
-      const duration = 5000;
-      const keywordDuration = 3000;
+      const duration = 9000;
+      const keywordDuration = 5000;
 
       function executeKeywords() {
         let totalKeywords = keywords.length;
