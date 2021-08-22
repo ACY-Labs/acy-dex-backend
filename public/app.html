@@ -52,20 +52,6 @@
         z-index: 2;
       }
 
-      @media (max-width: 768px) {
-        #slider {
-          margin-left: -150px;
-          width: 300px;
-        }
-      }
-
-      @media (max-width: 560px) {
-        #slider {
-          margin-left: -120px;
-          width: 250px;
-        }
-      }
-
       #layouts {
         position: absolute;
         right: 50px;
@@ -140,9 +126,9 @@
       }
 
       #keyword {
-        font-size: 30px;
-        /* color: #de5b24; */
-        color: white;
+        font-size: 48px;
+        color: #de5b24;
+        text-shadow: 2px 2px black;
         position: fixed;
         top: 20px;
         left: 20px;
@@ -170,6 +156,23 @@
         animation-duration: 3s;
         animation-iteration-count: infinite;
         animation-fill-mode: forwards;
+      }
+
+      @media (max-width: 768px) {
+        #slider {
+          margin-left: -150px;
+          width: 300px;
+        }
+        #keyword {
+          font-size: 30px;
+        }
+      }
+
+      @media (max-width: 560px) {
+        #slider {
+          margin-left: -120px;
+          width: 250px;
+        }
       }
     </style>
 
