@@ -58,6 +58,9 @@ function Slider() {
   };
 
   function togglePlay() {
+    console.log("Limits");
+    console.log(tMin);
+    console.log(tMax);
     if (playing) {
       playing = !playing;
       if (!playing) $("#play").prop("src", "icons/播放灰.png");
@@ -195,8 +198,9 @@ function Slider() {
           //    to: currentMax
           //});
         } else {
-          currentMin += step;
-          currentMax += step;
+          // adjust these for slider speed
+          currentMin += step / 5.5;
+          currentMax += step / 5.5;
         }
 
         sliderObject.update({

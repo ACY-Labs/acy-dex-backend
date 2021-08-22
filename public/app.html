@@ -138,12 +138,46 @@
       .logo {
         max-width: 30px;
       }
+
+      #keyword {
+        font-size: 30px;
+        /* color: #de5b24; */
+        color: white;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 100;
+      }
+
+      @keyframes fadeInOut {
+        0% {
+          opacity: 0;
+        }
+        25% {
+          opacity: 100;
+        }
+        50% {
+          opacity: 0;
+        }
+
+        100% {
+          opacity: 0;
+        }
+      }
+
+      .animation {
+        animation-name: fadeInOut;
+        animation-duration: 3s;
+        animation-iteration-count: infinite;
+        animation-fill-mode: forwards;
+      }
     </style>
 
     <script src="examples/sampleData.js"></script>
   </head>
 
   <body>
+    <p id="keyword">Built-in Protocol</p>
     <canvas id="c" class="overlay"></canvas>
     <div id="slider" style="display: none">
       <div>
@@ -179,6 +213,10 @@
     </div>
 
     <!--vendor includes-->
+    <script
+      type="text/javascript"
+      src="https://unpkg.com/default-passive-events"
+    ></script>
 
     <script src="lib/jquery.min.js"></script>
     <script src="lib/bootstrap.min.js"></script>
@@ -217,13 +255,110 @@
       ];
       let hoverUrls = ["icons/播放.png", "icons/加.png", "icons/刷新.png"];
       let playing = false;
-      var replayOn = true;
+      let replayOn = true;
+      let nodeTimeIds = [];
+      let keywordTimeIds = [];
+      let roundTimerId = 0;
+      let keywordRoundTimerId = 0;
+      let animationIds = [
+        "#spherical",
+        "#forceDirected",
+        "#grid",
+        "#helix",
+        "#circular",
+      ];
+      let keywords = [
+        "Built-in Protocol",
+        "Automated Arbitrage",
+        "Multi Route",
+        "Optimal Algorithm",
+        "No Delay",
+        "Low Slippage",
+        "Extra Income",
+        "Mutual Benefit",
+        "Fairness and Justness",
+      ];
+      let lastIndex = -1;
+      let lastKeywordIndex = 0;
+      const duration = 5000;
+      const keywordDuration = 3000;
+
+      function executeKeywords() {
+        let totalKeywords = keywords.length;
+        $("#keyword").addClass("animation");
+        for (let i = lastKeywordIndex + 1; i < totalKeywords; i++) {
+          keywordTimeIds.push(
+            setTimeout(() => {
+              $("#keyword").html(keywords[i]);
+              if (i === totalKeywords - 1) {
+                lastKeywordIndex = -1;
+
+                clearInterval(keywordRoundTimerId);
+                executeKeywords();
+                console.log("set interval");
+                keywordRoundTimerId = setInterval(
+                  executeKeywords,
+                  keywordDuration * totalKeywords
+                );
+              } else lastKeywordIndex = i;
+            }, (i - lastKeywordIndex) * keywordDuration)
+          );
+        }
+      }
+
+      function executeSeries() {
+        let totalAnimation = animationIds.length;
+
+        for (let i = lastIndex + 1; i < totalAnimation; i++) {
+          console.log(`${animationIds[i]} in ${(i - lastIndex) * duration}`);
+          nodeTimeIds.push(
+            setTimeout(() => {
+              console.log(i);
+              $(animationIds[i]).click();
+              if (i === totalAnimation - 1) {
+                lastIndex = -1;
+
+                clearInterval(roundTimerId);
+                executeSeries();
+                roundTimerId = setInterval(
+                  executeSeries,
+                  duration * totalAnimation
+                );
+              } else lastIndex = i;
+            }, (i - lastIndex) * duration)
+          );
+        }
+      }
+
+      function clearKeywords() {
+        $("#keyword").removeClass("animation");
+        // clear keyword setInterval and setTimeout(s)
+        clearInterval(keywordRoundTimerId);
+        for (let timerId of keywordTimeIds) {
+          clearTimeout(timerId);
+        }
+      }
+
+      function clearSeries() {
+        // clear animation setInterval and setTimeout(s)
+        clearInterval(roundTimerId);
+        for (let timerId of nodeTimeIds) {
+          clearTimeout(timerId);
+        }
+      }
 
       function play() {
         window.done = false;
         var audio = document.getElementById("audio");
-        if (!playing) audio.play();
-        else audio.pause();
+        if (!playing) {
+          executeSeries();
+          executeKeywords();
+          audio.play();
+        } else {
+          audio.pause();
+          clearSeries();
+          clearKeywords();
+        }
       }
 
       function negatePlaying() {
