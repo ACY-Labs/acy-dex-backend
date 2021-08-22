@@ -72,7 +72,7 @@ function generateIdMappings(inputArray, textureSize) {
 function generateCircularLayout(inputArray, textureSize) {
   var increase = (Math.PI * 2) / inputArray.length;
   var angle = 0;
-  var radius = inputArray.length * 4 * 2;
+  var radius = inputArray.length * 4;
 
   var textureArray = new Float32Array(textureSize * textureSize * 4);
 
@@ -86,7 +86,7 @@ function generateCircularLayout(inputArray, textureSize) {
 
       textureArray[i] = x;
       textureArray[i + 1] = y;
-      textureArray[i + 2] = z;
+      textureArray[i + 2] = 0;
       textureArray[i + 3] = w;
 
       angle += increase;
@@ -154,17 +154,17 @@ function generateHelixLayout(inputArray, textureSize) {
   var textureArray = new Float32Array(textureSize * textureSize * 4);
 
   for (var i = 0, l = inputArray.length; i < l; i++) {
-    var phi = i * 0.125 + Math.PI;
+    var phi = i + Math.PI;
 
     // modify to change the radius and position of a circle
     var x = i * 15;
-    var y = 500 * Math.sin(phi);
-    var z = 500 * Math.cos(phi);
+    var y = 250 * Math.sin(phi);
+    var z = 250 * Math.cos(phi);
     var w = 1.0;
 
     textureArray[i * 4] = y;
     textureArray[i * 4 + 1] = z;
-    textureArray[i * 4 + 2] = x;
+    textureArray[i * 4 + 2] = x - 2000;
     textureArray[i * 4 + 3] = w;
   }
 
@@ -192,12 +192,12 @@ function generateGridLayout(inputArray, textureSize) {
     // modify to change the radius and position of a circle
     var x = (i % 5) * 500 - 1000;
     var y = -(Math.floor(i / 5) % 5) * 500 + 1000;
-    var z = Math.floor(i / 25) * 500 - 1000;
+    var z = Math.floor(i / 25) * 300 - 1000;
     var w = 1.0;
 
     textureArray[i * 4] = x;
     textureArray[i * 4 + 1] = y;
-    textureArray[i * 4 + 2] = z;
+    textureArray[i * 4 + 2] = z - 1000;
     textureArray[i * 4 + 3] = w;
   }
 

@@ -75,7 +75,7 @@
         left: 0;
         /*padding: 20px;*/
         /*padding-bottom: 130px;*/
-        position: fixed;
+        position: absolute;
         right: 0;
         top: 0;
         z-index: 1;
@@ -125,15 +125,49 @@
         max-width: 30px;
       }
 
+      #keyword-container {
+        max-width: max-content;
+        position: relative;
+        z-index: 100;
+        margin: 2%;
+        display: inline-block;
+      }
+
+      .typewriter {
+        overflow: hidden; /* Ensures the content is not revealed until the animation */
+        border-right: 0.15em solid orange; /* The typwriter cursor */
+        white-space: nowrap; /* Keeps the content on a single line */
+        margin: 0 auto; /* Gives that scrolling effect as the typing happens */
+        animation: typing 3.5s steps(40, end),
+          blink-caret 0.75s step-end infinite;
+      }
+
       #keyword {
         font-size: 48px;
         color: #de5b24;
         text-shadow: 2px 2px black;
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        z-index: 100;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      /* The typing effect */
+      @keyframes typing {
+        from {
+          width: 0;
+        }
+        to {
+          width: 100%;
+        }
+      }
+
+      /* The typewriter cursor effect */
+      @keyframes blink-caret {
+        from,
+        to {
+          border-color: transparent;
+        }
+        50% {
+          border-color: orange;
+        }
       }
 
       @keyframes fadeInOut {
@@ -149,6 +183,27 @@
 
         100% {
           opacity: 0;
+        }
+      }
+
+      /* The typing effect */
+      @keyframes typing {
+        from {
+          width: 0;
+        }
+        to {
+          width: 100%;
+        }
+      }
+
+      /* The typewriter cursor effect */
+      @keyframes blink-caret {
+        from,
+        to {
+          border-color: transparent;
+        }
+        50% {
+          border-color: orange;
         }
       }
 
@@ -184,7 +239,9 @@
   </head>
 
   <body>
-    <p id="keyword">Built-in Protocol</p>
+    <div class="typewriter" id="keyword-container">
+      <p id="keyword">Arbitrage Supremacy of ACY Finance</p>
+    </div>
     <canvas id="c" class="overlay"></canvas>
     <div id="slider" style="display: none">
       <div>
@@ -203,13 +260,7 @@
           onmouseenter="hover(this,0);"
           onmouseout="unhover(this,0);"
         />
-        <img
-          src="icons/加号灰.png"
-          id="expand"
-          class="logo"
-          onmouseover="hover(this,1);"
-          onmouseout="unhover(this,1);"
-        />
+        <img id="expand" hidden />
         <img
           src="icons/刷新.png"
           id="repeat"
@@ -271,6 +322,7 @@
         "#circular",
       ];
       let keywords = [
+        "Arbitrage Supremacy of ACY Finance",
         "Built-in Protocol",
         "Automated Arbitrage",
         "Multi Route",
@@ -283,10 +335,14 @@
       ];
       let lastIndex = -1;
       let lastKeywordIndex = 0;
-      const duration = 9000;
+      const duration = 10000;
+      const danceDuration = 6500;
       const keywordDuration = 5000;
 
+      let lightOn = false;
+
       function executeKeywords() {
+        let totalAnimation = animationIds.length;
         let totalKeywords = keywords.length;
         $("#keyword").addClass("animation");
         for (let i = lastKeywordIndex + 1; i < totalKeywords; i++) {
@@ -295,13 +351,12 @@
               $("#keyword").html(keywords[i]);
               if (i === totalKeywords - 1) {
                 lastKeywordIndex = -1;
-
-                clearInterval(keywordRoundTimerId);
-                executeKeywords();
-                console.log("set interval");
-                keywordRoundTimerId = setInterval(
+                setTimeout(() => {
+                  $("#keyword").html("");
+                }, keywordDuration);
+                keywordRoundTimerId = setTimeout(
                   executeKeywords,
-                  keywordDuration * totalKeywords
+                  danceDuration * totalAnimation
                 );
               } else lastKeywordIndex = i;
             }, (i - lastKeywordIndex) * keywordDuration)
@@ -312,6 +367,8 @@
       function executeSeries() {
         let totalAnimation = animationIds.length;
 
+        let _duration = lightOn ? danceDuration : duration;
+
         for (let i = lastIndex + 1; i < totalAnimation; i++) {
           console.log(`${animationIds[i]} in ${(i - lastIndex) * duration}`);
           nodeTimeIds.push(
@@ -321,14 +378,17 @@
               if (i === totalAnimation - 1) {
                 lastIndex = -1;
 
-                clearInterval(roundTimerId);
+                $("#expand").click();
+                lightOn = !lightOn;
+
+                clearTimeout(roundTimerId);
                 executeSeries();
-                roundTimerId = setInterval(
+                roundTimerId = setTimeout(
                   executeSeries,
                   duration * totalAnimation
                 );
               } else lastIndex = i;
-            }, (i - lastIndex) * duration)
+            }, (i - lastIndex) * _duration)
           );
         }
       }
@@ -336,7 +396,7 @@
       function clearKeywords() {
         $("#keyword").removeClass("animation");
         // clear keyword setInterval and setTimeout(s)
-        clearInterval(keywordRoundTimerId);
+        clearTimeout(keywordRoundTimerId);
         for (let timerId of keywordTimeIds) {
           clearTimeout(timerId);
         }
@@ -351,6 +411,7 @@
       }
 
       function play() {
+        $("#keyword-container").removeClass("typewriter");
         window.done = false;
         var audio = document.getElementById("audio");
         if (!playing) {

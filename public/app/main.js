@@ -78,7 +78,7 @@ function init() {
   );
   camera.position.x = 0;
   camera.position.y = 0;
-  camera.position.z = 5000;
+  camera.position.z = 3000;
 
   controls = new THREE.OrbitControls(camera, canvas);
   controls.damping = 0.2;
