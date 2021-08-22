@@ -162,9 +162,9 @@ function generateHelixLayout(inputArray, textureSize) {
     var z = 500 * Math.cos(phi);
     var w = 1.0;
 
-    textureArray[i * 4] = x;
-    textureArray[i * 4 + 1] = y;
-    textureArray[i * 4 + 2] = z;
+    textureArray[i * 4] = y;
+    textureArray[i * 4 + 1] = z;
+    textureArray[i * 4 + 2] = x;
     textureArray[i * 4 + 3] = w;
   }
 
