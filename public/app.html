@@ -186,6 +186,22 @@
         }
       }
 
+      /* @keyframes fadeInOut {
+        0% {
+          background-color: none;
+        }
+        50% {
+          background-color: green;
+        }
+        75% {
+          background-color: none;
+        }
+
+        100% {
+          background-color: none;
+        }
+      } */
+
       /* The typing effect */
       @keyframes typing {
         from {
@@ -334,7 +350,7 @@
         "Fairness and Justness",
       ];
       let lastIndex = -1;
-      let lastKeywordIndex = 0;
+      let lastKeywordIndex = -1;
       const duration = 10000;
       const danceDuration = 6500;
       const keywordDuration = 5000;
@@ -342,6 +358,7 @@
       let lightOn = false;
 
       function executeKeywords() {
+        console.log("executeKeywords called");
         let totalAnimation = animationIds.length;
         let totalKeywords = keywords.length;
         $("#keyword").addClass("animation");
@@ -354,17 +371,14 @@
                 setTimeout(() => {
                   $("#keyword").html("");
                 }, keywordDuration);
-                keywordRoundTimerId = setTimeout(
-                  executeKeywords,
-                  danceDuration * totalAnimation
-                );
               } else lastKeywordIndex = i;
-            }, (i - lastKeywordIndex) * keywordDuration)
+            }, (i - lastKeywordIndex - 1) * keywordDuration)
           );
         }
       }
 
       function executeSeries() {
+        if (!lightOn) executeKeywords();
         let totalAnimation = animationIds.length;
 
         let _duration = lightOn ? danceDuration : duration;
@@ -380,8 +394,9 @@
 
                 $("#expand").click();
                 lightOn = !lightOn;
-
+                if (lightOn) $("#keyword").removeClass("animation");
                 clearTimeout(roundTimerId);
+
                 executeSeries();
                 roundTimerId = setTimeout(
                   executeSeries,
