@@ -4,8 +4,8 @@ function Slider() {
   var stepSize = 300;
 
   var sliderObject;
-  var tMin = null;
-  var tMax = null;
+  tMin = null;
+  tMax = null;
 
   var playing = false;
   var repeat = false;
@@ -13,8 +13,7 @@ function Slider() {
 
   var step = 0.01;
 
-  var currentMin = 0;
-  var currentMin = 0;
+  currentMin = 0;
 
   var oldDuration = {};
 
@@ -58,13 +57,8 @@ function Slider() {
   };
 
   function togglePlay() {
-    console.log("Limits");
-    console.log(tMin);
-    console.log(tMax);
     if (playing) {
       playing = !playing;
-      if (!playing) $("#play").prop("src", "icons/播放灰.png");
-      else $("#play").prop("src", "icons/暂停.png");
     } else {
       if (currentMax === tMax) {
         // this order matters
@@ -74,8 +68,6 @@ function Slider() {
       } else {
         playing = !playing;
       }
-
-      $("#play").prop("src", "icons/暂停.png");
     }
   }
 
@@ -199,8 +191,8 @@ function Slider() {
           //});
         } else {
           // adjust these for slider speed
-          currentMin += step / 10.5;
-          currentMax += step / 10.5;
+          currentMin += step / 20;
+          currentMax += step / 20;
         }
 
         sliderObject.update({

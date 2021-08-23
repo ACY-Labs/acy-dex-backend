@@ -68,8 +68,8 @@ function GUIInterface(simulator) {
     );
 
     var circular2 = document.createElement("div");
-    circular.id = "circular2";
-    $(circular).append(
+    circular2.id = "circular2";
+    $(circular2).append(
       "<img src='textures/circle.png' style='display:none' height='32px' width='32px'>"
     );
 
@@ -94,6 +94,8 @@ function GUIInterface(simulator) {
     container.appendChild(forceDirected);
     container.appendChild(document.createElement("br"));
     container.appendChild(circular);
+    container.appendChild(document.createElement("br"));
+    container.appendChild(circular2);
     container.appendChild(document.createElement("br"));
     container.appendChild(spherical);
     container.appendChild(document.createElement("br"));

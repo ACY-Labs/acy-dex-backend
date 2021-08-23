@@ -225,7 +225,7 @@
 
       .animation {
         animation-name: fadeInOut;
-        animation-duration: 5s;
+        animation-duration: 6s;
         animation-iteration-count: infinite;
         animation-fill-mode: forwards;
       }
@@ -326,18 +326,21 @@
       ];
       let hoverUrls = ["icons/播放.png", "icons/加.png", "icons/刷新.png"];
       let playing = false;
-      let replayOn = true;
       let nodeTimeIds = [];
       let keywordTimeIds = [];
       let roundTimerId = 0;
       let keywordRoundTimerId = 0;
-      let animationIds = [
+      let animationIds = ["#spherical", "#forceDirected", "#grid", "#helix"];
+
+      let animation2Ids = [
+        "#circular2",
         "#spherical",
         "#forceDirected",
         "#grid",
         "#helix",
-        "#circular2",
+        "#circular",
       ];
+
       let keywords = [
         "Arbitrage Supremacy of ACY Finance",
         "Built-in Protocol",
@@ -349,17 +352,17 @@
         "Extra Income",
         "Mutual Benefit",
         "Fairness and Justness",
+        "Coin the world...",
       ];
       let lastIndex = -1;
       let lastKeywordIndex = -1;
       const duration = 10000;
       const danceDuration = 6000;
-      const keywordDuration = 5000;
+      const keywordDuration = 6000;
 
       let lightOn = false;
 
       function executeKeywords() {
-        console.log("executeKeywords called");
         let totalAnimation = animationIds.length;
         let totalKeywords = keywords.length;
         $("#keyword").addClass("animation");
@@ -369,50 +372,62 @@
               $("#keyword").html(keywords[i]);
               if (i === totalKeywords - 1) {
                 lastKeywordIndex = -1;
-                setTimeout(() => {
-                  $("#keyword").html("");
-                }, keywordDuration);
+                $("#keyword").removeClass("animation");
+                $("#keyword-container").addClass("typewriter");
               } else lastKeywordIndex = i;
             }, (i - lastKeywordIndex - 1) * keywordDuration)
           );
         }
       }
 
-      function executeSeries() {
-        if (!lightOn) executeKeywords();
-        let totalAnimation = animationIds.length;
+      function executeSeries2() {
+        let totalAnimation = animation2Ids.length;
 
-        let _duration = lightOn ? danceDuration : duration;
+        $("#expand").click();
 
+        nodeTimeIds = [];
         for (let i = lastIndex + 1; i < totalAnimation; i++) {
-          console.log(`${animationIds[i]} in ${(i - lastIndex) * duration}`);
+          console.log(animation2Ids[i]);
           nodeTimeIds.push(
             setTimeout(() => {
-              console.log(i);
+              $(animation2Ids[i]).click();
+              // last animation
+              if (i === totalAnimation - 1) {
+                lastIndex = -1;
+                // restore colors
+                setTimeout(() => {
+                  $("#expand").click();
+                  playing = false;
+                  document
+                    .getElementById("play")
+                    .setAttribute("src", "icons/播放灰.png");
+                  var audio = document.getElementById("audio");
+                  audio.currentTime = 0;
+                  audio.pause();
+                  audio.currentTime = 0;
+                  slider.setLimits(tMin, tMax);
+                }, danceDuration);
+              } else lastIndex = i;
+            }, (i - lastIndex - 1) * danceDuration)
+          );
+        }
+      }
+
+      function executeSeries() {
+        $("#keyword-container").removeClass("typewriter");
+
+        executeKeywords();
+        let totalAnimation = animationIds.length;
+
+        for (let i = lastIndex + 1; i < totalAnimation; i++) {
+          nodeTimeIds.push(
+            setTimeout(() => {
               $(animationIds[i]).click();
               if (i === totalAnimation - 1) {
                 lastIndex = -1;
-
-                $("#expand").click();
-                lightOn = !lightOn;
-                if (lightOn) $("#keyword").removeClass("animation");
-                clearTimeout(roundTimerId);
-
-                executeSeries();
-                roundTimerId = setTimeout(
-                  executeSeries,
-                  duration * totalAnimation
-                );
-              } else if (i === totalAnimation - 2) {
-                if (lightOn) {
-                  $("#keyword").html("Coin the world...");
-                  $("#keyword-container").addClass("typewriter");
-                  setTimeout(() => {
-                    $("#keyword-container").removeClass("typewriter");
-                  }, _duration);
-                }
+                setTimeout(executeSeries2, duration);
               } else lastIndex = i;
-            }, (i - lastIndex) * _duration)
+            }, (i - lastIndex) * duration)
           );
         }
       }
@@ -453,12 +468,6 @@
         playing = !playing;
       }
 
-      function replay(element) {
-        if (replayOn) unhover(element, 2);
-        else hover(element, 2);
-
-        replayOn = !replayOn;
-      }
       function hover(element, index) {
         if (window.done) playing = false;
         if (playing && index === 0)
