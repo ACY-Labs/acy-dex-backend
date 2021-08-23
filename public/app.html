@@ -122,7 +122,7 @@
       }
 
       .logo {
-        max-width: 30px;
+        max-width: 40px;
       }
 
       #keyword-container {
@@ -282,6 +282,7 @@
           id="repeat"
           class="logo"
           onclick="replay(this);"
+          hidden
         />
       </div>
     </div>
@@ -335,7 +336,7 @@
         "#forceDirected",
         "#grid",
         "#helix",
-        "#circular",
+        "#circular2",
       ];
       let keywords = [
         "Arbitrage Supremacy of ACY Finance",
@@ -352,7 +353,7 @@
       let lastIndex = -1;
       let lastKeywordIndex = -1;
       const duration = 10000;
-      const danceDuration = 6500;
+      const danceDuration = 6000;
       const keywordDuration = 5000;
 
       let lightOn = false;
@@ -402,6 +403,14 @@
                   executeSeries,
                   duration * totalAnimation
                 );
+              } else if (i === totalAnimation - 2) {
+                if (lightOn) {
+                  $("#keyword").html("Coin the world...");
+                  $("#keyword-container").addClass("typewriter");
+                  setTimeout(() => {
+                    $("#keyword-container").removeClass("typewriter");
+                  }, _duration);
+                }
               } else lastIndex = i;
             }, (i - lastIndex) * _duration)
           );

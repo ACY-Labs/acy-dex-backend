@@ -15,6 +15,15 @@ function GUIInterface(simulator) {
     temperature = 1000;
   }
 
+  function enableCircular2() {
+    console.log("circular2");
+    simulator.velocityUniforms.layoutPositions.value = generateCircularLayout2(
+      nodesAndEdges,
+      nodesWidth
+    );
+    temperature = 1000;
+  }
+
   function enableSpherical() {
     console.log("spherical");
     simulator.velocityUniforms.layoutPositions.value = generateSphericalLayout(
@@ -58,6 +67,12 @@ function GUIInterface(simulator) {
       "<img src='textures/circle.png' style='display:none' height='32px' width='32px'>"
     );
 
+    var circular2 = document.createElement("div");
+    circular.id = "circular2";
+    $(circular).append(
+      "<img src='textures/circle.png' style='display:none' height='32px' width='32px'>"
+    );
+
     var spherical = document.createElement("div");
     spherical.id = "spherical";
     $(spherical).append(
@@ -89,6 +104,7 @@ function GUIInterface(simulator) {
 
     $("#forceDirected").on("click", enableForceDirected);
     $("#circular").on("click", enableCircular);
+    $("#circular2").on("click", enableCircular2);
     $("#spherical").on("click", enableSpherical);
     $("#helix").on("click", enableHelix);
     $("#grid").on("click", enableGrid);

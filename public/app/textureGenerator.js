@@ -69,6 +69,18 @@ function generateIdMappings(inputArray, textureSize) {
   return texture;
 }
 
+function rotateX(x, y, z, theta) {
+  const sinTheta = Math.sin(theta);
+  const cosTheta = Math.cos(theta);
+  return [x, cosTheta * y - sinTheta * z, sinTheta * y + cosTheta * z];
+}
+
+function rotateY(x, y, z, theta) {
+  const sinTheta = Math.sin(theta);
+  const cosTheta = Math.cos(theta);
+  return [cosTheta * x + sinTheta * z, y, -1 * sinTheta * x + cosTheta * z];
+}
+
 function generateCircularLayout(inputArray, textureSize) {
   var increase = (Math.PI * 2) / inputArray.length;
   var angle = 0;
@@ -83,10 +95,50 @@ function generateCircularLayout(inputArray, textureSize) {
       var y = radius * Math.sin(angle);
       var z = 0;
       var w = 1.0;
-
       textureArray[i] = x;
       textureArray[i + 1] = y;
-      textureArray[i + 2] = 0;
+      textureArray[i + 2] = z;
+      textureArray[i + 3] = w;
+
+      angle += increase;
+    } else {
+      textureArray[i] = -1.0;
+      textureArray[i + 1] = -1.0;
+      textureArray[i + 2] = -1.0;
+      textureArray[i + 3] = -1.0;
+    }
+  }
+  var texture = new THREE.DataTexture(
+    textureArray,
+    textureSize,
+    textureSize,
+    THREE.RGBAFormat,
+    THREE.FloatType
+  );
+  texture.needsUpdate = true;
+  //console.log('position', texture.image.data);
+  return texture;
+}
+
+function generateCircularLayout2(inputArray, textureSize) {
+  var increase = (Math.PI * 2) / inputArray.length;
+  var angle = 0;
+  var radius = inputArray.length * 4;
+
+  var textureArray = new Float32Array(textureSize * textureSize * 4);
+
+  for (var i = 0; i < textureArray.length; i += 4) {
+    if (i < inputArray.length * 4) {
+      // modify to change the radius and position of a circle
+      var x = radius * Math.cos(angle);
+      var y = radius * Math.sin(angle);
+      var z = 0;
+      var w = 1.0;
+      let [x0, y0, z0] = rotateX(x, y, z, -45);
+      let [x1, y1, z1] = rotateY(x0, y0, z0, 45);
+      textureArray[i] = x1;
+      textureArray[i + 1] = y1;
+      textureArray[i + 2] = z1;
       textureArray[i + 3] = w;
 
       angle += increase;
