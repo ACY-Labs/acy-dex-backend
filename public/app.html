@@ -47,7 +47,16 @@
         position: absolute;
         right: 30px;
         top: 30px;
-        z-index: 1000;
+        z-index: 2;
+      }
+
+      #slider input {
+        visibility: hidden;
+        height: 0 !important;
+      }
+      #slider .irs * {
+        visibility: hidden;
+        height: 0 !important;
       }
 
       #layouts {
@@ -229,17 +238,17 @@
       }
 
       @media (max-width: 768px) {
+        #slider {
+          margin-left: -150px;
+          top: auto;
+          bottom: 0px;
+        }
         #keyword {
           font-size: 30px;
         }
       }
 
       @media (max-width: 560px) {
-        #slider {
-          margin-left: -150px;
-          top: auto;
-          bottom: 30px;
-        }
         #keyword {
           font-size: 25px;
         }
@@ -255,24 +264,27 @@
     </div>
     <canvas id="c" class="overlay"></canvas>
     <div id="slider">
-      <audio id="audio" src="/bgm.mp3"></audio>
+      <div id="buttons">
+        <img
+          src="icons/播放灰.png"
+          id="play"
+          class="logo"
+          onclick="play();negatePlaying();unhover(this,0);"
+          onmouseenter="hover(this,0);"
+          onmouseout="unhover(this,0);"
+        />
+        <img id="expand" hidden />
+        <img
+          src="icons/刷新.png"
+          id="repeat"
+          class="logo"
+          onclick="replay(this);"
+          hidden
+        />
+      </div>
 
-      <img
-        src="icons/播放灰.png"
-        id="play"
-        class="logo"
-        onclick="play();negatePlaying();unhover(this,0);"
-        onmouseenter="hover(this,0);"
-        onmouseout="unhover(this,0);"
-      />
-      <img id="expand" hidden />
-      <img
-        src="icons/刷新.png"
-        id="repeat"
-        class="logo"
-        onclick="replay(this);"
-        hidden
-      />
+      <input id="range" />
+      <audio id="audio" src="/bgm.mp3"></audio>
     </div>
 
     <!--vendor includes-->
@@ -394,7 +406,7 @@
                   audio.pause();
                   audio.currentTime = 0;
                   slider.setLimits(tMin, tMax);
-                }, danceDuration);
+                }, danceDuration + 2000);
               } else lastIndex = i;
             }, (i - lastIndex - 1) * danceDuration)
           );
