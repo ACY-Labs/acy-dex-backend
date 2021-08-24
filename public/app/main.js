@@ -134,9 +134,6 @@ function init() {
 
   gpupicking = new GPUPick();
 
-  slider = new Slider();
-  slider.init();
-
   onWindowResize();
   window.addEventListener("resize", onWindowResize, false);
   document.addEventListener("mousemove", onMouseMove, false);
@@ -185,8 +182,6 @@ function initNodes() {
   max = _.max(bigArray);
 
   //console.log('min epoch:', min, 'max epoch:', max);
-
-  slider.setLimits(min, max);
 
   epochOffset = min;
 
@@ -287,40 +282,9 @@ function onMouseMove(e) {
   //console.log(mouseX, mouseY);
 }
 
-document.onkeypress = function (e) {
-  //console.log(e.charCode);
-
-  if (e.charCode === 115) {
-    simulate = !simulate;
-  }
-  if (e.charCode === 61) {
-    if (slider) {
-      slider.increaseStep();
-    }
-  }
-  if (e.charCode === 45) {
-    if (slider) {
-      slider.decreaseStep();
-    }
-  }
-
-  if (e.charCode === 93) {
-    if (slider) {
-      slider.increaseHandles();
-    }
-  }
-
-  if (e.charCode === 91) {
-    if (slider) {
-      slider.decreaseHandles();
-    }
-  }
-};
-
 function animate() {
   //stats.update();
   controls.update();
-  slider.update();
 
   requestAnimationFrame(animate);
   render();
