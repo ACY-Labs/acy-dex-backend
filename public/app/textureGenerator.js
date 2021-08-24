@@ -275,7 +275,7 @@ function generateZeroedPositionTexture(inputArray, textureSize) {
 
   for (var i = 0; i < textureArray.length; i += 4) {
     if (i < inputArray.length * 4) {
-      textureArray[i] = 10.0;
+      textureArray[i] = 15.0;
       textureArray[i + 1] = 0.0;
       textureArray[i + 2] = 0.0;
       textureArray[i + 3] = 0.0;
