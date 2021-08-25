@@ -45,13 +45,38 @@
 
       #slider {
         position: absolute;
-        left: 30px;
-        bottom: 0px;
+        width: 20%;
+        height: 20%;
+        left: 40%;
+        top: 40%;
         z-index: 2;
+        opacity: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: opacity 1s;
+      }
+
+      #buttons {
+        display: flex;
+        justify-content: center;
+      }
+
+      #slider:hover {
+        opacity: 1;
+      }
+
+      .show {
+        display: flex !important;
+        justify-content: center;
+        opacity: 1 !important;
       }
 
       #slider input {
         visibility: hidden;
+        height: 0 !important;
+      }
+      #slider .irs {
         height: 0 !important;
       }
       #slider .irs * {
@@ -150,7 +175,7 @@
       }
 
       #keyword {
-        font-size: 48px;
+        font-size: 32px;
         color: #de5b24;
         text-shadow: 2px 2px black;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -258,7 +283,7 @@
       <p id="keyword">Arbitrage Supremacy of ACY Finance</p>
     </div>
     <canvas id="c" class="overlay"></canvas>
-    <div id="slider">
+    <div id="slider" class="show">
       <div id="buttons">
         <img
           src="icons/播放灰.png"
@@ -392,6 +417,7 @@
                 // restore colors
                 setTimeout(() => {
                   $("#expand").click();
+                  $("#slider").addClass("show");
                   playing = false;
                   document
                     .getElementById("play")
@@ -449,10 +475,12 @@
         window.done = false;
         var audio = document.getElementById("audio");
         if (!playing) {
+          $("#slider").removeClass("show");
           executeSeries();
           executeKeywords();
           audio.play();
         } else {
+          $("#slider").addClass("show");
           audio.pause();
           clearSeries();
           clearKeywords();
