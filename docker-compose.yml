@@ -6,7 +6,9 @@ services:
     restart: always
     build: ./nginx
     ports:
-      - "6001:6001"
+      - target: 6001
+        published: 6001
+        mode: host
     depends_on:
       - backend
     volumes:
