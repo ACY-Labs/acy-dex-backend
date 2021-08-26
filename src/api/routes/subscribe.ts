@@ -22,6 +22,7 @@ export default (app: Router) => {
         let ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
         let status: Number = 200;
         let message: String = "Default message";
+        console.log(req.ip);
         if (!err.isEmpty()) {
           console.log(err.mapped());
           status = 400;

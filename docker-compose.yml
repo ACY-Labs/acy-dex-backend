@@ -1,11 +1,24 @@
 version: "3"
 
 services:
+  nginx:
+    container_name: nginx
+    restart: always
+    build: ./nginx
+    ports:
+      - "6001:6001"
+    depends_on:
+      - backend
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf
+    networks:
+      - web_network
+
   backend:
     container_name: acy_backend
     build: .
-    ports:
-      - "6001:3001"
+    expose:
+      - "3001"
     depends_on:
       - mongodb
     volumes:
@@ -16,6 +29,7 @@ services:
       - web_network
       - db_network
     command: npm run deploy
+
   mongodb:
     container_name: mongodb
     restart: always
