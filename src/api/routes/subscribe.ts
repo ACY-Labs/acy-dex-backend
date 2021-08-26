@@ -18,7 +18,8 @@ export default (app: Router) => {
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const subscribeServiceInstance = Container.get(SubscribeService);
-        var err = validationResult(req);
+        let err = validationResult(req);
+        let ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
         let status: Number = 200;
         let message: String = "Default message";
         if (!err.isEmpty()) {
@@ -28,7 +29,7 @@ export default (app: Router) => {
         } else {
           [status, message] = await subscribeServiceInstance.subscribe(
             req.body,
-            req.ip
+            ip
           );
           console.log(status, message);
         }
