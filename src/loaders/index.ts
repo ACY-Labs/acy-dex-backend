@@ -4,8 +4,8 @@ import dependencyInjectorLoader from "./dependencyInjector";
 import Logger from "./logger";
 
 export default async ({ expressApp }) => {
-  // const mongoConnection = await mongooseLoader();
-  // Logger.info("✌️ DB loaded and connected!");
+  const mongoConnection = await mongooseLoader();
+  Logger.info("✌️ DB loaded and connected!");
 
   /**
    * We are injecting the mongoose models into the DI container.
@@ -18,15 +18,22 @@ export default async ({ expressApp }) => {
     model: require("../models/pair").default,
   };
 
-  // await dependencyInjectorLoader({
-  //   mongoConnection,
-  //   models: [
-  //     pairModel,
-  //     // salaryModel,
-  //     // whateverModel
-  //   ],
-  // });
-  // Logger.info("✌️ Dependency Injector loaded");
+  const subscriberModel = {
+    name: "subscriberModel",
+    // Notice the require syntax and the '.default'
+    model: require("../models/subscriber").default,
+  };
+
+  await dependencyInjectorLoader({
+    mongoConnection,
+    models: [
+      pairModel,
+      subscriberModel,
+      // salaryModel,
+      // whateverModel
+    ],
+  });
+  Logger.info("✌️ Dependency Injector loaded");
 
   await expressLoader({ app: expressApp });
   Logger.info("✌️ Express loaded");

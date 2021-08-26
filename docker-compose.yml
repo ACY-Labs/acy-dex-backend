@@ -5,7 +5,7 @@ services:
     container_name: acy_backend
     build: .
     ports:
-      - "6001:3000"
+      - "6001:3001"
     depends_on:
       - mongodb
     volumes:

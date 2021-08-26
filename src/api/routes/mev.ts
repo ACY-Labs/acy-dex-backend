@@ -1,6 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { Container } from "typedi";
-import ChartService from "../../services/chart";
 import { Logger } from "winston";
 import { cacheMiddleware } from "../../middleware";
 const { createProxyMiddleware } = require("http-proxy-middleware");
