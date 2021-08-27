@@ -282,8 +282,8 @@
   </head>
 
   <body>
-    <div class="typewriter" id="keyword-container">
-      <p id="keyword">Arbitrage Supremacy of ACY Finance</p>
+    <div class="" id="keyword-container">
+      <p id="keyword"></p>
     </div>
     <canvas id="c" class="overlay"></canvas>
     <div id="slider" class="show">
@@ -365,7 +365,7 @@
       ];
 
       let keywords = [
-        "Arbitrage Supremacy of ACY Finance",
+        "ACY Finance Arbitrage Supremacy",
         "Built-in Protocol",
         "Automated Arbitrage",
         "Multi Route",
@@ -388,10 +388,15 @@
       function executeKeywords() {
         let totalAnimation = animationIds.length;
         let totalKeywords = keywords.length;
-        $("#keyword").addClass("animation");
         for (let i = lastKeywordIndex + 1; i < totalKeywords; i++) {
           keywordTimeIds.push(
             setTimeout(() => {
+              if (i === 1) {
+                $("#keyword").addClass("animation");
+              }
+              if (i === 2) {
+                $("#keyword-container").removeClass("typewriter");
+              }
               $("#keyword").html(keywords[i]);
               if (i === totalKeywords - 1) {
                 lastKeywordIndex = -1;
@@ -438,7 +443,7 @@
       }
 
       function executeSeries() {
-        $("#keyword-container").removeClass("typewriter");
+        $("#keyword-container").addClass("typewriter");
 
         executeKeywords();
         let totalAnimation = animationIds.length;
@@ -474,7 +479,7 @@
       }
 
       function play() {
-        $("#keyword-container").removeClass("typewriter");
+        $("#keyword-container").addClass("typewriter");
         window.done = false;
         var audio = document.getElementById("audio");
         if (!playing) {
