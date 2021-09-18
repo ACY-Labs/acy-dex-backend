@@ -12,11 +12,13 @@ import {
   INTERVAL_1H_STEP,
   INTERVAL_4H_STEP,
   INTERVAL_1D_STEP,
+  INTERVAL_1W_STEP,
   INTERVAL_1M_STEP,
   INTERVAL_15M_COUNT,
   INTERVAL_1H_COUNT,
   INTERVAL_4H_COUNT,
   INTERVAL_1D_COUNT,
+  INTERVAL_1W_COUNT,
   INTERVAL_1M_COUNT,
 } from "../constants";
 import { getBlockByTime, getAsyncTasksValidResults } from "../util";
@@ -134,6 +136,10 @@ export default class ChartService {
       case "1D":
         step = INTERVAL_1D_STEP;
         interval_count = INTERVAL_1D_COUNT;
+        break;
+      case "1W":
+        step = INTERVAL_1W_STEP;
+        interval_count = INTERVAL_1W_COUNT;
         break;
       case "1M":
         step = INTERVAL_1M_STEP;

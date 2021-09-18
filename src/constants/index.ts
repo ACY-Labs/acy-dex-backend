@@ -668,12 +668,14 @@ export const DEFAULT_CACHE_TIMEOUT_SECONDS = 10;
 const minute = 60;
 const hour = 60 * minute;
 const day = 24 * hour;
+const week = 7 * day;
 const month = 30 * day;
 
 export const INTERVAL_15M_STEP = minute;
 export const INTERVAL_1H_STEP = 5 * minute;
 export const INTERVAL_4H_STEP = 15 * minute;
 export const INTERVAL_1D_STEP = hour;
+export const INTERVAL_1W_STEP = 4 * hour;
 export const INTERVAL_1M_STEP = day;
 
 export const INTERVAL_15M_COUNT =
@@ -681,4 +683,5 @@ export const INTERVAL_15M_COUNT =
 export const INTERVAL_1H_COUNT = Math.floor(hour / INTERVAL_1H_STEP) + 1;
 export const INTERVAL_4H_COUNT = Math.floor((4 * hour) / INTERVAL_4H_STEP) + 1;
 export const INTERVAL_1D_COUNT = Math.floor(day / INTERVAL_1D_STEP) + 1;
+export const INTERVAL_1W_COUNT = Math.floor(week / INTERVAL_1W_STEP) + 1;
 export const INTERVAL_1M_COUNT = Math.floor(month / INTERVAL_1M_STEP) + 1;
