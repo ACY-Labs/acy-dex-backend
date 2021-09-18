@@ -87,6 +87,10 @@ export default class ChartService {
   public async getSwapRate(token0: string, token1: string, range: string) {
     this.logger.debug(`Chart data range ${range}`);
 
+    // checksum addresses
+    token0 = getAddress(token0);
+    token1 = getAddress(token1);
+
     // if data is cached
     let [data, need_update] = await this.checkCachedAndIsValid(
       token0,
@@ -266,10 +270,6 @@ export default class ChartService {
       token0.toLowerCase() < token1.toLowerCase()
         ? [token0, token1]
         : [token1, token0];
-
-    // checksum addresses
-    _token0 = getAddress(_token0);
-    _token1 = getAddress(_token1);
 
     let pairAddress = getCreate2Address(
       FACTORY_ADDRESS,
