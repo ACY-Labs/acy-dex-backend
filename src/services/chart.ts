@@ -1,5 +1,5 @@
 import { Service, Inject, Container } from "typedi";
-import { getCreate2Address } from "@ethersproject/address";
+import { getCreate2Address, getAddress } from "@ethersproject/address";
 import { pack, keccak256 } from "@ethersproject/solidity";
 import {
   FACTORY_ADDRESS,
@@ -266,6 +266,10 @@ export default class ChartService {
       token0.toLowerCase() < token1.toLowerCase()
         ? [token0, token1]
         : [token1, token0];
+
+    // checksum addresses
+    _token0 = getAddress(_token0);
+    _token1 = getAddress(_token1);
 
     let pairAddress = getCreate2Address(
       FACTORY_ADDRESS,
