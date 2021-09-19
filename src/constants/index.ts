@@ -663,7 +663,7 @@ export const ERC20_ABI = [
 
 // tweak for trade between speed and precision
 export const DEFAULT_CONSECUTIVE_BLOCK_COUNT = 100;
-export const DEFAULT_CACHE_TIMEOUT_SECONDS = 10;
+export const DEFAULT_CACHE_TIMEOUT_SECONDS = 1000;
 
 const minute = 60;
 const hour = 60 * minute;
