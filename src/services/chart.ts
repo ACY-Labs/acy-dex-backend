@@ -59,7 +59,6 @@ export default class ChartService {
     this.logger.debug("start checkCachedAndIsValid");
     let need_update = false;
     let data = await this.pairModel.findOne({ token0, token1, range }).exec();
-
     if (!data) {
       // swap and recheck
       data = await this.pairModel
@@ -148,7 +147,6 @@ export default class ChartService {
     }
 
     let intervals = new Array(interval_count);
-    console.log(step, interval_count);
     for (let i = interval_count - 1; i >= 0; i--) {
       intervals[interval_count - i - 1] = now - step * i;
     }
@@ -247,6 +245,7 @@ export default class ChartService {
     }
 
     let swaps: any = await Promise.allSettled(get_events_tasks);
+
     swaps = swaps
       .filter((item) => {
         return item.status === "fulfilled";
@@ -283,6 +282,7 @@ export default class ChartService {
       INIT_CODE_HASH
     );
 
+    this.logger.debug(`Uniswap V2 Pair address ${pairAddress}`);
     let contract = new this.web3.eth.Contract(PAIR_CONTRACT_ABI, pairAddress);
 
     // timestamp now in seconds
@@ -331,6 +331,14 @@ export default class ChartService {
         {
           token0,
           token1,
+          range,
+        },
+        { swaps: processed_swaps }
+      );
+      await this.pairModel.updateOne(
+        {
+          token0: token1,
+          token1: token0,
           range,
         },
         { swaps: processed_swaps }
