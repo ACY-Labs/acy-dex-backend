@@ -7,7 +7,6 @@ import cache from "memory-cache";
 @Service()
 export default class PoolService {
   constructor(
-    // @Inject("subscriberModel") private subscriberModel,
     @Inject("logger") private logger
   ) { }
 
@@ -21,13 +20,22 @@ export default class PoolService {
 
   // TODO: schedule to update automatically
   public async getValidPools(chainId) {
+    // take note of the last requested chainId
+    if (cache.get("chainId") !== chainId)
+      cache.put("chainId", chainId);
+    this.logger.info(`Fetching pools on chainId: ${cache.get("chainId")}`);
+
     if (cache.get("pool")) {
       this.logger.info("CACHED DATA FOUND: Last updated s ago");
       return cache.get("pool");
     } else {
       this.logger.info("CACHED DATA OUTDATED / NULL!");
-      const data = this.updateValidPools(chainId);
-      cache.put("pool", data);
+      const data = await this.updateValidPools(chainId);
+      cache.put("pool", data, 3600*1000, async (key, value) => {
+        this.logger.info("CACHED DATA UPDATING")
+        await this.getValidPools(cache.get("chainId"));
+      });
+      this.logger.info("CACHED DATA UP-TO-DATE");
       return data;
     }
   }
@@ -36,7 +44,6 @@ export default class PoolService {
   public async updateValidPools(chainId) {
     this.logger.debug("getValidPairs() is called.");    
     
-      
     const provider = new InfuraProvider("rinkeby", process.env.INFURA_API_KEY);
     
     // we only want WETH
@@ -58,12 +65,6 @@ export default class PoolService {
 
         // quit if the two tokens are equivalent, i.e. have the same chainId and address
         if (token0.equals(token1)) continue;
-        
-        this.logger.debug(`chainID ${chainId}`);
-        this.logger.debug(`${token0Symbol} ${token1Symbol}`);
-        this.logger.debug(`${token0Address} ${token1Address}`);
-
-        this.logger.debug(Pair.getAddress(token0, token1))
 
         // queue get pair task
         const pairTask = Fetcher.fetchPairData(token0, token1, provider);
@@ -75,19 +76,12 @@ export default class PoolService {
     const pairs = await Promise.allSettled(checkLiquidityPositionTasks);
     this.logger.debug(`Length of pairs fetched: ${checkLiquidityPositionTasks.length}`);
 
-    // for (let p of pairs) {
-    //   // this.logger.debug(p.status)
-    //   if (p.status === "rejected")
-    //     this.logger.debug(p.reason)
-    // }
     // // filter out invalid pairs
     const ret = tokenIndexPairs.filter((_, idx) => { return pairs[idx].status !== "rejected" })
-    
-    // // another correct logic
-    // for (let i=pairLength-1; i>=0; i--) {
-    //   if (pairs[i].status === "rejected") 
-    //     tokenIndexPairs.splice(i, 1);
-    // }
+
+    // debug code
+    // const validPairs = pairs.filter(pair => (pair.status !== "rejected"));
+    // console.log(JSON.stringify(validPairs, null, 2));
     
     this.logger.debug(`Length of valid pairs: ${ret.length}`);
 
