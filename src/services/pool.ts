@@ -7,7 +7,8 @@ import cache from "memory-cache";
 @Service()
 export default class PoolService {
   constructor(
-    @Inject("logger") private logger
+    @Inject("logger") private logger,
+    @Inject("userPoolModel") private userPoolModel,
   ) { }
 
   public format(data) {
@@ -86,5 +87,77 @@ export default class PoolService {
     this.logger.debug(`Length of valid pairs: ${ret.length}`);
 
     return this.format(ret);
+  }
+
+  public async getUserPools(walletId) {
+    this.logger.info("getUserPools called");
+    const record = this.userPoolModel.findOne({walletId}, (err, data) =>{
+      if (err) {
+        this.logger.debug(`Mongo error ${err}`); 
+        return false;
+      }
+      return data;
+    });
+    return record;
+  }
+
+  // FIXME: prevent duplicate adding, use set (token0 and token1 are interchangable)
+  public async updateUserPools(walletId, action, token0, token1) {
+    this.logger.debug("updateUserPools called");
+    console.log("received param in function ", walletId, action, token0, token1);
+    const record = await this.userPoolModel.findOne({walletId}).exec();
+    console.log(record);
+    
+    if (!record) {
+      this.logger.debug(`Mongo could not found the specific walletId`);
+      if (action !== "add") {
+        this.logger.debug(`Mongo could not remove non-exist record`);
+        return false;
+      }
+
+      const created = await this.userPoolModel.create({
+        walletId,
+        pools: [{
+          token0, token1
+        }]
+      }, (err, data) => {
+        if (err) {
+          this.logger.debug(`Mongo create new record error ${err}`);
+          return false;
+        }
+        this.logger.debug(`Mongo created a new user pool record`);
+        return data;
+      });
+      return true;
+    }
+
+    // locate the pair
+    let removeIdx = record.pools.findIndex(item => item.token0 === token0 && item.token1 === token1);
+    if (removeIdx === -1)
+      removeIdx = record.pools.findIndex(item => item.token0 === token1 && item.token1 === token0);
+
+    switch (action) {
+      case "add":
+        if (removeIdx !== -1) {
+          this.logger.debug("Mongo tries to add a new record, but found one. Abort");
+          return false;
+        }
+        record.pools.push({token0, token1}); 
+        await record.save();
+        this.logger.info(`Mongo added to user pool`);
+        break;
+
+      case "remove":
+        if (removeIdx === -1) {
+          this.logger.debug("Mongo tries to remove a record, could not find one. Abort");
+          return false;
+        }
+        record.pools.splice(removeIdx, 1);
+        await record.save();
+        this.logger.info(`Mongo removed from user pool`);
+        break;
+    }
+    
+    return true;
   }
 }
