@@ -1,6 +1,6 @@
 import { Service, Inject, Container } from "typedi";
 import supportedTokens from "../constants/supportedTokens";
-import {InfuraProvider} from "@ethersproject/providers"
+import { InfuraProvider } from "@ethersproject/providers"
 import { Fetcher, Token, Pair } from '@acyswap/sdk';
 import cache from "memory-cache";
 
@@ -32,7 +32,7 @@ export default class PoolService {
     } else {
       this.logger.info("CACHED DATA OUTDATED / NULL!");
       const data = await this.updateValidPools(chainId);
-      cache.put("pool", data, 3600*1000, async (key, value) => {
+      cache.put("pool", data, 3600 * 1000, async (key, value) => {
         this.logger.info("CACHED DATA UPDATING")
         await this.getValidPools(cache.get("chainId"));
       });
@@ -40,13 +40,13 @@ export default class PoolService {
       return data;
     }
   }
-  
+
   // TODO: Is chainId=4 when we use rinkeby?
   public async updateValidPools(chainId) {
-    this.logger.debug("getValidPairs() is called.");    
-    
+    this.logger.debug("getValidPairs() is called.");
+
     const provider = new InfuraProvider("rinkeby", process.env.INFURA_API_KEY);
-    
+
     // we only want WETH
     let tokens = supportedTokens.filter(token => token.symbol !== 'ETH');
 
@@ -70,10 +70,10 @@ export default class PoolService {
         // queue get pair task
         const pairTask = Fetcher.fetchPairData(token0, token1, provider);
         checkLiquidityPositionTasks.push(pairTask);
-        tokenIndexPairs.push([i,j]);
+        tokenIndexPairs.push([i, j]);
       }
     }
-    
+
     const pairs = await Promise.allSettled(checkLiquidityPositionTasks);
     this.logger.debug(`Length of pairs fetched: ${checkLiquidityPositionTasks.length}`);
 
@@ -83,7 +83,7 @@ export default class PoolService {
     // debug code
     // const validPairs = pairs.filter(pair => (pair.status !== "rejected"));
     // console.log(JSON.stringify(validPairs, null, 2));
-    
+
     this.logger.debug(`Length of valid pairs: ${ret.length}`);
 
     return this.format(ret);
@@ -91,23 +91,21 @@ export default class PoolService {
 
   public async getUserPools(walletId) {
     this.logger.info("getUserPools called");
-    const record = this.userPoolModel.findOne({walletId}, (err, data) =>{
-      if (err) {
-        this.logger.debug(`Mongo error ${err}`); 
-        return false;
-      }
+    const data = await this.userPoolModel.findOne({ walletId }).exec();
+    if (!data) {
+      return { "pools": [] };
+    } else {
       return data;
-    });
-    return record;
+    }
   }
 
   // FIXME: prevent duplicate adding, use set (token0 and token1 are interchangable)
   public async updateUserPools(walletId, action, token0, token1) {
     this.logger.debug("updateUserPools called");
     console.log("received param in function ", walletId, action, token0, token1);
-    const record = await this.userPoolModel.findOne({walletId}).exec();
+    const record = await this.userPoolModel.findOne({ walletId }).exec();
     console.log(record);
-    
+
     if (!record) {
       this.logger.debug(`Mongo could not found the specific walletId`);
       if (action !== "add") {
@@ -142,7 +140,7 @@ export default class PoolService {
           this.logger.debug("Mongo tries to add a new record, but found one. Abort");
           return false;
         }
-        record.pools.push({token0, token1}); 
+        record.pools.push({ token0, token1 });
         await record.save();
         this.logger.info(`Mongo added to user pool`);
         break;
@@ -157,7 +155,7 @@ export default class PoolService {
         this.logger.info(`Mongo removed from user pool`);
         break;
     }
-    
+
     return true;
   }
 }
