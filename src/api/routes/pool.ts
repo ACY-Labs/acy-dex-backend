@@ -63,4 +63,22 @@ export default (app: Router) => {
       }
     }
   );
+  app.get(
+    "/pool/info",
+    async (req: Request, res: Response, next: NextFunction) => {
+      logger.debug(
+        "Calling pool GET endpoint /pool/general with query: %o",
+        req.query
+      );
+      try {
+        const { token0Symbol, token1Symbol } = req.query;
+        // const { token0, token1 } = req.body;
+        const data = await poolServiceInstance.getPoolInfo(token0Symbol, token1Symbol);
+        return res.status(201).send(data);
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
 };

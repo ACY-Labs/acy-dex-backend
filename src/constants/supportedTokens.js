@@ -28,7 +28,7 @@ export default [
       name: 'ACY',
       symbol: 'ACY',
       address: '0xd0da907ec2F98E23ecf75CA12b6C83744dFBDf30',
-      addressOnEth: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+      addressOnEth: '0xE41d2489571d322189246DaFA5ebDe1F4699F498', // now this is ZRX addr
       decimal: 18,
       logoURI: 'https://acy.finance/static/media/logo.78c0179c.svg',
     },
