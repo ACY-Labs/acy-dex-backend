@@ -14,6 +14,28 @@ docker compose up
 npm run debug
 ```
 
+### Development
+
+1. Install nodemon by `npm install -g nodemon`.
+2. Make sure you have `.env` in the root directory. (retrieve from project owner)
+3. Add the following codes to connect to the remote database (so please work with caution):
+```
+# config\index.ts
+databaseName: process.env.MONGO_AUTHENTICATION_DATABASE,
+databaseUser: process.env.MONGO_NON_ROOT_USERNAME,
+databasePass: process.env.MONGO_NON_ROOT_PASSWORD,
+
+# src\loaders\mongoose.ts
+dbName: config.databaseName,
+user: config.databaseUser,
+pass: config.databasePass,
+```
+4. Start development with `npm run debug`
+5. Optional tools for debugging:
+    - MongoDB Compass: list data
+    - Postman: test api endpoints
+
+
 ### Output
 
 #### WETH-USDC
