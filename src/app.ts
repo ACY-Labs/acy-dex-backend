@@ -6,6 +6,9 @@ import express from "express";
 
 import Logger from "./loaders/logger";
 
+import { Container } from "typedi";
+import indexService from "./indexer";
+
 async function startServer() {
   const app = express();
 
@@ -16,6 +19,8 @@ async function startServer() {
    * So we are using good old require.
    **/
   await require("./loaders").default({ expressApp: app });
+  const indexer = Container.get(indexService);
+  indexer.main();
 
   app
     .listen(config.port, () => {
@@ -31,4 +36,9 @@ async function startServer() {
     });
 }
 
+async function startIndexer() {
+  
+}
+
 startServer();
+startIndexer();
