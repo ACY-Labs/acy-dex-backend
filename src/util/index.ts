@@ -73,3 +73,30 @@ export async function getAsyncTasksValidResults(tasks) {
 
   return results;
 }
+
+/////
+import TokenList from "../constants/supportedTokens";
+
+export function decodeTokenAmount(tokenAddr, amount) {
+  const token = TokenList.find(token => token.address == tokenAddr);
+  const tokenSymbol = token.symbol;
+  const amountFloat = amount / Math.pow(10, token.decimals);
+  return { symbol: tokenSymbol, amount: amountFloat }
+}
+
+import { getCreate2Address } from "@ethersproject/address";
+import { pack, keccak256 } from "@ethersproject/solidity";
+export const getPairAddress = (token0Addr, token1Addr) => {
+    const FACTORY_ADDRESS = "0xb43DD1c50377b6dbaEBa3DcBB2232a3964b22440";
+    const INIT_CODE_HASH = "0xfbf3b88d6f337be529b00f1dc9bff44bb43fa3c6b5b7d58a2149e59ac5e0c4a8";
+    const [_token0, _token1] =
+    token0Addr.toLowerCase() < token1Addr.toLowerCase()
+        ? [token0Addr, token1Addr]
+        : [token1Addr, token0Addr];
+    const pairAddress = getCreate2Address(
+      FACTORY_ADDRESS,
+      keccak256(["bytes"], [pack(["address", "address"], [_token0, _token1])]),
+      INIT_CODE_HASH
+    );
+    return pairAddress;
+}

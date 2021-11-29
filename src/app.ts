@@ -36,9 +36,5 @@ async function startServer() {
     });
 }
 
-async function startIndexer() {
-  
-}
 
 startServer();
-startIndexer();
