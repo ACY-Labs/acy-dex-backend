@@ -29,7 +29,7 @@ export default class IndexService {
         // switch case with methodName
         if (methodName.startsWith("swap")) {
             this.swapService.decodeMultiPath(txPack);   // transaction table
-            this.liquidityService.updatePoolVolume(txPack);
+            // this.liquidityService.updatePoolVolume(txPack);  // not yet implemented
         }
 
     }
@@ -113,22 +113,6 @@ export default class IndexService {
                     }
                 });
             });
-
-        // const subscription = this.web3.eth.subscribe('pendingTransaction', {
-        //     address: '0x9c040CC3CE4B2C135452370Eed152A72ce5d5b18',
-        //     // address: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
-        // }, function(error, result){
-        //     if (!error)
-        //         console.log(result);
-        // })
-        // .on("connected", function(subscriptionId){
-        //     console.log(subscriptionId);
-        // })
-        // .on("data", function(log){
-        //     console.log(log);
-        // })
-        // .on("changed", function(log){
-        // });
     }
 
     private async test() {
