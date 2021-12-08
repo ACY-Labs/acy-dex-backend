@@ -39,20 +39,20 @@ export default async ({ expressApp }) => {
     model: require("../models/launch").default,
   };
 
-  await dependencyInjectorLoader({
+  dependencyInjectorLoader({
     mongoConnection,
     models: [
       pairModel,
       subscriberModel,
       userPoolModel,
       pairVolumeModel,
-      launchModel,
+      // launchModel,
       // salaryModel,
       // whateverModel
     ],
   });
   Logger.info("✌️ Dependency Injector loaded");
 
-  await expressLoader({ app: expressApp });
+  expressLoader({ app: expressApp });
   Logger.info("✌️ Express loaded");
 };
