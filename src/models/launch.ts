@@ -17,7 +17,7 @@ const Launch = new mongoose.Schema(
       required: [true],
     },
     idoDate:{
-      time: Date,
+      type: Date,
       default: Date.now,
     },
     raiseSize:{
@@ -25,24 +25,24 @@ const Launch = new mongoose.Schema(
       required: [true],
     },
     amount:{
-        type: Number,
-        required: [true],
+      type: Number,
+      required: [true],
     },
     marketCap:{
-        type: Number,
-        required: [true],
+      type: Number,
+      required: [true],
     },
     allocation:{
-        type: Number,
+      type: Number,
     },
     ticketDeposited:{
-        type: Number,
+      type: Number,
     },
     maxAllocation:{
-        type: Number,
+      type: Number,
     },
     maxWinners:{
-        type: Number,
+      type: Number,
     },
   },
   { timestamps: true }
