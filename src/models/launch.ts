@@ -20,6 +20,23 @@ const Launch = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    social:[
+      {
+        website: String,
+        whitepaper: String,
+        deck: String,
+        twitter: String,
+        telegram: String,
+        linkedin: String,
+        medium: String,
+        github: String,
+        forum: String,
+        Youtube: String,
+        etheraddress: String,
+        polyaddress: String,
+        confluxaddress: String,
+      }
+    ],
     raiseSize:{
       type: Number,
       required: [true],
@@ -44,6 +61,9 @@ const Launch = new mongoose.Schema(
     maxWinners:{
       type: Number,
     },
+    ticketValue:{
+      type: Number,
+    }
   },
   { timestamps: true }
 );
