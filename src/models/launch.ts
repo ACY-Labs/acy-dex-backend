@@ -17,33 +17,53 @@ const Launch = new mongoose.Schema(
       required: [true],
     },
     idoDate:{
-      time: Date,
+      type: Date,
       default: Date.now,
     },
+    social:[
+      {
+        website: String,
+        whitepaper: String,
+        deck: String,
+        twitter: String,
+        telegram: String,
+        linkedin: String,
+        medium: String,
+        github: String,
+        forum: String,
+        Youtube: String,
+        etheraddress: String,
+        polyaddress: String,
+        confluxaddress: String,
+      }
+    ],
     raiseSize:{
       type: Number,
       required: [true],
     },
     amount:{
-        type: Number,
-        required: [true],
+      type: Number,
+      required: [true],
     },
     marketCap:{
-        type: Number,
-        required: [true],
+      type: Number,
+      required: [true],
     },
     allocation:{
-        type: Number,
+      type: Number,
     },
     ticketDeposited:{
-        type: Number,
+      type: Number,
     },
     maxAllocation:{
-        type: Number,
+      type: Number,
     },
     maxWinners:{
-        type: Number,
+      type: Number,
     },
+    ticketValue:{
+      type: Number,
+    }
   },
   { timestamps: true }
 );
