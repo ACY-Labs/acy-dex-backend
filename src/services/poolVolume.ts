@@ -166,8 +166,9 @@ export default class PoolVolumeService {
             }
 
             // first check ..... if exists in database & lastvolume ... return if not reached interval
+            
 
-            if(inDatabase && data.lastVolume.token0 + data.lastVolume.token1 == 0 && blockNum % NO_VOLUME_UPDATE_INTERVAL != 0) {
+            if(inDatabase && data.lastVolume.token0 + data.lastVolume.token1 == 0 && blockNum - data.lastBlockNumber >= NO_VOLUME_UPDATE_INTERVAL) {
                 return;
             }
 
@@ -220,7 +221,7 @@ export default class PoolVolumeService {
             }
 
     }
-    public async updateVolumeData(blockNum){
+    public async updateVolumeData(){
 
         // only update every 4 blocks i.e. 1 minute
         // get Volumes for all pairs of available tokens
@@ -230,24 +231,24 @@ export default class PoolVolumeService {
         // let token1 = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
         // let decimal0 = supportedTokens.find(item => item.addressOnEth.toLowerCase() == token0.toLowerCase()).decimals;
         // let decimal1 = supportedTokens.find(item => item.addressOnEth.toLowerCase() == token1.toLowerCase()).decimals;
-        // await this.updateSinglePair(token0,token1,decimal0,decimal1,blockNum);
-        
-        if(blockNum % SUBSCRIPTION_INTERVAL == 0){
+        // await this.updateSinglePair(token0,token1,decimal0,decimal1);
 
-            let all_tasks = [];
+        let blockNum = await this.web3.eth.getBlockNumber();
 
-            for(let i=0;i<supportedTokens.length-1;i++){
-                for(let j=i+1;j<supportedTokens.length;j++){
+        let all_tasks = [];
 
-                    all_tasks.push(this.updateSinglePair(supportedTokens[i].addressOnEth,
-                        supportedTokens[j].addressOnEth,supportedTokens[i].decimals,
-                        supportedTokens[j].decimals,blockNum));
+        for(let i=0;i<supportedTokens.length-1;i++){
+            for(let j=i+1;j<supportedTokens.length;j++){
+
+                all_tasks.push(this.updateSinglePair(supportedTokens[i].addressOnEth,
+                    supportedTokens[j].addressOnEth,supportedTokens[i].decimals,
+                    supportedTokens[j].decimals,blockNum));
                     
-                }
             }
-            await Promise.allSettled(all_tasks);
-            console.log('solving for %d',all_tasks.length);
         }
+        await Promise.allSettled(all_tasks);
+        console.log('solving for %d',all_tasks.length);
+        
 
     }
 
