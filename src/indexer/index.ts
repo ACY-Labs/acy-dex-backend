@@ -2,6 +2,7 @@ import { Service, Inject, Container } from "typedi";
 // import LiquidityService from "./liquidity";
 import SwapService from "./swap";
 import { eventHashList, eventList, methodHashList } from "./utils";
+import PoolVolumeService from "../services/poolVolume";
 
 @Service()
 export default class IndexService {
@@ -14,6 +15,7 @@ export default class IndexService {
     constructor(
         @Inject("web3") private web3,
         public swapService: SwapService,
+        public poolVolumeService : PoolVolumeService
         // public liquidityService: LiquidityService
     ) {
         this.routerAddr = '0x9c040CC3CE4B2C135452370Eed152A72ce5d5b18';
@@ -75,7 +77,7 @@ export default class IndexService {
         // filter out only ACY transaction
         const block = await this.web3.eth.getBlock(blockNum, true);
         const acyTx = block.transactions.filter(tx => tx.to == this.routerAddr);
-
+        // console.log(acyTx);
         // decode one and dispatch task
         for (let tx of acyTx) {
             (async () => {
@@ -90,7 +92,6 @@ export default class IndexService {
             })();
         }
     }
-
     public async subscribe() {
         console.log("start subscription")
 
@@ -101,8 +102,8 @@ export default class IndexService {
             .on("data", async (blockHeader) => {
                 const { hash, number: blockNum } = blockHeader;
                 console.log("currentBlock: ", blockNum);
-
-                this.filterAcyTx(blockNum);
+                await this.poolVolumeService.updateVolumeData(blockNum);
+                // this.filterAcyTx(blockNum);
 
             })
             .on("error", (error) => {
