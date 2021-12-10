@@ -2,6 +2,14 @@ import mongoose from "mongoose";
 
 const PairVolume = new mongoose.Schema(
   {
+    token0 : {
+      type: String,
+      required: [true],
+    },
+    token1 : {
+      type: String,
+      required: [true],
+    },
     pairAddr: {
       type: String,
       required: [true],
@@ -11,6 +19,10 @@ const PairVolume = new mongoose.Schema(
       type: Number,
     },
     lastVolume: {
+      token0: Number,
+      token1: Number,
+    },
+    lastReserves : {
       token0: Number,
       token1: Number,
     },
