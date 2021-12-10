@@ -93,27 +93,28 @@ export default class IndexService {
         }
     }
     public async subscribe() {
-        console.log("start subscription")
+        console.log("start subscription");
+        await this.poolVolumeService.updateVolumeData();;
 
-        this.subscriber = this.web3.eth.subscribe('newBlockHeaders')
-            .on("connected", function (subscriptionId) {
-                console.log("connected", subscriptionId);
-            })
-            .on("data", async (blockHeader) => {
-                const { hash, number: blockNum } = blockHeader;
-                console.log("currentBlock: ", blockNum);
-                await this.poolVolumeService.updateVolumeData(blockNum);
-                // this.filterAcyTx(blockNum);
+        // this.subscriber = this.web3.eth.subscribe('newBlockHeaders')
+        //     .on("connected", function (subscriptionId) {
+        //         console.log("connected", subscriptionId);
+        //     })
+        //     .on("data", async (blockHeader) => {
+        //         const { hash, number: blockNum } = blockHeader;
+        //         console.log("currentBlock: ", blockNum);
+                
+        //         // this.filterAcyTx(blockNum);
 
-            })
-            .on("error", (error) => {
-                console.log("error", error);
-                this.subscriber.unsubscribe(function (error, success) {
-                    if (success) {
-                        console.log('Successfully unsubscribed!');
-                    }
-                });
-            });
+        //     })
+        //     .on("error", (error) => {
+        //         console.log("error", error);
+        //         this.subscriber.unsubscribe(function (error, success) {
+        //             if (success) {
+        //                 console.log('Successfully unsubscribed!');
+        //             }
+        //         });
+        //     });
     }
 
     private async test() {
@@ -131,7 +132,6 @@ export default class IndexService {
     public async main() {
         // this.liquidityService.updateDB("0xAE461cA67B15dc8dc81CE7615e0320dA1A9aB8D5", new Date())
         // await this.test();
-        this.subscribe();
         // this.count++;
         // console.log(this.count)
         // setTimeout(() => { this.main() }, 15000);
