@@ -8,6 +8,7 @@ import Logger from "./loaders/logger";
 
 import { Container } from "typedi";
 import indexService from "./indexer";
+import poolVolumeService from "./services/poolVolume"
 
 async function startServer() {
   const app = express();
@@ -19,8 +20,8 @@ async function startServer() {
    * So we are using good old require.
    **/
   await require("./loaders").default({ expressApp: app });
-  const indexer = Container.get(indexService);
-  indexer.main();
+  const poolService = Container.get(poolVolumeService);
+  setInterval(() => poolService.updateVolumeData(), 60000);
 
   app
     .listen(config.port, () => {

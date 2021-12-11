@@ -685,3 +685,9 @@ export const INTERVAL_4H_COUNT = Math.floor((4 * hour) / INTERVAL_4H_STEP) + 1;
 export const INTERVAL_1D_COUNT = Math.floor(day / INTERVAL_1D_STEP) + 1;
 export const INTERVAL_1W_COUNT = Math.floor(week / INTERVAL_1W_STEP) + 1;
 export const INTERVAL_1M_COUNT = Math.floor(month / INTERVAL_1M_STEP) + 1;
+
+export const AVERAGE_BLOCK_COUNT_PER_DAY = 4 * 60 * 4; // init with data from last 4 hrs 
+export const GLOBAL_VOLUME_TIME_RANGE = 24 * 60 * 60 * 1000; // 1 day  in msec
+export const AVERAGE_BLOCK_GEN_TIME = 15 * 1000; // in msec.
+export const SUBSCRIPTION_INTERVAL = 1 * 4 * 5; // # of blocks for each update // 1 min of blocks DEFAULT 20 b
+export const NO_VOLUME_UPDATE_INTERVAL = 1 * 4 * 15; // # of blocks for each update IFF lastvolumes was 0.0
