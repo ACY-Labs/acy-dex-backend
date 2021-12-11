@@ -46,7 +46,7 @@ export default async ({ expressApp }) => {
       subscriberModel,
       userPoolModel,
       pairVolumeModel,
-      // launchModel,
+      launchModel,
       // salaryModel,
       // whateverModel
     ],
