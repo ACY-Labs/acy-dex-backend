@@ -153,18 +153,18 @@ export default class FarmService {
         for(var j=0; j< poolPositons.length; j++){
             amountRow.push(farmContract.methods.getTotalRewards(poolId, poolPositons[j].positionId, rewardTokens[i].farmToken).call());
         }
-        poolTokenRewardInfoPromise.push(farmContract.methods.getPoolTokenRewardInfo(poolId,rewardTokens[i].farmToken).call());
+        poolTokenRewardInfoPromise.push(await farmContract.methods.getPoolTokenRewardInfo(poolId,rewardTokens[i].farmToken).call());
         amountCol.push(amountRow)
     }
     const BLOCKS_PER_YEAR = 60*60*24*365/BLOCK_PER_SEC;
     //HERE
-    const poolRewardsPerYear = await Promise.allSettled(poolTokenRewardInfoPromise)
-    .then(result => {
-        return result;
-        return result.map((info,index) => info[3]/(10**rewardTokens[index].decimals) * BLOCKS_PER_YEAR);
-    });
+    // const poolRewardsPerYear = await Promise.allSettled(poolTokenRewardInfoPromise)
+    // .then(result => {
+    //     return result;
+    //     return result.map((info,index) => info[3]/(10**rewardTokens[index].decimals) * BLOCKS_PER_YEAR);
+    // });
 
-    return poolRewardsPerYear;
+    return poolTokenRewardInfoPromise;
 
     const totalRewardPerYear = poolRewardsPerYear.reduce((total,reward,index) =>
         total += tokenPrice[rewardTokens[index].symbol] * reward
