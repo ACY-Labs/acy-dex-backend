@@ -121,6 +121,9 @@ export default class FarmService {
   public async getAllPools(account) {
     let farms = await this.farmModel.find();
     const farmPromise = [];
+    const farmContract = new this.web3.eth.Contract(FARM_ABI, FARM_ADDRESS);
+    const num = await farmContract.methods.numPools().call();
+    return `numPools: ${num}`;
     const pools = await this.getPool(1,account);
     // return "TEST in getAllPools ";
     // farms.forEach(farm => {
