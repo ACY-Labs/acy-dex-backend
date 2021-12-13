@@ -158,6 +158,7 @@ export default class FarmService {
     }
     // return "HERE 21";
     const BLOCKS_PER_YEAR = 60*60*24*365/BLOCK_PER_SEC;
+    return "HERE 21.5";
     //HERE
     const poolRewardsPerYear = await Promise.all(poolTokenRewardInfoPromise).then(result => {
         // return result.map((info,index) => info[3]/(10**rewardTokens[index].decimals) * BLOCKS_PER_YEAR);
