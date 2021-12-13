@@ -29,14 +29,14 @@ export default (app: Router) => {
     }
   );
 
-  route.get(
+  route.post(
     "/testFarm",
     async (req: Request, res: Response, next: NextFunction) => {
       logger.debug(
         "Calling chart GET endpoint /farm/testfarm with query: %o",
       );
       try {
-        return res.status(201).json("TEST GET FARM");
+        return res.status(201).json("TEST post FARM");
       } catch (e) {
         logger.error("🔥 error: %o", e);
         return next(e);
