@@ -14,7 +14,7 @@ const poolVolumeService = Container.get(PoolVolumeService);
     "/all",
     async (req: Request, res: Response, next: NextFunction) => {
       logger.debug(
-        "Calling pool GET endpoint /poolchart/all with query: %o",
+        "Calling pool GET endpoint /poolchart/all",
         req.query
       );
       try {
@@ -30,27 +30,4 @@ const poolVolumeService = Container.get(PoolVolumeService);
     }
   );
 
-
-
-//   route.post(
-//     "/pair",
-//     async (req: Request, res: Response, next: NextFunction) => {
-//       logger.debug(
-//         "Calling chart POST endpoint /swap with query: %o",
-//         req.query
-//       );
-//       try {
-//         const chartServiceInstance = Container.get(ChartService);
-//         const data = await chartServiceInstance.getSwapRate(
-//           req.query.token0,
-//           req.query.token1,
-//           req.query.range
-//         );
-//         return res.status(201).json(data);
-//       } catch (e) {
-//         logger.error("🔥 error: %o", e);
-//         return next(e);
-//       }
-//     }
-//   );
 };
