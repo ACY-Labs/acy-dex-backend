@@ -120,10 +120,10 @@ export default class FarmService {
   }
   public async getAllPools(account) {
     let farms = await this.farmModel.find();
-    const web3 = new Web3("https://rinkeby.infura.io/v3/1e70bbd1ae254ca4a7d583bc92a067a2");
-    const contract = new web3.eth.Contract(FARM_ABI, FARM_ADDRESS);
-    const numPools = await contract.methods.numPools().call();
-    return numPools;
+    // const web3 = new Web3("https://rinkeby.infura.io/v3/1e70bbd1ae254ca4a7d583bc92a067a2");
+    // const contract = new web3.eth.Contract(FARM_ABI, FARM_ADDRESS);
+    // const numPools = await contract.methods.numPools().call();
+    // return numPools;
     const farmPromise = [];
     farms.forEach(farm => {
         farmPromise.push(this.getPool(farm.poolId,account));
