@@ -29,21 +29,6 @@ export default (app: Router) => {
     }
   );
 
-  route.post(
-    "/testFarm",
-    async (req: Request, res: Response, next: NextFunction) => {
-      logger.debug(
-        "Calling chart GET endpoint /farm/testfarm with query: %o",
-      );
-      try {
-        return res.status(201).json("TEST post FARM");
-      } catch (e) {
-        logger.error("🔥 error: %o", e);
-        return next(e);
-      }
-    }
-  );
-
   route.get(
     "/getAllPools",
     async (req: Request, res: Response, next: NextFunction) => {
@@ -72,7 +57,24 @@ export default (app: Router) => {
         const farmServiceInstance = Container.get(FarmService);
         // 0x1954F985F1086caBDc0Ea5FCC2a55732e7e43DD5
         // 0x0000000000000000000000000000000000000000
-        const data = await farmServiceInstance.getPool(0, "0x0000000000000000000000000000000000000000");
+        const data = await farmServiceInstance.getPool(req.query.poolId, req.query.account);
+        return res.status(201).json(data);
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
+  route.get(
+    "/updatePool",
+    async (req: Request, res: Response, next: NextFunction) => {
+      logger.debug(
+        "Calling chart GET endpoint /farm/updatePool with query: %o",
+        req.query
+      );
+      try {
+        const farmServiceInstance = Container.get(FarmService);
+        const data = await farmServiceInstance.updatePool(req.query.poolId);
         return res.status(201).json(data);
       } catch (e) {
         logger.error("🔥 error: %o", e);

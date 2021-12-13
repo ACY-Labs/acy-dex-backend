@@ -25,16 +25,13 @@ export default class FarmService {
   public getTokenSymbol(address) {
       return supportedTokens.find(token => token.address == address).symbol;
   }
-  public async massUpdateFarm() {
 
-    // const contract = getFarmsContract(library, account);
+  public async updatePool(poolId) {
     const web3 = new Web3("https://rinkeby.infura.io/v3/1e70bbd1ae254ca4a7d583bc92a067a2");
     const contract = new web3.eth.Contract(FARM_ABI, FARM_ADDRESS);
-    const numPools = await contract.methods.numPools().call();
-    for(var poolId = 0 ; poolId < numPools ; poolId++) {
-        const poolInfo = await contract.methods.poolInfo(poolId).call();
-    const rewardTokens123 = await contract.methods.getPoolRewardTokens(poolId).call();;
-    const rewardTokensAddresses = await contract.methods.getPoolRewardTokenAddresses(poolId).call();;
+    const poolInfo = await contract.methods.poolInfo(poolId).call();
+    const rewardTokens123 = await contract.methods.getPoolRewardTokens(poolId).call();
+    const rewardTokensAddresses = await contract.methods.getPoolRewardTokenAddresses(poolId).call();
     const rewardTokensSymbols = [];
     rewardTokensAddresses.forEach((address,i) => {
         rewardTokensSymbols.push(supportedTokens.find(token => token.address == address))
@@ -99,22 +96,118 @@ export default class FarmService {
             lockDuration: data[3]
         })
     }
-    const created = await this.farmModel.create({
-        poolId,
-        lpToken,
-        tokens,
-        rewardTokens,
-        startBlock,
-        endBlock,
-        positions
-      }, (err, data) => {
-        if (err) {
-          this.logger.debug(`Mongo create new record error ${err}`);
-          return false;
-        }
+    const created = await this.farmModel.updateOne(
+        {
+            poolId
+        },
+        {
+            poolId,
+            lpToken,
+            tokens,
+            rewardTokens,
+            startBlock,
+            endBlock,
+            positions
+        }, (err, data) => {
+    if (err) {
+        this.logger.debug(`Mongo create new record error ${err}`);
+        return false;
+    }
         this.logger.debug(`Mongo created a new user pool record`);
         return data;
-      });
+    });
+    return true;
+  }
+  public async massUpdateFarm() {
+
+    // const contract = getFarmsContract(library, account);
+    const web3 = new Web3("https://rinkeby.infura.io/v3/1e70bbd1ae254ca4a7d583bc92a067a2");
+    const contract = new web3.eth.Contract(FARM_ABI, FARM_ADDRESS);
+    const numPools = await contract.methods.numPools().call();
+    for(var poolId = 0 ; poolId < numPools ; poolId++) {
+        const poolInfo = await contract.methods.poolInfo(poolId).call();
+        const rewardTokens123 = await contract.methods.getPoolRewardTokens(poolId).call();;
+        const rewardTokensAddresses = await contract.methods.getPoolRewardTokenAddresses(poolId).call();;
+        const rewardTokensSymbols = [];
+        rewardTokensAddresses.forEach((address,i) => {
+            rewardTokensSymbols.push(supportedTokens.find(token => token.address == address))
+        });
+        let token0;
+        let token1;
+        let lpDecimals = 18;
+        const pairTokens = [];
+        try {
+            const lpTokenContract =  new web3.eth.Contract(PAIR_CONTRACT_ABI, poolInfo[0]);
+            token1 = await lpTokenContract.methods.token1().call();
+            token0 = await lpTokenContract.methods.token0().call();
+            lpDecimals = await lpTokenContract.methods.decimals().call();
+            pairTokens.push(token0);
+            pairTokens.push(token1);
+        } catch (e) {
+            // not a lp token, maybe a single token?
+            token0 = poolInfo[0];
+            token1 = null;
+            pairTokens.push(token0);
+        }
+
+        const poolPositons = await contract.methods.getPoolPositions(poolId).call();
+
+        const lpToken = {
+            address: poolInfo[0],
+            decimals: lpDecimals,
+            lpBalance: poolInfo[1],
+            lpScore: poolInfo[2],
+        }
+        const startBlock = poolInfo[4];
+        const endBlock = poolInfo[5];
+        const rewardTokens = [];
+        rewardTokensSymbols.forEach((token,i) => {
+            rewardTokens.push({
+                symbol: token.symbol,
+                logoURI: token.logoURI,
+                address: token.address,
+                decimals: token.decimals,
+                farmToken: rewardTokens123[i]
+            })
+        });
+        const tokens = [];
+        pairTokens.forEach(address => {
+            let token =  supportedTokens.find(token => token.address == address);
+            tokens.push({
+                symbol: token.symbol,
+                logoURI: token.logoURI,
+                address: token.address,
+                decimals: token.decimals
+            })
+        })
+        const positions = [];
+
+        for(var i=0; i<poolPositons.length ; i++) {
+            let data = await contract.methods.stakingPosition(poolId,poolPositons[i]).call();
+            positions.push({
+                positionId: poolPositons[i],
+                address: data[0],
+                lpAmount: data[1],
+                stakeTimestamp: data[2],
+                lockDuration: data[3]
+            })
+        }
+        const created = await this.farmModel.create({
+            poolId,
+            lpToken,
+            tokens,
+            rewardTokens,
+            startBlock,
+            endBlock,
+            positions
+        }, (err, data) => {
+        if (err) {
+            this.logger.debug(`Mongo create new record error ${err}`);
+            return false;
+        }
+            this.logger.debug(`Mongo created a new user pool record`);
+            return data;
+        });
     }
     return true;
   }
