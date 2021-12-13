@@ -162,9 +162,9 @@ export default class FarmService {
     // .then(result => {
     //     return result;
     //     return result.map((info,index) => info[3]/(10**rewardTokens[index].decimals) * BLOCKS_PER_YEAR);
-    // });
-
-    return poolTokenRewardInfoPromise;
+    // });0x0100000000000000000000000000000000000000000000000000000000000000
+    const test = await farmContract.methods.getPoolTokenRewardInfo(poolId,0x0100000000000000000000000000000000000000000000000000000000000000).call();
+    return test;
 
     const totalRewardPerYear = poolRewardsPerYear.reduce((total,reward,index) =>
         total += tokenPrice[rewardTokens[index].symbol] * reward
