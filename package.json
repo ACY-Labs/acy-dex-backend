@@ -28,6 +28,7 @@
     "@ethersproject/solidity": "^5.4.0",
     "@ethersproject/units": "^5.4.0",
     "apicache": "^1.6.2",
+    "axios": "^0.24.0",
     "bignumber.js": "^9.0.1",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
