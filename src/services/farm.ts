@@ -121,12 +121,13 @@ export default class FarmService {
   public async getAllPools(account) {
     let farms = await this.farmModel.find();
     const farmPromise = [];
-    return "TEST in getAllPools ";
-    farms.forEach(farm => {
-        farmPromise.push(this.getPool(farm.poolId,account));
-    });
-    const pools = await Promise.all(farmPromise);
-    return pools;
+    const pools = await this.getPool(1,account);
+    // return "TEST in getAllPools ";
+    // farms.forEach(farm => {
+    //     farmPromise.push(this.getPool(farm.poolId,account));
+    // });
+    // const pools = await Promise.all(farmPromise);
+    return [pools];
   }
 
   public async getPool(poolId, account) {
