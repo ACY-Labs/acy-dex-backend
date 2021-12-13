@@ -153,7 +153,7 @@ export default class FarmService {
         for(var j=0; j< poolPositons.length; j++){
             amountRow.push(farmContract.methods.getTotalRewards(poolId, poolPositons[j].positionId, rewardTokens[i].farmToken).call());
         }
-        poolTokenRewardInfoPromise.push(await farmContract.methods.getPoolTokenRewardInfo(poolId,rewardTokens[i].farmToken).call());
+        // poolTokenRewardInfoPromise.push(await farmContract.methods.getPoolTokenRewardInfo(poolId,rewardTokens[i].farmToken).call());
         amountCol.push(amountRow)
     }
     const BLOCKS_PER_YEAR = 60*60*24*365/BLOCK_PER_SEC;
