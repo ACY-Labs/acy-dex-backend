@@ -32,4 +32,18 @@ export default (app: Router) => {
       }
     }
   );
+  route.get(
+    "/testFarm",
+    async (req: Request, res: Response, next: NextFunction) => {
+      logger.debug(
+        "Calling chart GET endpoint /swap/testfarm with query: %o",
+      );
+      try {
+        return res.status(201).json("TEST GET FARM");
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
 };

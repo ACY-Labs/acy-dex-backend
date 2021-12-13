@@ -30,6 +30,21 @@ export default (app: Router) => {
   );
 
   route.get(
+    "/testFarm",
+    async (req: Request, res: Response, next: NextFunction) => {
+      logger.debug(
+        "Calling chart GET endpoint /farm/testfarm with query: %o",
+      );
+      try {
+        return res.status(201).json("TEST GET FARM");
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
+
+  route.get(
     "/getAllPools",
     async (req: Request, res: Response, next: NextFunction) => {
       logger.debug(
