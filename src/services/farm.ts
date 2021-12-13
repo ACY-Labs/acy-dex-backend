@@ -169,7 +169,8 @@ export default class FarmService {
         const amountHex = await Promise.all(amountCol[i]).then(re => re);
         // allTokenAmount.push(amountHex);
         allTokenAmount.push(
-            amountHex.reduce((total, currentAmount) => total += parseInt(currentAmount),0 )
+            // amountHex.reduce((total, currentAmount) => total += parseInt(currentAmount),0 )
+            100
         );
     }
 
