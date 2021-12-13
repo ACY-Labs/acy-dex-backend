@@ -137,7 +137,7 @@ export default class FarmService {
     const farmContract = new this.web3.eth.Contract(FARM_ABI, FARM_ADDRESS);
     const BLOCK_PER_SEC = 14;
     const tokenPrice = await getAllSuportedTokensPrice();
-    return "HERE 1";
+    // return "HERE 1";
     // if(farm.positions.length === 0 ){
     // const totalPendingRewards = [];
     // for (let tX = 0; tX < rewardTokens.length; tX++) {
@@ -165,7 +165,7 @@ export default class FarmService {
     const totalRewardPerYear = poolRewardsPerYear.reduce((total,reward,index) =>
         total += tokenPrice[rewardTokens[index].symbol] * reward
     );
-
+    return "HERE 2";
     let allTokenAmount = [];
     for(var i=0; i<rewardTokens.length ; i++){
         const amountHex = await Promise.all(amountCol[i]).then(re => re);
