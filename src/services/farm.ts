@@ -156,12 +156,13 @@ export default class FarmService {
         poolTokenRewardInfoPromise.push(farmContract.methods.getPoolTokenRewardInfo(poolId,rewardTokens[i].farmToken).call());
         amountCol.push(amountRow)
     }
-    return "HERE 21";
+    // return "HERE 21";
     const BLOCKS_PER_YEAR = 60*60*24*365/BLOCK_PER_SEC;
     //HERE
     const poolRewardsPerYear = await Promise.all(poolTokenRewardInfoPromise).then(result => {
         return result.map((info,index) => info[3]/(10**rewardTokens[index].decimals) * BLOCKS_PER_YEAR);
     });
+    return "HERE 22";
 
     const totalRewardPerYear = poolRewardsPerYear.reduce((total,reward,index) =>
         total += tokenPrice[rewardTokens[index].symbol] * reward
