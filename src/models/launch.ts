@@ -16,11 +16,23 @@ const Launch = new mongoose.Schema(
       type: Number,
       required: [true],
     },
-    idoDate:{
+    regStart: {
       type: Date,
       default: Date.now,
     },
-    social:[
+    regEnd: {
+      type: Date,
+      default: Date.now,
+    },
+    saleStart: {
+      type: Date,
+      default: Date.now,
+    },
+    saleEnd: {
+      type: Date,
+      default: Date.now,
+    },
+    social: [
       {
         website: String,
         whitepaper: String,
@@ -31,39 +43,20 @@ const Launch = new mongoose.Schema(
         medium: String,
         github: String,
         forum: String,
-        Youtube: String,
+        youtube: String,
         etheraddress: String,
         polyaddress: String,
         confluxaddress: String,
-      }
+      },
     ],
-    raiseSize:{
+    totalRaise: {
       type: Number,
       required: [true],
     },
-    amount:{
+    totalSale:{
       type: Number,
       required: [true],
     },
-    marketCap:{
-      type: Number,
-      required: [true],
-    },
-    allocation:{
-      type: Number,
-    },
-    ticketDeposited:{
-      type: Number,
-    },
-    maxAllocation:{
-      type: Number,
-    },
-    maxWinners:{
-      type: Number,
-    },
-    ticketValue:{
-      type: Number,
-    }
   },
   { timestamps: true }
 );
