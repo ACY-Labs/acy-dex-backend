@@ -163,6 +163,7 @@ export default class FarmService {
     // .then(result => {
     //     return result.map((info,index) => info[3]/(10**rewardTokens[index].decimals) * BLOCKS_PER_YEAR);
     // });
+    return "HERE 21.5";
     return poolRewardsPerYear;
 
     const totalRewardPerYear = poolRewardsPerYear.reduce((total,reward,index) =>
