@@ -6,13 +6,12 @@ import { formatUnits, parseUnits } from '@ethersproject/units';
 import { Fetcher, Token, Pair, TokenAmount } from '@acyswap/sdk';
 import { InfuraProvider } from "@ethersproject/providers"
 import { getAllSuportedTokensPrice } from "../util"
-
+import Web3 from "web3";
 @Service()
 export default class FarmService {
   constructor(
     @Inject("farmModel") private farmModel,
     @Inject("logger") private logger,
-    @Inject("web3") private web3
   ) {}
 
 //   public async getProjects() {
@@ -29,7 +28,8 @@ export default class FarmService {
   public async massUpdateFarm() {
 
     // const contract = getFarmsContract(library, account);
-    const contract = new this.web3.eth.Contract(FARM_ABI, FARM_ADDRESS);
+    const web3 = new Web3("https://rinkeby.infura.io/v3/1e70bbd1ae254ca4a7d583bc92a067a2");
+    const contract = new web3.eth.Contract(FARM_ABI, FARM_ADDRESS);
     const numPools = await contract.methods.numPools().call();
     for(var poolId = 0 ; poolId < numPools ; poolId++) {
         const poolInfo = await contract.methods.poolInfo(poolId).call();
@@ -44,7 +44,7 @@ export default class FarmService {
     let lpDecimals = 18;
     const pairTokens = [];
     try {
-        const lpTokenContract =  new this.web3.eth.Contract(PAIR_CONTRACT_ABI, poolInfo[0]);
+        const lpTokenContract =  new web3.eth.Contract(PAIR_CONTRACT_ABI, poolInfo[0]);
         token1 = await lpTokenContract.methods.token1().call();
         token0 = await lpTokenContract.methods.token0().call();
         lpDecimals = await lpTokenContract.methods.decimals().call();
@@ -121,26 +121,22 @@ export default class FarmService {
   public async getAllPools(account) {
     let farms = await this.farmModel.find();
     const farmPromise = [];
-    const farmContract = new this.web3.eth.Contract(FARM_ABI, FARM_ADDRESS);
-    const num = await farmContract.methods.numPools().call();
-    return `numPools: ${num}`;
-    const pools = await this.getPool(1,account);
-    // return "TEST in getAllPools ";
-    // farms.forEach(farm => {
-    //     farmPromise.push(this.getPool(farm.poolId,account));
-    // });
-    // const pools = await Promise.all(farmPromise);
-    return [pools];
+    farms.forEach(farm => {
+        farmPromise.push(this.getPool(farm.poolId,account));
+    });
+    const pools = await Promise.all(farmPromise);
+    return pools;
   }
 
   public async getPool(poolId, account) {
+    const web3 = new Web3("https://rinkeby.infura.io/v3/1e70bbd1ae254ca4a7d583bc92a067a2");
     let farm = await this.farmModel.findOne({poolId: poolId});
     const poolPositons = farm.positions;
     const rewardTokens = farm.rewardTokens;
-    const farmContract = new this.web3.eth.Contract(FARM_ABI, FARM_ADDRESS);
+    const farmContract = new web3.eth.Contract(FARM_ABI, FARM_ADDRESS);
     const BLOCK_PER_SEC = 14;
     const tokenPrice = await getAllSuportedTokensPrice();
-    // return "HERE 1";
+    
     // if(farm.positions.length === 0 ){
     // const totalPendingRewards = [];
     // for (let tX = 0; tX < rewardTokens.length; tX++) {
@@ -156,26 +152,22 @@ export default class FarmService {
         for(var j=0; j< poolPositons.length; j++){
             amountRow.push(farmContract.methods.getTotalRewards(poolId, poolPositons[j].positionId, rewardTokens[i].farmToken).call());
         }
-        // poolTokenRewardInfoPromise.push(await farmContract.methods.getPoolTokenRewardInfo(poolId,rewardTokens[i].farmToken).call());
+        poolTokenRewardInfoPromise.push(farmContract.methods.getPoolTokenRewardInfo(poolId,rewardTokens[i].farmToken).call());
         amountCol.push(amountRow)
     }
     const BLOCKS_PER_YEAR = 60*60*24*365/BLOCK_PER_SEC;
     //HERE
-    // const poolRewardsPerYear = await Promise.allSettled(poolTokenRewardInfoPromise)
-    // .then(result => {
-    //     return result;
-    //     return result.map((info,index) => info[3]/(10**rewardTokens[index].decimals) * BLOCKS_PER_YEAR);
-    // });0x0100000000000000000000000000000000000000000000000000000000000000
-    const test = await farmContract.methods.getPoolTokenRewardInfo(poolId,"0x0100000000000000000000000000000000000000000000000000000000000000").call();
-    return test;
+    const poolRewardsPerYear = await Promise.all(poolTokenRewardInfoPromise).then(result => {
+        return result.map((info,index) => info[3]/(10**rewardTokens[index].decimals) * BLOCKS_PER_YEAR);
+    });
 
     const totalRewardPerYear = poolRewardsPerYear.reduce((total,reward,index) =>
         total += tokenPrice[rewardTokens[index].symbol] * reward
     );
-    // return "HERE 2";
+
     let allTokenAmount = [];
     for(var i=0; i<rewardTokens.length ; i++){
-        const amountHex = await Promise.all(amountCol[i]);
+        const amountHex = await Promise.all(amountCol[i]).then(re => re);
         // allTokenAmount.push(amountHex);
         allTokenAmount.push(
             amountHex.reduce((total, currentAmount) => total += parseInt(currentAmount),0 )
@@ -269,7 +261,7 @@ export default class FarmService {
         const provider = new InfuraProvider("rinkeby", process.env.INFURA_API_KEY);
         const pair = await Fetcher.fetchPairData(token0, token1, provider);
 
-        const pair_contract = new this.web3.eth.Contract(ERC20_ABI, pair.liquidityToken.address); 
+        const pair_contract = new web3.eth.Contract(ERC20_ABI, pair.liquidityToken.address); 
         const totalSupply = await pair_contract.methods.totalSupply().call();
         const totalAmount = new TokenAmount(pair.liquidityToken, totalSupply.toString());
 
