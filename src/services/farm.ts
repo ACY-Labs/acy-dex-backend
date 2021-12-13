@@ -121,6 +121,7 @@ export default class FarmService {
   public async getAllPools(account) {
     let farms = await this.farmModel.find();
     const farmPromise = [];
+    return "TEST in getAllPools ";
     farms.forEach(farm => {
         farmPromise.push(this.getPool(farm.poolId,account));
     });

@@ -52,7 +52,6 @@ export default (app: Router) => {
         req.query.account
       );
       try {
-        return res.status(201).json("TEST post FARM getAllPools");
         const farmServiceInstance = Container.get(FarmService);
         const data = await farmServiceInstance.getAllPools(req.query.account);
         return res.status(201).json(data);
