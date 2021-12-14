@@ -3,7 +3,7 @@ import FARM_ABI from "../constants/farm_abi";
 import { FARM_ADDRESS, PAIR_CONTRACT_ABI, ERC20_ABI} from "../constants";
 import supportedTokens from "../constants/supportedTokens";
 import { formatUnits, parseUnits } from '@ethersproject/units';
-import { Fetcher, Token, Pair, TokenAmount } from '@acyswap/sdk';
+import { Fetcher, Token, Pair, TokenAmount, JSBI, BigintIsh } from '@acyswap/sdk';
 import { InfuraProvider } from "@ethersproject/providers"
 import { getAllSuportedTokensPrice } from "../util"
 import Web3 from "web3";
@@ -96,26 +96,48 @@ export default class FarmService {
             lockDuration: data[3]
         })
     }
-    const created = await this.farmModel.updateOne(
-        {
-            poolId
-        },
-        {
-            poolId,
-            lpToken,
-            tokens,
-            rewardTokens,
-            startBlock,
-            endBlock,
-            positions
-        }, (err, data) => {
-    if (err) {
-        this.logger.debug(`Mongo create new record error ${err}`);
-        return false;
+    const find = await this.farmModel.findOne({poolId}).exec();
+    if(find) {
+        const created = await this.farmModel.updateOne(
+            {
+                poolId
+            },
+            {
+                poolId,
+                lpToken,
+                tokens,
+                rewardTokens,
+                startBlock,
+                endBlock,
+                positions
+            }, (err, data) => {
+        if (err) {
+            this.logger.debug(`Mongo create new record error ${err}`);
+            return false;
+        }
+            this.logger.debug(`Mongo created a new user pool record`);
+            return data;
+        });
+    } else {
+        const created = await this.farmModel.create(
+            {
+                poolId,
+                lpToken,
+                tokens,
+                rewardTokens,
+                startBlock,
+                endBlock,
+                positions
+            }, (err, data) => {
+        if (err) {
+            this.logger.debug(`Mongo create new record error ${err}`);
+            return false;
+        }
+            this.logger.debug(`Mongo created a new user pool record`);
+            return data;
+        });
     }
-        this.logger.debug(`Mongo created a new user pool record`);
-        return data;
-    });
+    
     return true;
   }
   public async massUpdateFarm() {
@@ -350,8 +372,7 @@ export default class FarmService {
         return stakeDataPromise;
     });
     const tokens = farm.tokens;
-    let token0Amount = farm.lpToken.lpBalance;
-    let token1Amount = 0;
+    let ratio = tokenPrice[tokens[0].symbol];
     if(tokens.length > 1) {
         const token0 = new Token(null, tokens[0].address, tokens[0].decimals, tokens[0].symbol);
         const token1 = new Token(null, tokens[1].address, tokens[1].decimals, tokens[1].symbol);
@@ -362,23 +383,47 @@ export default class FarmService {
         const totalSupply = await pair_contract.methods.totalSupply().call();
         const totalAmount = new TokenAmount(pair.liquidityToken, totalSupply.toString());
 
-        const token0Deposited = pair.getLiquidityValue(
+        // 
+        const allToken0 = pair.getLiquidityValue(
             pair.token0,
             totalAmount,
-            new TokenAmount(pair.liquidityToken, farm.lpToken.lpBalance),
+            totalAmount,
             false
         );
-        const token1Deposited = pair.getLiquidityValue(
+        const allToken1 = pair.getLiquidityValue(
             pair.token1,
             totalAmount,
-            new TokenAmount(pair.liquidityToken, farm.lpToken.lpBalance),
+            totalAmount,
             false
         );
-        token0Amount = parseFloat(token0Deposited.toSignificant(4));
-        token1Amount = parseFloat(token1Deposited.toSignificant(4));
+        const allToken0Amount = parseFloat(allToken0.toExact());
+        const allToken1Amount = parseFloat(allToken1.toExact());
+        // const num0 = parseFloat(allToken0.toExact());
+        // const num1 = parseFloat(allToken1.toExact());
+        // console.log("TEST divided",num0,num1);
+        ratio = (allToken0Amount * tokenPrice[tokens[0].symbol] + allToken1Amount * tokenPrice[tokens[1].symbol]) / parseFloat(totalAmount.toExact());
+        
+        // const token0Deposited = pair.getLiquidityValue(
+        //     pair.token0,
+        //     totalAmount,
+        //     new TokenAmount(pair.liquidityToken, farm.lpToken.lpBalance),
+        //     false
+        // );
+        // const token1Deposited = pair.getLiquidityValue(
+        //     pair.token1,
+        //     totalAmount,
+        //     new TokenAmount(pair.liquidityToken, farm.lpToken.lpBalance),
+        //     false
+        // );
+        // token0Amount = parseFloat(token0Deposited.toSignificant(4));
+        // token1Amount = parseFloat(token1Deposited.toSignificant(4));
+
+        // console.log("TVL CAL:",ratio * farm.lpToken.lpBalance/10**farm.lpToken.decimals);
+
     }
-    const tvl = tokens.length > 1 ? token0Amount * tokenPrice[tokens[0].symbol] + token1Amount * tokenPrice[tokens[1].symbol]
-          : farm.lpToken.lpBalance/10**farm.lpToken.decimals * tokenPrice[tokens[0].symbol];
+    // const tvl = tokens.length > 1 ? token0Amount * tokenPrice[tokens[0].symbol] + token1Amount * tokenPrice[tokens[1].symbol]
+    //       : farm.lpToken.lpBalance/10**farm.lpToken.decimals * tokenPrice[tokens[0].symbol];
+    const tvl = ratio * farm.lpToken.lpBalance/10**farm.lpToken.decimals;
     return {
         poolId: poolId,
         lpTokenAddress: farm.lpToken.address,
@@ -397,7 +442,8 @@ export default class FarmService {
         startBlock: farm.startBlock,
         endBlock: farm.endBlock,
         tvl: tvl,
-        apr: (totalRewardPerYear/tvl)*100, 
+        apr: (totalRewardPerYear/(tvl==0?1:tvl))*100,
+        ratio: ratio
     };
   }
 
