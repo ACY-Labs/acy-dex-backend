@@ -2,6 +2,7 @@ import expressLoader from "./express";
 import mongooseLoader from "./mongoose";
 import dependencyInjectorLoader from "./dependencyInjector";
 import Logger from "./logger";
+import userLaunch from "../models/userLaunch";
 
 export default async ({ expressApp }) => {
   const mongoConnection = await mongooseLoader();
@@ -39,6 +40,11 @@ export default async ({ expressApp }) => {
     model: require("../models/launch").default,
   };
 
+  const userLaunchModel = {
+    name: "userLaunchModel",
+    model: require("../models/userLaunch").default,
+  }
+
   const userModel = {
     name:"userModel",
     model:require("../models/userInfo").default,
@@ -52,6 +58,7 @@ export default async ({ expressApp }) => {
       userPoolModel,
       pairVolumeModel,
       launchModel,
+      userLaunchModel,
       userModel,
       // salaryModel,
       // whateverModel
