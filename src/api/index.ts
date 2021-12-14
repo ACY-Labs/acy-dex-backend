@@ -5,7 +5,6 @@ import mev from "./routes/mev";
 import subscribe from "./routes/subscribe";
 import launchpad from "./routes/launchpad";
 import poolVolume from "./routes/poolVolume";
-import launchpad from "./routes/launchpad";
 import farm from "./routes/farm";
 import userInfo from "./routes/user";
 
