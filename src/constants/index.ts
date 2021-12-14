@@ -1,4 +1,5 @@
 export const FACTORY_ADDRESS = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
+export const FARM_ADDRESS    = "0x11B64a91fA3eedfe0977a64D908BB8B8faf903a4";
 
 export const INIT_CODE_HASH =
   "0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f";
@@ -689,5 +690,6 @@ export const INTERVAL_1M_COUNT = Math.floor(month / INTERVAL_1M_STEP) + 1;
 export const AVERAGE_BLOCK_COUNT_PER_DAY = 4 * 60 * 4; // init with data from last 4 hrs 
 export const GLOBAL_VOLUME_TIME_RANGE = 24 * 60 * 60 * 1000; // 1 day  in msec
 export const AVERAGE_BLOCK_GEN_TIME = 15 * 1000; // in msec.
-export const SUBSCRIPTION_INTERVAL = 1 * 4 * 5; // # of blocks for each update // 1 min of blocks DEFAULT 20 b
-export const NO_VOLUME_UPDATE_INTERVAL = 1 * 4 * 15; // # of blocks for each update IFF lastvolumes was 0.0
+export const SUBSCRIPTION_INTERVAL = 1 * 4 * 1; // # of blocks for each update // 1 min of blocks DEFAULT 20 b
+export const NO_VOLUME_UPDATE_INTERVAL = 1 * 4 * 5; // # of blocks for each update IFF lastvolumes was 0.0
+export const UPDATE_TIME_INTERVAL = 1 * 60 * 1000; // 5 min to refresh expressed in msec

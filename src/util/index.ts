@@ -1,6 +1,8 @@
 import moment = require("moment");
 import { Container } from "typedi";
 import Web3 from "web3";
+import supportedTokens from "../constants/supportedTokens";
+import axios from 'axios';
 
 export function timestampToDate(timestamp) {
   const date = moment.unix(timestamp);
@@ -99,4 +101,21 @@ export const getPairAddress = (token0Addr, token1Addr) => {
       INIT_CODE_HASH
     );
     return pairAddress;
+}
+
+export async function getAllSuportedTokensPrice() {
+  const searchIdsArray = supportedTokens.map(token => token.idOnCoingecko);
+  const searchIds = searchIdsArray.join('%2C');
+  const tokensPrice = await axios.get(
+    `https://api.coingecko.com/api/v3/simple/price?ids=${searchIds}&vs_currencies=usd`
+    ).then(result =>{
+      const data = result.data;
+      const tokensPrice = {};
+      supportedTokens.forEach(token =>{
+        tokensPrice[token.symbol] = data[token.idOnCoingecko]['usd'];
+      })
+      tokensPrice['ACY'] = 1;//dont know acy price now;
+      return tokensPrice;
+    });
+  return tokensPrice;
 }
