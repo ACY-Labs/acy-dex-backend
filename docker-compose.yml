@@ -18,6 +18,7 @@ services:
 
   backend:
     container_name: acy_backend
+    restart: always
     build: .
     expose:
       - "3001"
