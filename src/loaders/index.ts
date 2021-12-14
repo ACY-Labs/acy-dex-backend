@@ -39,10 +39,15 @@ export default async ({ expressApp }) => {
     model: require("../models/launch").default,
   };
 
+  const userModel = {
+    name:"userModel",
+    model:require("../models/userInfo").default,
+  }
   const farmModel = {
     name: "farmModel",
     model: require("../models/farm").default,
   };
+
 
   await dependencyInjectorLoader({
 
@@ -53,6 +58,7 @@ export default async ({ expressApp }) => {
       userPoolModel,
       pairVolumeModel,
       launchModel,
+      userModel,
       farmModel
       // salaryModel,
       // whateverModel
