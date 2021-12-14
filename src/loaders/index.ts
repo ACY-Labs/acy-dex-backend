@@ -45,6 +45,7 @@ export default async ({ expressApp }) => {
   };
 
   await dependencyInjectorLoader({
+
     mongoConnection,
     models: [
       pairModel,
@@ -59,6 +60,6 @@ export default async ({ expressApp }) => {
   });
   Logger.info("✌️ Dependency Injector loaded");
 
-  await expressLoader({ app: expressApp });
+  expressLoader({ app: expressApp });
   Logger.info("✌️ Express loaded");
 };

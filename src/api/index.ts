@@ -3,6 +3,7 @@ import pool from "./routes/pool";
 import chart from "./routes/chart";
 import mev from "./routes/mev";
 import subscribe from "./routes/subscribe";
+import launchpad from "./routes/launchpad";
 import poolVolume from "./routes/poolVolume";
 import launchpad from "./routes/launchpad";
 import farm from "./routes/farm";
@@ -14,6 +15,7 @@ export default () => {
   chart(app);
   mev(app);
   subscribe(app);
+  launchpad(app);
   poolVolume(app);
   launchpad(app);
   farm(app);
