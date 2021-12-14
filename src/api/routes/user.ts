@@ -7,7 +7,7 @@ const route = Router();
 
 export default (app: Router) => {
   // route prefix
-  app.use("/launch", route);
+  app.use("/userInfo", route);
 
   const logger: Logger = Container.get("logger");
 

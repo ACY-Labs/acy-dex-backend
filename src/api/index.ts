@@ -5,6 +5,7 @@ import mev from "./routes/mev";
 import subscribe from "./routes/subscribe";
 import launchpad from "./routes/launchpad";
 import poolVolume from "./routes/poolVolume";
+import userInfo from "./routes/user";
 
 // guaranteed to get dependencies
 export default () => {
@@ -15,6 +16,8 @@ export default () => {
   subscribe(app);
   launchpad(app);
   poolVolume(app);
+  userInfo(app);
+
 
   return app;
 };

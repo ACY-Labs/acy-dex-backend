@@ -13,6 +13,7 @@ const UserInfo = new mongoose.Schema(
                 token1: { type: String },
                 token0deposited: {type: Number},
                 token1deposited: {type: Number},
+                earned: {type:Number},
                 
                 // holdingPercentage: { type: Number } // should be calculated on front end , because this changes every seconds
             }
