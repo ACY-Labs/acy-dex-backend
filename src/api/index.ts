@@ -7,6 +7,7 @@ import launchpad from "./routes/launchpad";
 import poolVolume from "./routes/poolVolume";
 import launchpad from "./routes/launchpad";
 import farm from "./routes/farm";
+import userInfo from "./routes/user";
 
 // guaranteed to get dependencies
 export default () => {
@@ -19,6 +20,7 @@ export default () => {
   poolVolume(app);
   launchpad(app);
   farm(app);
+  userInfo(app);
 
 
   return app;
