@@ -50,6 +50,12 @@ export default async ({ expressApp }) => {
     model:require("../models/userInfo").default,
   }
 
+  const farmModel = {
+    name: "farmModel",
+    model: require("../models/farm").default,
+  };
+
+
   await dependencyInjectorLoader({
     mongoConnection,
     models: [
@@ -60,6 +66,7 @@ export default async ({ expressApp }) => {
       launchModel,
       userLaunchModel,
       userModel,
+      farmModel
       // salaryModel,
       // whateverModel
     ],
