@@ -21,7 +21,7 @@ async function startServer() {
    **/
   await require("./loaders").default({ expressApp: app });
   const poolService = Container.get(poolVolumeService);
-  setInterval(() => poolService.updateVolumeData(), 60000);
+  setInterval(() => poolService.updateVolumeData(), 300000);
 
   app
     .listen(config.port, () => {
