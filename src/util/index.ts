@@ -119,3 +119,7 @@ export async function getAllSuportedTokensPrice() {
     });
   return tokensPrice;
 }
+
+export function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

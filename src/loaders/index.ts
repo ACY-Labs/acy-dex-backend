@@ -49,7 +49,7 @@ export default async ({ expressApp }) => {
     name:"userModel",
     model:require("../models/userInfo").default,
   }
-
+  
   const farmModel = {
     name: "farmModel",
     model: require("../models/farm").default,
@@ -57,6 +57,7 @@ export default async ({ expressApp }) => {
 
 
   await dependencyInjectorLoader({
+
     mongoConnection,
     models: [
       pairModel,

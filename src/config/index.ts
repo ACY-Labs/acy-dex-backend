@@ -23,6 +23,8 @@ export default {
   databaseName: process.env.MONGO_AUTHENTICATION_DATABASE,
   databaseUser: process.env.MONGO_NON_ROOT_USERNAME,
   databasePass: process.env.MONGO_NON_ROOT_PASSWORD,
+
+  
   /**
    * Used by winston logger
    */
