@@ -10,7 +10,15 @@ export default (app: Router) => {
 const userService = Container.get(UserService);
   const logger: Logger = Container.get("logger");
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+  route.post(
+=======
   route.get(
+>>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
+=======
+  route.get(
+>>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
     "/swap",
     async (req: Request, res: Response, next: NextFunction) => {
       logger.debug(

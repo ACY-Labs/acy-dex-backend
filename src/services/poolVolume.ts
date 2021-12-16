@@ -10,7 +10,7 @@ import {
     AVERAGE_BLOCK_COUNT_PER_DAY,
     GLOBAL_VOLUME_TIME_RANGE,
     AVERAGE_BLOCK_GEN_TIME,
-    SUBSCRIPTION_INTERVAL,
+    HISTORICAL_DATA_UPDATE_COUNT,
     NO_VOLUME_UPDATE_INTERVAL
   } from "../constants";
 import supportedTokens from "../constants/uniqueTokens";
@@ -135,6 +135,13 @@ export default class PoolVolumeService {
             }
         }
     }
+    public async deleteOutOfDateHistorical(data){
+        if(!data.historicalData) return null;
+        else{
+            if(data.historicalData.length < HISTORICAL_DATA_UPDATE_COUNT) return data.historicalData;
+            else return data.historicalData.slice(data.historicalData.length - HISTORICAL_DATA_UPDATE_COUNT,data.historicalData.length);
+        }
+    }
     public async updateSinglePair(token0,token1,decimal0,decimal1,blockNum){
 
             token0 = getAddress(token0);
@@ -161,14 +168,13 @@ export default class PoolVolumeService {
 
             let [data, inDatabase] = await this.checkIfExist(pairAddress);
 
+
             if(!inDatabase){
                 data = await this.initRecord(_token0,_token1,pairAddress,contract,blockNum,_decimal0,_decimal1);
             }
 
             // first check ..... if exists in database & lastvolume ... return if not reached interval
-            
-
-            if(inDatabase && data.lastVolume.token0 + data.lastVolume.token1 == 0 && blockNum - data.lastBlockNumber >= NO_VOLUME_UPDATE_INTERVAL) {
+            if(inDatabase && data.lastVolume.token0 + data.lastVolume.token1 == 0 && (blockNum - data.lastBlockNumber) < NO_VOLUME_UPDATE_INTERVAL) {
                 return;
             }
 
@@ -195,6 +201,36 @@ export default class PoolVolumeService {
 
             let updated_volume = await this.calcNewVolume(processed_logs,_decimal0,_decimal1);
 
+            let historicalData = await this.deleteOutOfDateHistorical(data);
+
+            let today = new Date();
+            let todaysrt = today.toISOString().substring(0, 10);;
+
+            if(historicalData){
+
+                let newLog = {
+                    date : todaysrt,
+                    volume24h : updated_volume,
+                    reserves : updatedReserves
+                };
+
+                if(historicalData[historicalData.length - 1].date == todaysrt) {
+                    historicalData[historicalData.length - 1] = newLog;
+                }else{
+                    historicalData.push(newLog);
+                }
+
+            }else{
+                historicalData = [
+                    {
+                        date : todaysrt,
+                        volume24h : updated_volume,
+                        reserves : updatedReserves
+
+                    }
+                ]
+            }
+
             if (inDatabase) {
                 await this.pairVolumeModel.updateOne(
                 {
@@ -206,6 +242,7 @@ export default class PoolVolumeService {
                     lastBlockNumber : blockNum,
                     lastVolume: updated_volume,
                     lastReserves: updatedReserves,
+                    historicalData : historicalData,
                     history: processed_logs }
                 )
             } else {
@@ -216,6 +253,7 @@ export default class PoolVolumeService {
                     lastBlockNumber : blockNum,
                     lastVolume: updated_volume,
                     lastReserves: updatedReserves,
+                    historicalData :historicalData,
                     history: processed_logs
                 });
             }
@@ -226,12 +264,13 @@ export default class PoolVolumeService {
         // only update every 4 blocks i.e. 1 minute
         // get Volumes for all pairs of available tokens
         // if(blockNum % SUBSCRIPTION_INTERVAL) return;
-        // //just for testing
-        // let token0 = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
-        // let token1 = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
+        //just for testing
+        //  let blockNum = await this.web3.eth.getBlockNumber();
+        // let token0 = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
+        // let token1 = '0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643';
         // let decimal0 = supportedTokens.find(item => item.addressOnEth.toLowerCase() == token0.toLowerCase()).decimals;
         // let decimal1 = supportedTokens.find(item => item.addressOnEth.toLowerCase() == token1.toLowerCase()).decimals;
-        // await this.updateSinglePair(token0,token1,decimal0,decimal1);
+        // await this.updateSinglePair(token0,token1,decimal0,decimal1,blockNum);
 
         let blockNum = await this.web3.eth.getBlockNumber();
 
@@ -266,7 +305,7 @@ export default class PoolVolumeService {
 
     public async getAllPairs(){
         let data: any = await this.pairVolumeModel.find();
-        if(!data) return null
+        if(!data) return [];
         let _data = data.map((item)=>{
             return this.formatSingle(item)
         })
@@ -285,5 +324,21 @@ export default class PoolVolumeService {
         let _data = this.formatSingle(data);
 
         return { data : _data};
+    }
+
+    public async getHistoricalData(){
+
+        let data: any = await this.pairVolumeModel.find();
+        if(!data) return [];
+        
+        let _data = data.map((item) => {
+            return {
+                token0 : item.token0,
+                token1 : item.token1,
+                historicalData : item.historicalData
+            }
+        })
+        return {data : _data};
+
     }
 }
