@@ -96,13 +96,31 @@ export default class LaunchService {
 
     // TODO: a concrete allocation method
     // use simple random right now
+    console.log("allBalance:");
+    let allBalance = await this.getBalance(walletId);
+    console.log("allBalance:", allBalance);
+    console.log(allBalance);
+    
+    let allocationAmount = Math.round(
+      10 + Math.random() * 200
+    )
+    userProject.allocationAmount = allocationAmount;
+    await user.save((err) => {
+      if (err) {
+        this.logger.error(`Mongo saving user record error: ${err}`);
+      } else {
+        this.logger.info(`Allocation made, amount: ${allocationAmount}`)
+      }
+    })
+    return userProject;
+  }
 
+  public async getBalance(addr: String) {
     // Ymj add
+    this.logger.info(`getBalance`, addr);
     const web3 = new Web3("https://rinkeby.infura.io/v3/1e70bbd1ae254ca4a7d583bc92a067a2");
     //const web3 = new Web3("web3");
-    //const tokenAddress = TESTNET_RINKEBY_TOKENADDR;
     //const addr = "0xa04d7588Ddcc9dc6Bd24A948E0C918Fb7136f44E"
-    const addr = walletId;
 
     var plist = [];
     TESTNET_RINKEBY_TOKENADDR.map(function(n){
@@ -122,54 +140,19 @@ export default class LaunchService {
       return format_list;
     }).catch((err)=>{
       console.log(err);
-      //this.logger.console.error("in Promise for erc20"); 
     });
     this.logger.info("Promise all out");
-    console.log("allBalance:", allBalance);
-
-    // 贡献值
-
-    /*
-    主流币
-      比特币（BTC）
-      以太币（ETH）
-      瑞波币（XRP）
-      比特币现金（BCH）
-      艾达币（ADA）
-      莱特币（LTC）
-      新经币（XEM）
-      恒星币（XLM）
-      达世币（DASH）
-      EOS等数字货币
-    */
-    /*
-    稳定币
-     泰达币（USDT）
-     TUSD
-     USDC
-     GUSD
-     HUSD
-    */
-
-
-    // Ymj add end
-    let allocationAmount = Math.round(
-      10 + Math.random() * 200
-    )
-    userProject.allocationAmount = allocationAmount;
-    await user.save((err) => {
-      if (err) {
-        this.logger.error(`Mongo saving user record error: ${err}`);
-      } else {
-        this.logger.info(`Allocation made, amount: ${allocationAmount}`)
-      }
-    })
-    return userProject;
+    return allBalance;
   }
 
   public async useAllocation(walletId: String, projectToken: String, amount: Number) {
     this.logger.info(`useAllocation ${walletId} - ${projectToken} - ${amount}`);
     // TODO: finish this function
+    let user = await this.userLaunchModel.findOne({
+      walletId: walletId
+    }).exec()
+    let allocationRemainder = user.allocationAmount - user.allocationUsed
+    // token
   }
 
   public async getAllocationInfo(walletId: String, projectToken: String) {
