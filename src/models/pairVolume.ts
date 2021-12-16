@@ -26,6 +26,23 @@ const PairVolume = new mongoose.Schema(
       token0: Number,
       token1: Number,
     },
+    historicalData: [ 
+      {
+        date : String,
+        volume24h : 
+        {
+          token0: Number,
+          token1: Number,
+        }
+        ,
+        reserves : 
+        {
+          token0: Number,
+          token1: Number,
+        }
+      }
+      
+    ],
     // range: {
     //   type: String,
     //   required: [true, "15M"],
