@@ -29,5 +29,21 @@ const poolVolumeService = Container.get(PoolVolumeService);
       }
     }
   );
+  route.get(
+    "/historical",
+    async (req: Request, res: Response, next: NextFunction) => {
+      logger.debug(
+        "Calling pool GET endpoint /poolchart/historical",
+        req.query
+      );
+      try {
+        const data = await poolVolumeService.getHistoricalData();
+        return res.status(201).json(data);
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  )
 
 };

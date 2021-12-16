@@ -21,6 +21,13 @@ const UserInfo = new mongoose.Schema(
         totalSwappedValue: { type: Number },
         totalFeesPaid: { type: Number },
         totalTransactions: { type: Number },
+<<<<<<< HEAD
+<<<<<<< HEAD
+        lastTransactionHash : { type : String}
+=======
+>>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
+=======
+>>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
     },
     { timestamps: true }
 );
