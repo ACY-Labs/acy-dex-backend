@@ -19,6 +19,12 @@ export default async ({ expressApp }) => {
     model: require("../models/pair").default,
   };
 
+  const rateModel = {
+    name: "rateModel",
+    // Notice the require syntax and the '.default'
+    model: require("../models/rater").default,
+  };
+
   const subscriberModel = {
     name: "subscriberModel",
     // Notice the require syntax and the '.default'
@@ -61,6 +67,7 @@ export default async ({ expressApp }) => {
     mongoConnection,
     models: [
       pairModel,
+      rateModel,
       subscriberModel,
       userPoolModel,
       pairVolumeModel,
