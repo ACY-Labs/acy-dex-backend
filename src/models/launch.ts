@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 
 const Launch = new mongoose.Schema(
   {
+    projectID:{
+      type: Number,
+      required: [true],
+    },
     projectName: {
       type: String,
       required: [true],
@@ -53,9 +57,15 @@ const Launch = new mongoose.Schema(
       type: Number,
       required: [true],
     },
-    totalSale:{
+    totalSale: {
       type: Number,
       required: [true],
+    },
+    projectStatus: {
+      type: String,
+    },
+    contextData: {
+      type: String,
     },
   },
   { timestamps: true }

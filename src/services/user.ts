@@ -18,7 +18,10 @@ export default class UserService {
             totalFeesPaid: 0,
             totalTransactions: 0,
 <<<<<<< HEAD
+<<<<<<< HEAD
             lastTransactionHash : ''
+=======
+>>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
 =======
 >>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
         });
@@ -37,16 +40,22 @@ export default class UserService {
         }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         if(userRecord.lastTransactionHash == data.hash) return;
 
         let newTotalSwappedValue =  new BigNumber(data.valueSwapped).plus(userRecord.totalSwappedValue);
         let newTotalFeesPaid = new BigNumber(data.feesPaid).plus(userRecord.totalFeesPaid) ;
 =======
+=======
+>>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
         let usdToken = tokenList.find(item => item.symbol == 'USDC');
         let decimal = usdToken.decimals;
 
         let newTotalSwappedValue =  new BigNumber(data.valueSwapped).div(new BigNumber(`1e+${decimal}`)).plus(userRecord.totalSwappedValue);
         let newTotalFeesPaid = new BigNumber(data.feesPaid).div(new BigNumber(`1e+${decimal}`)).plus(userRecord.totalFeesPaid) ;
+<<<<<<< HEAD
+>>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
+=======
 >>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
         let newTotalTransactions = userRecord.totalTransactions + 1;
 
@@ -58,9 +67,13 @@ export default class UserService {
                 totalSwappedValue: newTotalSwappedValue,
                 totalFeesPaid: newTotalFeesPaid,
 <<<<<<< HEAD
+<<<<<<< HEAD
                 totalTransactions: newTotalTransactions,
                 lastTransactionHash : data.hash
             }
+=======
+                totalTransactions: newTotalTransactions, }
+>>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
 =======
                 totalTransactions: newTotalTransactions, }
 >>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
