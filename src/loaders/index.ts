@@ -22,7 +22,7 @@ export default async ({ expressApp }) => {
   const rateModel = {
     name: "rateModel",
     // Notice the require syntax and the '.default'
-    model: require("../models/rater").default,
+    model: require("../models/rate").default,
   };
 
   const subscriberModel = {
