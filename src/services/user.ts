@@ -17,7 +17,10 @@ export default class UserService {
             totalSwappedValue: 0,
             totalFeesPaid: 0,
             totalTransactions: 0,
+<<<<<<< HEAD
             lastTransactionHash : ''
+=======
+>>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
         });
     }
     public async performTx (data){
@@ -33,10 +36,18 @@ export default class UserService {
             userRecord = await this.userInfoModel.findOne({ walletId }).exec();
         }
 
+<<<<<<< HEAD
         if(userRecord.lastTransactionHash == data.hash) return;
 
         let newTotalSwappedValue =  new BigNumber(data.valueSwapped).plus(userRecord.totalSwappedValue);
         let newTotalFeesPaid = new BigNumber(data.feesPaid).plus(userRecord.totalFeesPaid) ;
+=======
+        let usdToken = tokenList.find(item => item.symbol == 'USDC');
+        let decimal = usdToken.decimals;
+
+        let newTotalSwappedValue =  new BigNumber(data.valueSwapped).div(new BigNumber(`1e+${decimal}`)).plus(userRecord.totalSwappedValue);
+        let newTotalFeesPaid = new BigNumber(data.feesPaid).div(new BigNumber(`1e+${decimal}`)).plus(userRecord.totalFeesPaid) ;
+>>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
         let newTotalTransactions = userRecord.totalTransactions + 1;
 
         await this.userInfoModel.updateOne(
@@ -46,9 +57,13 @@ export default class UserService {
             { 
                 totalSwappedValue: newTotalSwappedValue,
                 totalFeesPaid: newTotalFeesPaid,
+<<<<<<< HEAD
                 totalTransactions: newTotalTransactions,
                 lastTransactionHash : data.hash
             }
+=======
+                totalTransactions: newTotalTransactions, }
+>>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
             )
     }
 }
