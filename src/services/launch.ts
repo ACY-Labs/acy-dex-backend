@@ -1,5 +1,6 @@
 import { Service, Inject, Container } from "typedi";
 import { sleep } from "../util";
+import format from 'date-fns/format'
 
 @Service()
 export default class LaunchService {
@@ -16,19 +17,33 @@ export default class LaunchService {
         this.logger.info(`Retrieve data failed`);
     // store into array
     let result = []
-    data.map(obj => { 
+    data.forEach(obj => { 
       // get specific properties
       let tempRes = {}
       tempRes = {
         projectID: obj.projectID, 
         projectName: obj.projectName, 
         projectToken: obj.projectToken,
-        projectStatus: obj.projectStatus,
+        // projectStatus: obj.projectStatus,
         tokenPrice: obj.tokenPrice,
         totalRaise: obj.totalRaise,
         totalSale: obj.totalSale,
-        saleStart: obj.saleStart,
       }
+      // categorized project into Ongoing/Upcoming/Ended
+      let saleStart = obj.saleStart;
+      let saleEnd = obj.saleEnd;
+      let current = new Date();
+      if(current < saleStart) {
+        tempRes["projectStatus"] = "Upcoming"
+      } else if (current > saleEnd){
+        tempRes["projectStatus"] = "Ended"
+      } else{
+        tempRes["projectStatus"] = "Ongoing"
+      }
+
+      let temp = new Date(obj.saleEnd)
+      let dateTime = temp.toLocaleDateString() + ' ' + temp.toTimeString().substring(0, temp.toTimeString().indexOf("GMT"));
+      tempRes["saleEnd"] = dateTime;
       result.push(tempRes);
     });
     this.logger.debug("end getProjects");
@@ -37,10 +52,9 @@ export default class LaunchService {
 
   public async getProjectsByID(projectsId: Number){
     this.logger.info(`Retrieve project from db`);
-    // find using key and value
     let data = await this.launchModel.findOne({projectID: projectsId}).exec();
-    if(!data) 
-        this.logger.info(`Retrieve data failed`);
+    if(!data)
+      this.logger.info(`Retrieve data failed`);
     this.logger.debug("end getProjectsByID");
     return data;
   }

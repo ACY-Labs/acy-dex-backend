@@ -11,8 +11,7 @@ export default (app: Router) => {
   app.use("/launch", route);
 
   const logger: Logger = Container.get("logger");
-
-  app.get(
+  route.get(
     "/projects",
     async (req: Request, res: Response, next: NextFunction) => {
       logger.debug(
