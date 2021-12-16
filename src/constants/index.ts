@@ -691,5 +691,6 @@ export const AVERAGE_BLOCK_COUNT_PER_DAY = 4 * 60 * 4; // init with data from la
 export const GLOBAL_VOLUME_TIME_RANGE = 24 * 60 * 60 * 1000; // 1 day  in msec
 export const AVERAGE_BLOCK_GEN_TIME = 15 * 1000; // in msec.
 export const SUBSCRIPTION_INTERVAL = 1 * 4 * 1; // # of blocks for each update // 1 min of blocks DEFAULT 20 b
-export const NO_VOLUME_UPDATE_INTERVAL = 1 * 4 * 5; // # of blocks for each update IFF lastvolumes was 0.0
+export const NO_VOLUME_UPDATE_INTERVAL = 3 * 4 * 5; // # of blocks for each update IFF lastvolumes was 0.0
 export const UPDATE_TIME_INTERVAL = 1 * 60 * 1000; // 5 min to refresh expressed in msec
+export const HISTORICAL_DATA_UPDATE_COUNT = 22 ; // max number of records to store in historical data.
