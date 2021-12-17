@@ -122,8 +122,4 @@ export async function getAllSuportedTokensPrice() {
 
 export function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
-<<<<<<< HEAD
->>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
-=======
->>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
 }
