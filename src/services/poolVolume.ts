@@ -15,6 +15,7 @@ import {
   } from "../constants";
 import supportedTokens from "../constants/uniqueTokens";
 import {getPairAddress} from "../util/index"
+import { loggers } from "winston";
 @Service()
 export default class PoolVolumeService {
 
@@ -153,13 +154,13 @@ export default class PoolVolumeService {
                 : [token1, token0, decimal1, decimal0];
 
             //UNISWAP DATA .... 
-            let pairAddress = getCreate2Address(
-            FACTORY_ADDRESS,
-            keccak256(["bytes"], [pack(["address", "address"], [_token0, _token1])]),
-            INIT_CODE_HASH
-            );
+            // let pairAddress = getCreate2Address(
+            // FACTORY_ADDRESS,
+            // keccak256(["bytes"], [pack(["address", "address"], [_token0, _token1])]),
+            // INIT_CODE_HASH
+            // );
             //ACY DATA ....
-            // let pairAddress = getPairAddress(token0,token1);
+            let pairAddress = getPairAddress(token0,token1);
         
             let contract = new this.web3.eth.Contract(PAIR_CONTRACT_ABI, pairAddress);
 
@@ -271,22 +272,33 @@ export default class PoolVolumeService {
         // let decimal0 = supportedTokens.find(item => item.addressOnEth.toLowerCase() == token0.toLowerCase()).decimals;
         // let decimal1 = supportedTokens.find(item => item.addressOnEth.toLowerCase() == token1.toLowerCase()).decimals;
         // await this.updateSinglePair(token0,token1,decimal0,decimal1,blockNum);
+<<<<<<< HEAD
+=======
 
-        let blockNum = await this.web3.eth.getBlockNumber();
+        try{
+>>>>>>> 3401f56817e94faeb741c095b66c36e5bf210629
 
-        let all_tasks = [];
+            let blockNum = await this.web3.eth.getBlockNumber();
 
-        for(let i=0;i<supportedTokens.length-1;i++){
-            for(let j=i+1;j<supportedTokens.length;j++){
+            let all_tasks = [];
 
-                all_tasks.push(this.updateSinglePair(supportedTokens[i].addressOnEth,
-                    supportedTokens[j].addressOnEth,supportedTokens[i].decimals,
+            for(let i=0;i<supportedTokens.length-1;i++){
+                for(let j=i+1;j<supportedTokens.length;j++){
+
+                    all_tasks.push(this.updateSinglePair(supportedTokens[i].address,
+                    supportedTokens[j].address,supportedTokens[i].decimals,
                     supportedTokens[j].decimals,blockNum));
                     
+                }
             }
+            await Promise.allSettled(all_tasks);
+            console.log('solving for %d',all_tasks.length);
+            
+        }catch (e){
+            console.log("failed to fetch transactions with error : ", e);
         }
-        await Promise.allSettled(all_tasks);
-        console.log('solving for %d',all_tasks.length);
+
+        
         
 
     }

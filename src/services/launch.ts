@@ -3,7 +3,11 @@ import Web3 from "web3";
 import { ERC20_ABI, FARM_ADDRESS} from "../constants";
 import {TESTNET_RINKEBY_TOKENADDR} from "../constants/tokenAddress"
 import { sleep } from "../util";
+<<<<<<< HEAD
 import format from 'date-fns/format'
+=======
+// import format from 'date-fns/format'
+>>>>>>> 3401f56817e94faeb741c095b66c36e5bf210629
 
 
 @Service()
@@ -22,10 +26,15 @@ export default class LaunchService {
     // store into array
     let result = []
 <<<<<<< HEAD
+<<<<<<< HEAD
     data.forEach(obj => { 
 =======
     data.map(obj => {
 >>>>>>> 99a80defd80cf1dcbf1ac203e9edfef532b1290a
+=======
+
+    data.forEach(obj => { 
+>>>>>>> 3401f56817e94faeb741c095b66c36e5bf210629
       // get specific properties
       let tempRes = {}
       tempRes = {
@@ -134,7 +143,10 @@ export default class LaunchService {
   }
 
   public async getBalance(addr: String) {
+<<<<<<< HEAD
     // Ymj add
+=======
+>>>>>>> 3401f56817e94faeb741c095b66c36e5bf210629
     this.logger.info(`getBalance`, addr);
     const web3 = new Web3("https://rinkeby.infura.io/v3/1e70bbd1ae254ca4a7d583bc92a067a2");
     //const web3 = new Web3("web3");

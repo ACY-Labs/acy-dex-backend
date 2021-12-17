@@ -23,11 +23,15 @@ const UserInfo = new mongoose.Schema(
         totalTransactions: { type: Number },
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         lastTransactionHash : { type : String}
 =======
 >>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
 =======
 >>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
+=======
+        lastTransactionHash : { type : String}
+>>>>>>> 3401f56817e94faeb741c095b66c36e5bf210629
     },
     { timestamps: true }
 );
