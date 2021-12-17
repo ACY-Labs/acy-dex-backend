@@ -272,11 +272,8 @@ export default class PoolVolumeService {
         // let decimal0 = supportedTokens.find(item => item.addressOnEth.toLowerCase() == token0.toLowerCase()).decimals;
         // let decimal1 = supportedTokens.find(item => item.addressOnEth.toLowerCase() == token1.toLowerCase()).decimals;
         // await this.updateSinglePair(token0,token1,decimal0,decimal1,blockNum);
-<<<<<<< HEAD
-=======
 
         try{
->>>>>>> 3401f56817e94faeb741c095b66c36e5bf210629
 
             let blockNum = await this.web3.eth.getBlockNumber();
 
