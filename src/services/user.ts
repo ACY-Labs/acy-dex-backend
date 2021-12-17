@@ -18,7 +18,6 @@ export default class UserService {
             totalFeesPaid: 0,
             totalTransactions: 0,
 
-
             lastTransactionHash : ''
         });
     }
@@ -35,13 +34,14 @@ export default class UserService {
             userRecord = await this.userInfoModel.findOne({ walletId }).exec();
         }
 
-
         if(userRecord.lastTransactionHash == data.hash) return;
 
         let newTotalSwappedValue =  new BigNumber(data.valueSwapped).plus(userRecord.totalSwappedValue);
         let newTotalFeesPaid = new BigNumber(data.feesPaid).plus(userRecord.totalFeesPaid) ;
+
         let usdToken = tokenList.find(item => item.symbol == 'USDC');
         let decimal = usdToken.decimals;
+
 
 
 
@@ -55,7 +55,6 @@ export default class UserService {
             { 
                 totalSwappedValue: newTotalSwappedValue,
                 totalFeesPaid: newTotalFeesPaid,
-
                 totalTransactions: newTotalTransactions,
                 lastTransactionHash : data.hash
             }
