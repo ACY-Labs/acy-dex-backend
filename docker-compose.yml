@@ -28,6 +28,7 @@ services:
       - ./src:/code/src
       - ./node_modules:/code/node_modules
       - ./public:/code/public
+      - .env:/code/.env
     networks:
       - web_network
       - db_network
