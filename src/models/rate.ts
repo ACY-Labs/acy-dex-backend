@@ -12,17 +12,16 @@ const Rate = new mongoose.Schema(
       required: [true],
       index: true,
     },
-    time: {
-      type: Date,
-      required: [true],
-    },
-    rate: {
-      type: Number,
-      require: [true],
-    }
+    History: [
+      {
+        exchangeRate : Number,
+        date : String,
+      }
+    ],
   },
   { timestamps: true }
 );
 
 // convert to model
 export default mongoose.model("Rate", Rate);
+

@@ -43,13 +43,12 @@ export default (app: Router) => {
       );
       try {
         const rateServiceInstance = Container.get(RateService);
-        let reqTemp = {
-          token0 : req.query.token0,
-          token1 : req.query.token1,
-          rate : req.query.rate,
-          time : req.query.time,
-        }
-        rateServiceInstance.addRate(reqTemp);
+        rateServiceInstance.addRate(
+          req.query.token0,
+          req.query.token1,
+          req.query.rate,
+          req.query.time,
+        );
         return res.status(201);
       } catch (e) {
         logger.error("🔥 error: %o", e);
@@ -67,7 +66,7 @@ export default (app: Router) => {
       );
       try {
         const rateServiceInstance = Container.get(RateService);
-        const data = await rateServiceInstance.processSwapData(req.query.token0,req.query.token1,req.query.range);
+        const data = await rateServiceInstance.processSwapData(req.query.token0,req.query.token1);
         return res.status(201).json(data);
       } catch (e) {
         logger.error("🔥 error: %o", e);
