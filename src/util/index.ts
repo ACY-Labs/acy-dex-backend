@@ -3,6 +3,7 @@ import { Container } from "typedi";
 import Web3 from "web3";
 import supportedTokens from "../constants/supportedTokens";
 import axios from 'axios';
+import { FACTORY_ADDRESS, INIT_CODE_HASH } from "../constants";
 
 export function timestampToDate(timestamp) {
   const date = moment.unix(timestamp);
@@ -89,8 +90,6 @@ export function decodeTokenAmount(tokenAddr, amount) {
 import { getCreate2Address } from "@ethersproject/address";
 import { pack, keccak256 } from "@ethersproject/solidity";
 export const getPairAddress = (token0Addr, token1Addr) => {
-    const FACTORY_ADDRESS = "0xb43DD1c50377b6dbaEBa3DcBB2232a3964b22440";
-    const INIT_CODE_HASH = "0xfbf3b88d6f337be529b00f1dc9bff44bb43fa3c6b5b7d58a2149e59ac5e0c4a8";
     const [_token0, _token1] =
     token0Addr.toLowerCase() < token1Addr.toLowerCase()
         ? [token0Addr, token1Addr]
