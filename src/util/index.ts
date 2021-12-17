@@ -118,31 +118,12 @@ export async function getAllSuportedTokensPrice() {
       return tokensPrice;
     });
   return tokensPrice;
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
-=======
->>>>>>> 3401f56817e94faeb741c095b66c36e5bf210629
+
 }
 
-export function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
-=======
->>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
-}
-=======
-}
-=======
-  }
+
 
 export function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  // return new Promise(resolve => setTimeout(resolve, ms));
 }
->>>>>>> 57eb6823a8165e5ea936d014ce5670df8b692d2b
->>>>>>> 3401f56817e94faeb741c095b66c36e5bf210629
+

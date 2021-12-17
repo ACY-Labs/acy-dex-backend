@@ -7,6 +7,7 @@ export default async (): Promise<Db> => {
     dbName: config.databaseName,
     user: config.databaseUser,
     pass: config.databasePass,
+    
     useNewUrlParser: true,
     useCreateIndex: true,
     useUnifiedTopology: true,
