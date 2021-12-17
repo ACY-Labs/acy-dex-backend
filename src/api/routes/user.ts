@@ -9,16 +9,9 @@ export default (app: Router) => {
   app.use("/users", route);
 const userService = Container.get(UserService);
   const logger: Logger = Container.get("logger");
-
-<<<<<<< HEAD
-<<<<<<< HEAD
+  
   route.post(
-=======
-  route.get(
->>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
-=======
-  route.get(
->>>>>>> 890647a14108276ea95025fb9ac9f5cb5d0964d3
+
     "/swap",
     async (req: Request, res: Response, next: NextFunction) => {
       logger.debug(
@@ -28,6 +21,24 @@ const userService = Container.get(UserService);
       try {
         await userService.performTx(req.query);
         return res.status(201).json({response : "Success!"});
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
+
+  route.get(
+
+    "/all",
+    async (req: Request, res: Response, next: NextFunction) => {
+      logger.debug(
+        "Calling chart POST endpoint /swap with query: %o",
+        req.query
+      );
+      try {
+        let data = await userService.getAllUsers(req.query);
+        return res.status(201).json(data);
       } catch (e) {
         logger.error("🔥 error: %o", e);
         return next(e);
