@@ -61,9 +61,6 @@ const Launch = new mongoose.Schema(
       type: Number,
       required: [true],
     },
-    projectStatus: {
-      type: String,
-    },
     contextData: {
       type: String,
     },

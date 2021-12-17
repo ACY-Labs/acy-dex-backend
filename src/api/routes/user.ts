@@ -9,9 +9,13 @@ export default (app: Router) => {
   app.use("/users", route);
 const userService = Container.get(UserService);
   const logger: Logger = Container.get("logger");
+<<<<<<< HEAD
   
   route.post(
 
+=======
+  route.post(
+>>>>>>> 57eb6823a8165e5ea936d014ce5670df8b692d2b
     "/swap",
     async (req: Request, res: Response, next: NextFunction) => {
       logger.debug(
