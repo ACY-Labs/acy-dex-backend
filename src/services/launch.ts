@@ -3,7 +3,7 @@ import Web3 from "web3";
 import { ERC20_ABI, FARM_ADDRESS} from "../constants";
 import {TESTNET_RINKEBY_TOKENADDR} from "../constants/tokenAddress"
 import { sleep } from "../util";
-import format from 'date-fns/format'
+// import format from 'date-fns/format'
 
 
 @Service()
@@ -21,11 +21,8 @@ export default class LaunchService {
       this.logger.info(`Retrieve data failed`);
     // store into array
     let result = []
-<<<<<<< HEAD
+
     data.forEach(obj => { 
-=======
-    data.map(obj => {
->>>>>>> 99a80defd80cf1dcbf1ac203e9edfef532b1290a
       // get specific properties
       let tempRes = {}
       tempRes = {
@@ -110,7 +107,7 @@ export default class LaunchService {
 
     let userProject = user.projects[projectIndex];
     // already allocated, cannot allocate again, return old allocation amount
-    // if(userProject.allocationAmount !== 0) return userProject;
+    if(userProject.allocationAmount !== 0) return userProject;
 
     // TODO: a concrete allocation method
     // use simple random right now
@@ -134,7 +131,6 @@ export default class LaunchService {
   }
 
   public async getBalance(addr: String) {
-    // Ymj add
     this.logger.info(`getBalance`, addr);
     const web3 = new Web3("https://rinkeby.infura.io/v3/1e70bbd1ae254ca4a7d583bc92a067a2");
     //const web3 = new Web3("web3");
