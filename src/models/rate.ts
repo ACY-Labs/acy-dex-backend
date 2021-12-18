@@ -15,10 +15,12 @@ const Rate = new mongoose.Schema(
     History: [
       {
         exchangeRate : Number,
-        date : String,
+        time : Number, 
+        count: Number,
       }
     ],
   },
+
   { timestamps: true }
 );
 

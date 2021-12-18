@@ -21,6 +21,7 @@ const UserInfo = new mongoose.Schema(
         totalSwappedValue: { type: Number },
         totalFeesPaid: { type: Number },
         totalTransactions: { type: Number },
+
         lastTransactionHash : { type : String}
     },
     { timestamps: true }

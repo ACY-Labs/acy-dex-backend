@@ -3,7 +3,7 @@ import Web3 from "web3";
 import { ERC20_ABI, FARM_ADDRESS} from "../constants";
 import {TESTNET_RINKEBY_TOKENADDR} from "../constants/tokenAddress"
 import { sleep } from "../util";
-import format from 'date-fns/format'
+// import format from 'date-fns/format'
 
 
 @Service()
@@ -21,10 +21,9 @@ export default class LaunchService {
       this.logger.info(`Retrieve data failed`);
     // store into array
     let result = []
-<<<<<<< HEAD
-<<<<<<< HEAD
-    data.forEach(obj => { 
 
+    data.forEach(obj => { 
+      // get specific properties
       let tempRes = {}
       tempRes = {
         projectID: obj.projectID,
