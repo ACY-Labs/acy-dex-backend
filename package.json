@@ -17,7 +17,7 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "@acyswap/sdk": "^1.0.4",
+    "@acyswap/sdk": "^1.0.10",
     "@ethersproject/abi": "^5.4.1",
     "@ethersproject/address": "^5.4.0",
     "@ethersproject/bignumber": "^5.4.0",
