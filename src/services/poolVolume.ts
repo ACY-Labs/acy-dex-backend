@@ -5,6 +5,7 @@ import BigNumber from "bignumber.js";
 import {
     FACTORY_ADDRESS,
     INIT_CODE_HASH,
+    ROUTER_ADDRESS,
     PAIR_CONTRACT_ABI,
     ERC20_ABI,
     AVERAGE_BLOCK_COUNT_PER_DAY,
@@ -26,12 +27,14 @@ export default class PoolVolumeService {
     }
 
     private async getEventsFromInterval (contract,lb,rb) {
+
         let options = {
             fromBlock: lb,
             toBlock: rb,
           };
         
         let allEvents =  await contract.getPastEvents("allEvents",options);
+
         let swapLogs = allEvents.filter(item=>item.event == 'Swap');
         let syncLogs = allEvents.filter(item=>item.event == 'Sync');
 
@@ -40,7 +43,7 @@ export default class PoolVolumeService {
         let now:any = new Date();
 
         for (let i = 0; i < total_swap_logs; i++) {
-            let { amount0In, amount0Out, amount1In, amount1Out } =
+            let { sender, amount0In, amount0Out, amount1In, amount1Out } =
             swapLogs[i].returnValues;
             let log_time = new Date(now);
             let log_time_msec = ((rb-swapLogs[i].blockNumber)*AVERAGE_BLOCK_GEN_TIME);
@@ -77,6 +80,7 @@ export default class PoolVolumeService {
 
         let [swapLogs,syncLogs] = await this.getEventsFromInterval(contract,blockNum-AVERAGE_BLOCK_COUNT_PER_DAY,blockNum);
         let updatedReserves = await this.getReserves(contract,decimal0,decimal1);
+        // console.log(updatedReserves.token0,updatedReserves.token1);
         return {
             token0 : token0,
             token1 : token1,
@@ -145,6 +149,8 @@ export default class PoolVolumeService {
     }
     public async updateSinglePair(token0,token1,decimal0,decimal1,blockNum){
 
+            // console.log("looking for tokenss... -- > " , token0, token1);
+
             token0 = getAddress(token0);
             token1 = getAddress(token1);
 
@@ -152,6 +158,9 @@ export default class PoolVolumeService {
             token0.toLowerCase() < token1.toLowerCase()
                 ? [token0, token1, decimal0, decimal1]
                 : [token1, token0, decimal1, decimal0];
+
+            token0 = _token0;
+            token1 = _token1;
 
             //UNISWAP DATA .... 
             // let pairAddress = getCreate2Address(
@@ -172,7 +181,9 @@ export default class PoolVolumeService {
 
             if(!inDatabase){
                 data = await this.initRecord(_token0,_token1,pairAddress,contract,blockNum,_decimal0,_decimal1);
+                // console.log("didnt find this liquidity pool", data);
             }
+
 
             // first check ..... if exists in database & lastvolume ... return if not reached interval
             if(inDatabase && data.lastVolume.token0 + data.lastVolume.token1 == 0 && (blockNum - data.lastBlockNumber) < NO_VOLUME_UPDATE_INTERVAL) {
@@ -186,6 +197,7 @@ export default class PoolVolumeService {
             let swapLogs = [];
             let syncLogs = [];
             if(startBlock<blockNum) [swapLogs,syncLogs] = await this.getEventsFromInterval(contract,startBlock,blockNum);
+            // console.log(swapLogs,syncLogs);
 
             processed_logs = await this.addNewLogs(processed_logs,swapLogs);
 
@@ -266,11 +278,11 @@ export default class PoolVolumeService {
         // get Volumes for all pairs of available tokens
         // if(blockNum % SUBSCRIPTION_INTERVAL) return;
         //just for testing
-        //  let blockNum = await this.web3.eth.getBlockNumber();
-        // let token0 = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
-        // let token1 = '0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643';
-        // let decimal0 = supportedTokens.find(item => item.addressOnEth.toLowerCase() == token0.toLowerCase()).decimals;
-        // let decimal1 = supportedTokens.find(item => item.addressOnEth.toLowerCase() == token1.toLowerCase()).decimals;
+        // let blockNum = await this.web3.eth.getBlockNumber();
+        // let token0 = '0x55d398326f99059ff775485246999027b3197955';
+        // let token1 = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
+        // let decimal0 = supportedTokens.find(item => item.address.toLowerCase() == token0.toLowerCase()).decimals;
+        // let decimal1 = supportedTokens.find(item => item.address.toLowerCase() == token1.toLowerCase()).decimals;
         // await this.updateSinglePair(token0,token1,decimal0,decimal1,blockNum);
 
         try{
