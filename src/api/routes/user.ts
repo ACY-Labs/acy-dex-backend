@@ -29,6 +29,24 @@ const userService = Container.get(UserService);
     }
   );
 
+  route.post(
+
+    "/adduser",
+    async (req: Request, res: Response, next: NextFunction) => {
+      logger.debug(
+        "Calling chart POST endpoint /liquidity with query: %o",
+        req.query
+      );
+      try {
+        await userService.addUser(req.query);
+        return res.status(201).json({response : "Success!"});
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
+
   route.get(
 
     "/all",

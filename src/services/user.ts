@@ -71,4 +71,17 @@ export default class UserService {
         })
         return {data : _data};
     }
+
+    public async addUser(data){
+
+        console.log(data);
+
+        let walletId = data.address;
+        let userRecord = await this.userInfoModel.findOne({ walletId }).exec();
+
+        if(!userRecord) {
+            console.log("record not found, creating one")
+            await this.initUser(walletId);
+        }
+    }
 }
