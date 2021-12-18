@@ -5,7 +5,6 @@ import BigNumber from "bignumber.js";
 import {
     FACTORY_ADDRESS,
     INIT_CODE_HASH,
-    ROUTER_ADDRESS,
     PAIR_CONTRACT_ABI,
     ERC20_ABI,
     AVERAGE_BLOCK_COUNT_PER_DAY,
@@ -27,6 +26,8 @@ export default class PoolVolumeService {
     }
 
     private async getEventsFromInterval (contract,lb,rb) {
+
+        // console.log("getting events from interval",lb,rb);
 
         let options = {
             fromBlock: lb,
@@ -177,18 +178,18 @@ export default class PoolVolumeService {
             let startBlock = blockNum - AVERAGE_BLOCK_COUNT_PER_DAY;
 
             let [data, inDatabase] = await this.checkIfExist(pairAddress);
-
+            
 
             if(!inDatabase){
                 data = await this.initRecord(_token0,_token1,pairAddress,contract,blockNum,_decimal0,_decimal1);
                 // console.log("didnt find this liquidity pool", data);
             }
 
-
+            //  COMMENT OUT FOLLOWING LINES TO SKIP FETCHING DATA FROM NO_VOLUUME PAIRS
             // first check ..... if exists in database & lastvolume ... return if not reached interval
-            if(inDatabase && data.lastVolume.token0 + data.lastVolume.token1 == 0 && (blockNum - data.lastBlockNumber) < NO_VOLUME_UPDATE_INTERVAL) {
-                return;
-            }
+            // if(inDatabase && data.lastVolume.token0 + data.lastVolume.token1 == 0 && (blockNum - data.lastBlockNumber) < NO_VOLUME_UPDATE_INTERVAL) {
+            //     return;
+            // }
 
             startBlock = Math.max(startBlock,data.lastBlockNumber) + 1;
 
@@ -300,8 +301,9 @@ export default class PoolVolumeService {
                     
                 }
             }
-            await Promise.allSettled(all_tasks);
-            console.log('solving for %d',all_tasks.length);
+            let solved = await Promise.allSettled(all_tasks);
+            console.log("fetched data successfully for %d pairs out of",solved.filter(item => item.status == 'fulfilled').length, all_tasks.length);
+            // console.log('solving for %d',all_tasks.length);
             
         }catch (e){
             console.log("failed to fetch transactions with error : ", e);
