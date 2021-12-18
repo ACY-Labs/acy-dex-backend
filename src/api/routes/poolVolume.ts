@@ -44,6 +44,22 @@ const poolVolumeService = Container.get(PoolVolumeService);
         return next(e);
       }
     }
+  );
+  route.get(
+    "/pair",
+    async (req: Request, res: Response, next: NextFunction) => {
+      logger.debug(
+        "Calling pool GET endpoint /poolchart/pair",
+        req.query
+      );
+      try {
+        const data = await poolVolumeService.getPair(req.query.token0,req.query.token1);
+        return res.status(201).json(data);
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
   )
 
 };
