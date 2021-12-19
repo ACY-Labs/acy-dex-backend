@@ -44,4 +44,20 @@ export default [
   //   logoURI: 'https://cryptologos.cc/logos/binance-coin-bnb-logo.svg?v=014',
   //   idOnCoingecko: "binancecoin",
   // },
+  {
+    name: 'Ethereum',
+    symbol: 'ETH',
+    address: '0x2170Ed0880ac9A755fd29B2688956BD959F933F8',
+    decimals: 18,
+    logoURI: 'https://cryptologos.cc/logos/ethereum-eth-logo.svg?v=014',
+    idOnCoingecko: "ethereum",
+  },
+  {
+    name: 'Binance Bitcoin',
+    symbol: 'BTCB',
+    address: '0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c',
+    decimals: 18,
+    logoURI: 'https://cryptologos.cc/logos/bitcoin-btc-logo.svg?v=014',
+    idOnCoingecko: "binance-bitcoin",
+  },
 ];
