@@ -34,7 +34,7 @@ export default class FarmService {
     const rewardTokensAddresses = await contract.methods.getPoolRewardTokenAddresses(poolId).call();
     // const rewardTokensSymbols = [];
     const rewardTokensSymbols = rewardTokensAddresses.map(address => 
-        supportedTokens.find(token => token.address.toLowerCase() == address.toLowerCase()).symbol
+        supportedTokens.find(token => token.address.toLowerCase() == address.toLowerCase())
     );
     let token0;
     let token1;

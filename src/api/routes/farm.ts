@@ -34,7 +34,6 @@ export default (app: Router) => {
     async (req: Request, res: Response, next: NextFunction) => {
       logger.debug(
         "Calling chart GET endpoint /farm/getAllPools with query: %o",
-        req.query.account
       );
       try {
         const farmServiceInstance = Container.get(FarmService);
