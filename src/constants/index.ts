@@ -1,5 +1,8 @@
 export const FACTORY_ADDRESS = "0x3d077c05c3AbCE52257E453607209f81D9db01fC";
-export const FARM_ADDRESS    = "0x11B64a91fA3eedfe0977a64D908BB8B8faf903a4";
+
+export const FARM_ADDRESS    = "0xcd0b5136d2e9972077cd769714ade9c3506fb5d6";
+export const RPC_URL         = "https://bsc-dataseed.binance.org/";
+
 
 export const INIT_CODE_HASH =
   "0xfbf3b88d6f337be529b00f1dc9bff44bb43fa3c6b5b7d58a2149e59ac5e0c4a8";

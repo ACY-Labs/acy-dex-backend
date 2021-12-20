@@ -34,11 +34,10 @@ export default (app: Router) => {
     async (req: Request, res: Response, next: NextFunction) => {
       logger.debug(
         "Calling chart GET endpoint /farm/getAllPools with query: %o",
-        req.query.account
       );
       try {
         const farmServiceInstance = Container.get(FarmService);
-        const data = await farmServiceInstance.getAllPools(req.query.account);
+        const data = await farmServiceInstance.getAllPools();
         return res.status(201).json(data);
       } catch (e) {
         logger.error("🔥 error: %o", e);
@@ -57,7 +56,7 @@ export default (app: Router) => {
         const farmServiceInstance = Container.get(FarmService);
         // 0x1954F985F1086caBDc0Ea5FCC2a55732e7e43DD5
         // 0x0000000000000000000000000000000000000000
-        const data = await farmServiceInstance.getPool(req.query.poolId, req.query.account);
+        const data = await farmServiceInstance.getPool(req.query.poolId);
         return res.status(201).json(data);
       } catch (e) {
         logger.error("🔥 error: %o", e);
