@@ -9,6 +9,7 @@ import Logger from "./loaders/logger";
 import { Container } from "typedi";
 import indexService from "./indexer";
 import poolVolumeService from "./services/poolVolume"
+import FarmService from "./services/farm"
 
 async function startServer() {
   const app = express();
@@ -21,7 +22,9 @@ async function startServer() {
    **/
   await require("./loaders").default({ expressApp: app });
   const poolService = Container.get(poolVolumeService);
+  const farmService = Container.get(FarmService);
   setInterval(() => poolService.updateVolumeData(), 300000);
+  setInterval(() => farmService.massUpdateFarm(), 30000);
 
   app
     .listen(config.port, () => {
