@@ -16,7 +16,7 @@ const userService = Container.get(UserService);
     "/swap",
     async (req: Request, res: Response, next: NextFunction) => {
       logger.debug(
-        "Calling chart POST endpoint /swap with query: %o",
+        "Calling user POST endpoint /swap with query: %o",
         req.query
       );
       try {
@@ -34,7 +34,7 @@ const userService = Container.get(UserService);
     "/adduser",
     async (req: Request, res: Response, next: NextFunction) => {
       logger.debug(
-        "Calling chart POST endpoint /liquidity with query: %o",
+        "Calling user POST endpoint /liquidity with query: %o",
         req.query
       );
       try {
@@ -52,11 +52,28 @@ const userService = Container.get(UserService);
     "/all",
     async (req: Request, res: Response, next: NextFunction) => {
       logger.debug(
-        "Calling chart POST endpoint /swap with query: %o",
+        "Calling user POST endpoint /all with query: %o",
         req.query
       );
       try {
         let data = await userService.getAllUsers(req.query);
+        return res.status(201).json(data);
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
+  
+  route.get(
+    "/stats",
+    async (req: Request, res: Response, next: NextFunction) => {
+      logger.debug(
+        "Calling user POST endpoint /stats with query: %o",
+        req.query
+      );
+      try {
+        let data = await userService.getUserStats(req.query);
         return res.status(201).json(data);
       } catch (e) {
         logger.error("🔥 error: %o", e);

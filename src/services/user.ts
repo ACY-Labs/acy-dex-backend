@@ -26,7 +26,8 @@ export default class UserService {
         console.log(data);
 
         let walletId = data.address;
-        let userRecord = await this.userInfoModel.findOne({ walletId }).exec();
+        let userRecord = await this.userInfoModel.findOne({walletId:
+            { $regex: new RegExp("^" + walletId.toLowerCase(), "i") } }).exec();
 
         if(!userRecord) {
             console.log("record not found, creating one")
@@ -50,7 +51,8 @@ export default class UserService {
 
         await this.userInfoModel.updateOne(
             {
-                walletId
+                walletId:
+                { $regex: new RegExp("^" + walletId.toLowerCase(), "i") } 
             },
             { 
                 totalSwappedValue: newTotalSwappedValue,
@@ -77,11 +79,26 @@ export default class UserService {
         console.log(data);
 
         let walletId = data.address;
-        let userRecord = await this.userInfoModel.findOne({ walletId }).exec();
+        let userRecord = await this.userInfoModel.findOne({walletId:
+            { $regex: new RegExp("^" + walletId.toLowerCase(), "i") } }).exec();
 
         if(!userRecord) {
             console.log("record not found, creating one")
             await this.initUser(walletId);
+        }
+    }
+
+    public async getUserStats(data){
+        console.log(data);
+        let walletId = data.address;
+
+        let userRecord = await this.userInfoModel.findOne({walletId:
+        { $regex: new RegExp("^" + walletId.toLowerCase(), "i") } }).exec();
+        if(!userRecord) return {data : 'null'};
+        else{
+            return{
+                data : userRecord
+            }
         }
     }
 }
