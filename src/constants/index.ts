@@ -2,7 +2,7 @@ export const FACTORY_ADDRESS = "0x3d077c05c3AbCE52257E453607209f81D9db01fC";
 
 export const FARM_ADDRESS    = "0xcd0b5136d2e9972077cd769714ade9c3506fb5d6";
 export const RPC_URL         = "https://bsc-dataseed.binance.org/";
-
+export const CHAINID         = 56;
 
 export const INIT_CODE_HASH =
   "0xfbf3b88d6f337be529b00f1dc9bff44bb43fa3c6b5b7d58a2149e59ac5e0c4a8";
@@ -697,4 +697,9 @@ export const SUBSCRIPTION_INTERVAL = 1 * 4 * 1; // # of blocks for each update /
 export const NO_VOLUME_UPDATE_INTERVAL = 3 * 4 * 5; // # of blocks for each update IFF lastvolumes was 0.0
 export const UPDATE_TIME_INTERVAL = 1 * 60 * 1000; // 5 min to refresh expressed in msec
 export const HISTORICAL_DATA_UPDATE_COUNT = 22 ; // max number of records to store in historical data.
+
+//BSC generate 1 block every 3 sec
+export const BLOCK_TIME = 3;
+export const BLOCKS_PER_YEAR = 60*60*24*365/BLOCK_TIME;
+export const BLOCKS_PER_MONTH = 60*60*24*31/BLOCK_TIME; 
 

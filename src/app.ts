@@ -24,7 +24,7 @@ async function startServer() {
   const poolService = Container.get(poolVolumeService);
   const farmService = Container.get(FarmService);
   setInterval(() => poolService.updateVolumeData(), 300000);
-  setInterval(() => farmService.massUpdateFarm(), 30000);
+  setInterval(() => farmService.massUpdateFarm(), 600000);
 
   app
     .listen(config.port, () => {

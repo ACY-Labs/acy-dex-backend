@@ -3,7 +3,11 @@ import { Container } from "typedi";
 import Web3 from "web3";
 import supportedTokens from "../constants/supportedTokens";
 import axios from 'axios';
-import { FACTORY_ADDRESS, INIT_CODE_HASH } from "../constants";
+import { FACTORY_ADDRESS, INIT_CODE_HASH, RPC_URL, PAIR_CONTRACT_ABI, CHAINID } from "../constants";
+import { JsonRpcProvider } from "@ethersproject/providers"
+import { Token, TokenAmount, Fetcher } from '@acyswap/sdk';
+import { Contract } from '@ethersproject/contracts';
+import uniqueTokens from "../constants/uniqueTokens";
 
 export function timestampToDate(timestamp) {
   const date = moment.unix(timestamp);
@@ -103,24 +107,85 @@ export const getPairAddress = (token0Addr, token1Addr) => {
 }
 
 export async function getAllSuportedTokensPrice() {
-  const searchIdsArray = supportedTokens.map(token => token.idOnCoingecko);
+  const library = new JsonRpcProvider(RPC_URL, 56);
+  const searchIdsArray = uniqueTokens.map(token => token.idOnCoingecko);
   const searchIds = searchIdsArray.join('%2C');
   const tokensPrice = await axios.get(
     `https://api.coingecko.com/api/v3/simple/price?ids=${searchIds}&vs_currencies=usd`
-    ).then(result =>{
-      const data = result.data;
-      const tokensPrice = {};
-      supportedTokens.forEach(token =>{
-        tokensPrice[token.symbol] = data[token.idOnCoingecko]['usd'];
-      })
-      tokensPrice['ACY'] = 1;//dont know acy price now;
-      return tokensPrice;
-    });
+  ).then(async (result) =>{
+    const data = result.data;
+    console.log(data);
+    const tokensPrice = {};
+    uniqueTokens.forEach(token =>{
+      tokensPrice[token.symbol] = data[token.idOnCoingecko]['usd'];
+    })
+    try {
+      tokensPrice['ACY'] = await getACYPrice(library);
+    } catch(e) {
+      tokensPrice['ACY'] = 0.2
+    }
+    
+    return tokensPrice;
+  });
   return tokensPrice;
 }
-
-export function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+export function getPairContract(pair_address, library) {
+  return new Contract(pair_address, PAIR_CONTRACT_ABI, library);
+}
+export async function getACYPrice(library){
+  const ACY  = uniqueTokens.find(token => token.symbol == "ACY");
+  const USDT = uniqueTokens.find(token => token.symbol == "USDT");
+  const BUSD = uniqueTokens.find(token => token.symbol == "BUSD");
+  
+  const acyToken  = new Token(CHAINID, ACY.address, 18, ACY.symbol);
+  const usdToken  = new Token(CHAINID, USDT.address, 18, USDT.symbol);
+  const busdToken = new Token(CHAINID, BUSD.address, 18, BUSD.symbol);
+  const acyUsdtPair = await Fetcher.fetchPairData(acyToken, usdToken, library).catch(e => {
+    return false
+  });
+  const acyBusdPair = await Fetcher.fetchPairData(acyToken, busdToken, library).catch(e => {
+    return false
+  });
+  if(!acyUsdtPair && !acyBusdPair) {
+    return 0.2;
+  } else if(!acyUsdtPair) {
+    const result = await getTokenPriceByPair(acyBusdPair, ACY.symbol, library);
+    return result;
+  } else if(!acyBusdPair) {
+    const result = await getTokenPriceByPair(acyUsdtPair, ACY.symbol, library);
+    return result;
+  } else {
+    const acyToUsdtPrice =  getTokenPriceByPair(acyUsdtPair, ACY.symbol, library);
+    const acyToBusdPrice =  getTokenPriceByPair(acyBusdPair, ACY.symbol, library);
+    let [result1, result2] = await Promise.all([acyToUsdtPrice, acyToBusdPrice]);
+    const result = (result1+result2)/2;
+    return result;
+  }
 }
 
+export async function getTokenPriceByPair(pair, symbol, library) {
+  const pair_contract = getPairContract(pair.liquidityToken.address, library)
+  const totalSupply = await pair_contract.totalSupply();
+  const totalAmount = new TokenAmount(pair.liquidityToken, totalSupply.toString());
+  const allToken0 = pair.getLiquidityValue(
+    pair.token0,
+    totalAmount,
+    totalAmount,
+    false
+  );
+  const allToken1 = pair.getLiquidityValue(
+    pair.token1,
+    totalAmount,
+    totalAmount,
+    false
+  );
+  const allToken0Amount = parseFloat(allToken0.toExact());
+  const allToken1Amount = parseFloat(allToken1.toExact());
+  if(pair.token0.symbol == symbol) {
+    return allToken1Amount / allToken0Amount ;
+  } else {
+    return allToken0Amount / allToken1Amount ;
+  }
+  return 0;
+}
 
