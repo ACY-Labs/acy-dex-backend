@@ -140,14 +140,24 @@ export default class FarmService {
   }
   public async massUpdateFarm() {
 
-    const web3 = new Web3(RPC_URL);
-    const contract = new web3.eth.Contract(FARM_ABI, FARM_ADDRESS);
-    const numPools = await contract.methods.numPools().call();
-    this.logger.debug(numPools);
-    for(var poolId = 0 ; poolId < numPools ; poolId++) {
-        this.updatePoolNew(poolId)
+    try {
+
+        this.logger.debug("updating in massUdpdateFarm...");
+
+
+        const web3 = new Web3(RPC_URL);
+        const contract = new web3.eth.Contract(FARM_ABI, FARM_ADDRESS);
+        const numPools = await contract.methods.numPools().call();
+        this.logger.debug(numPools);
+        for(var poolId = 0 ; poolId < numPools ; poolId++) {
+            this.updatePoolNew(poolId)
+        }
+        return true;
+
+    }catch (e){
+        console.log("FARM UPDATE FAILED with error",e);
+
     }
-    return true;
   }
   public async getAllPools() {
     let farms = await this.farmModel.find();
