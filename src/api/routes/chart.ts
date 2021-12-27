@@ -43,13 +43,13 @@ export default (app: Router) => {
       );
       try {
         const rateServiceInstance = Container.get(RateService);
-        rateServiceInstance.addRate(
+        await rateServiceInstance.addRate(
           req.query.token0,
           req.query.token1,
           req.query.rate,
           req.query.time,
         );
-        return res.status(201);
+        return res.status(201).json({'msg': 'addRate success'});
       } catch (e) {
         logger.error("🔥 error: %o", e);
         return next(e);

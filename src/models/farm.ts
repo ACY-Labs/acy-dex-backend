@@ -24,6 +24,8 @@ const Farm = new mongoose.Schema(
         address: { type: String},
         decimals: { type: Number},
         farmToken: { type: String},
+        accumulateReward: {type: Number},
+        rewardPerYear: {type: Number}
     }],
     startBlock: {type: Number},
     endBlock: {type: Number},
