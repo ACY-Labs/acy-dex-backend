@@ -188,4 +188,7 @@ export async function getTokenPriceByPair(pair, symbol, library) {
   }
   return 0;
 }
+export function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
