@@ -4,9 +4,9 @@ import config from "../config";
 
 export default async (): Promise<Db> => {
   const connection = await mongoose.connect(config.databaseURL, {
-    dbName: config.databaseName,
-    user: config.databaseUser,
-    pass: config.databasePass,
+    // dbName: config.databaseName,
+    // user: config.databaseUser,
+    // pass: config.databasePass,
     
     useNewUrlParser: true,
     useCreateIndex: true,

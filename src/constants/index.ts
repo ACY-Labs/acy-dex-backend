@@ -1,4 +1,5 @@
 export const FACTORY_ADDRESS = "0x3d077c05c3AbCE52257E453607209f81D9db01fC";
+export const ACY_ROUTER = "0x4DCa8E42634abdE1925ebB7f82AC29Ea00d34bA2";
 
 export const FARM_ADDRESS    = "0xcd0b5136d2e9972077cd769714ade9c3506fb5d6";
 export const RPC_URL         = "https://bsc-dataseed.binance.org/";
@@ -6,6 +7,13 @@ export const RPC_URL         = "https://bsc-dataseed.binance.org/";
 
 export const INIT_CODE_HASH =
   "0xfbf3b88d6f337be529b00f1dc9bff44bb43fa3c6b5b7d58a2149e59ac5e0c4a8";
+
+export const BSCSCAN_API = 'https://api.bscscan.com/api';
+export const TX_LIST_GLOBAL_START_BLOCK = 13500000; // block before our contract is created in BSC
+export const TX_LIST_MAX_BLOCK_NUMBER = 10000;
+export const OFFSET = 1000; // max number of tx stored in db;
+export const BSCSCAN_API_KEY = 'H2W1JHHRFB5H7V735N79N75UVG86E9HFH2';
+export const TX_LIST_REFRESH_TIME = 60000;
 
 export const PAIR_CONTRACT_ABI = [
   {

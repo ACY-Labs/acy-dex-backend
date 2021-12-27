@@ -41,6 +41,11 @@ export default async ({ expressApp }) => {
     model: require("../models/pairVolume").default,
   };
 
+  const txListModel = {
+    name: "txListModel",
+    model : require("../models/tx").default,
+  }
+
   const launchModel = {
     name: "launchModel",
     model: require("../models/launch").default,
@@ -74,7 +79,8 @@ export default async ({ expressApp }) => {
       launchModel,
       userLaunchModel,
       userModel,
-      farmModel
+      farmModel,
+      txListModel
       // salaryModel,
       // whateverModel
     ],
