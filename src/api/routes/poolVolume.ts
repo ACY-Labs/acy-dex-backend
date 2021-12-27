@@ -30,14 +30,30 @@ const poolVolumeService = Container.get(PoolVolumeService);
     }
   );
   route.get(
-    "/historical",
+    "/historical/all",
     async (req: Request, res: Response, next: NextFunction) => {
       logger.debug(
-        "Calling pool GET endpoint /poolchart/historical",
+        "Calling pool GET endpoint /poolchart/historicalall",
         req.query
       );
       try {
         const data = await poolVolumeService.getHistoricalData();
+        return res.status(201).json(data);
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
+  route.get(
+    "/historical/pair",
+    async (req: Request, res: Response, next: NextFunction) => {
+      logger.debug(
+        "Calling pool GET endpoint /poolchart/historical/pair",
+        req.query
+      );
+      try {
+        const data = await poolVolumeService.getPairHistorical(req.query);
         return res.status(201).json(data);
       } catch (e) {
         logger.error("🔥 error: %o", e);
@@ -53,7 +69,7 @@ const poolVolumeService = Container.get(PoolVolumeService);
         req.query
       );
       try {
-        const data = await poolVolumeService.getPair(req.query.token0,req.query.token1);
+        const data = await poolVolumeService.getPair(req.query);
         return res.status(201).json(data);
       } catch (e) {
         logger.error("🔥 error: %o", e);

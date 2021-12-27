@@ -317,6 +317,7 @@ export default class PoolVolumeService {
     public formatSingle (data){
         if(!data) return null;
         let _data = {
+            pairAddr : data.pairAddr,
             token0: data.token0,
             token1: data.token1,
             lastReserves: data.lastReserves,
@@ -335,18 +336,36 @@ export default class PoolVolumeService {
         return {data : _data};
     }
 
-    public async getPair(token0, token1){
+    public async getPair(query){
 
-        token0 = getAddress(token0);
-        token1 = getAddress(token1);
+        //query might have pairAddress or token1 and tokenn 2 address
 
-        let data : any = await this.pairVolumeModel.findOne({ token0 : token0,token1 : token1 }).exec();
-        if(!data){
-            data = await this.pairVolumeModel.findOne({ token0 : token1,token1 : token0 }).exec();
+        if(query.pairAddr){
+            let data : any = await this.pairVolumeModel.findOne({pairAddr:
+                { $regex: new RegExp("^" + query.pairAddr.toLowerCase(), "i") }}).exec();
+            
+            let _data = this.formatSingle(data);
+
+            return {data : _data};
+        }else{
+
+            let token0 = query.token0;
+            let token1 = query.token1;
+
+            let data : any = await this.pairVolumeModel.findOne({token0:
+                { $regex: new RegExp("^" + token0.toLowerCase(), "i") } ,token1:
+                { $regex: new RegExp("^" + token1.toLowerCase(), "i") } }).exec();
+            if(!data){
+                data = await this.pairVolumeModel.findOne({token0:
+                    { $regex: new RegExp("^" + token1.toLowerCase(), "i") } ,token1:
+                    { $regex: new RegExp("^" + token0.toLowerCase(), "i") } }).exec();
+            }
+            let _data = this.formatSingle(data);
+    
+            return { data : _data};
+
         }
-        let _data = this.formatSingle(data);
 
-        return { data : _data};
     }
 
     public async getHistoricalData(){
@@ -363,5 +382,22 @@ export default class PoolVolumeService {
         })
         return {data : _data};
 
+    }
+    public async getPairHistorical(query){
+
+        let data: any = await this.pairVolumeModel.find({pairAddr:
+            { $regex: new RegExp("^" + query.pairAddr.toLowerCase(), "i") }}).exec();
+        
+        if(!data) return [];
+
+        let _data = data.map((item) => {
+            return {
+                token0 : item.token0,
+                token1 : item.token1,
+                historicalData : item.historicalData
+            }
+        })
+        
+        return {data : _data[0]};
     }
 }
