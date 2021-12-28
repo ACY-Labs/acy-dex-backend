@@ -19,6 +19,7 @@ export default ({
     Container.set("cache", {});
     Container.set("web3", Web3Instance);
     Container.set("logger", LoggerInstance);
+    Container.set("runningFlag", {});
   } catch (e) {
     LoggerInstance.error("🔥 Error on dependency injector loader: %o", e);
     throw e;

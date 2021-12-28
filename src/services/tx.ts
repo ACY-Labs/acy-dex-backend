@@ -8,18 +8,14 @@ import {
     OFFSET,
     ACY_ROUTER
 
-  } from "../constants";
+} from "../constants";
 import supportedTokens from "../constants/uniqueTokens";
 import {getPairAddress} from "../util/index"
-import { loggers } from "winston";
+import { Logger } from "winston";
 import axios from 'axios';
 import {parseTxData} from '../util/txData';
 import { JsonRpcProvider } from "@ethersproject/providers";
 import txList from "../api/routes/txList";
-import { sleep } from "../util/index";
-
-// import fetch from "node-fetch";
-
 @Service()
 export default class TxService {
 
@@ -29,13 +25,15 @@ export default class TxService {
     ) {}
 
     public libraryOut = new JsonRpcProvider('https://bsc-dataseed1.defibit.io/');
+
+    private logger: Logger = Container.get("logger");
     
     //function finds the bottom of new list in currlist and deletes the remaining if already passed
 
     public async findNewTxList(currList, newList){
 
-        // console.log("got a current list of %d items and new list with %d transactions",currList.length,newList.length);
-        // console.log(currList[currList.length-1],newList[newList.length-1].hash);
+        // this.logger.debug("got a current list of %d items and new list with %d transactions",currList.length,newList.length);
+        // this.logger.debug(currList[currList.length-1],newList[newList.length-1].hash);
 
         let currLength = currList.length;
 
@@ -45,7 +43,7 @@ export default class TxService {
 
         if(index_bottom==-1) return [[],newList];
 
-        // console.log(index_bottom);
+        // this.logger.debug(index_bottom);
 
         let _currList = currList.slice(0,index_bottom+1);
         
@@ -71,8 +69,8 @@ export default class TxService {
         let data = await response.data.result;
 
         let [_currList,_toAdd] = await this.findNewTxList(currTxList,data);
-        console.log("currently data list having %d and adding %d txs", _currList.length,_toAdd.length);
-        // console.log(_currList.slice(-2),_toAdd);
+        this.logger.debug("currently data list having %d and adding %d txs", _currList.length,_toAdd.length);
+        // this.logger.debug(_currList.slice(-2),_toAdd);
         for(let i=0;i<_toAdd.length;i++){
             _toAdd[i] = await parseTxData(_toAdd[i].hash, _toAdd[i].timeStamp, _toAdd[i].input.substring(0,10),this.libraryOut)
         }
@@ -82,7 +80,7 @@ export default class TxService {
 
 
         if (user_tx) {
-            console.log("updating in db");
+            this.logger.debug("updating in db");
             await this.txListModel.updateOne(
             {
                  Router : address,
@@ -92,46 +90,44 @@ export default class TxService {
                 txList : _currList
             }
             )
-            console.log("UPDATED!");
+            this.logger.debug("UPDATED!");
         } else {
-            console.log("created in db");
+            this.logger.debug("created in db");
             await this.txListModel.create({
                 Router : address,
                 lastBlockNumber : blockNum,
                 txList : _currList
             });
-            console.log("wrote in Dd");
+            this.logger.debug("wrote in Dd");
         }        
     }
 
-    public async updateTxList(){
+    public async updateTxList() {
+        
+        let runningFlag = Container.get('runningFlag');
+        if(runningFlag['isUpdatingTxList']) {
+            this.logger.warn('TxList already updating.');
+            return;
+        }
 
-        console.log("updating tx list......");
-
+        runningFlag['isUpdatingTxList'] = true;
+        Container.set('runningFlag', runningFlag);
+        this.logger.debug("updating tx list......");
 
         let now = new Date().getTime();
-        // console.log(now);
-
-        
         // these looks like  a naive approach but its very stable after testing, if we
         // update the interval of blocks we are fetching from, some transactions might be skipped.
         //if records dont exist, start recording slowly bcs of a limit of data for request
-
         try {
             let blockNum = await this.web3.eth.getBlockNumber();
             await this.updateUnique(ACY_ROUTER,blockNum);
-            console.log("SUCCESSFULLY fetched data for 1 ROUTER");
-        }catch (e){
-            console.log("FETCH DATA UNSUCCESSFUL with error -- > ",e);
-        }    
-        let elapsed_time = new Date().getTime() - now;
+            this.logger.debug("SUCCESSFULLY fetched data for 1 ROUTER");
+        } catch (e){
+            this.logger.debug("FETCH DATA UNSUCCESSFUL with error -- > ",e);
+        }
 
-        if(elapsed_time<TX_LIST_REFRESH_TIME) await sleep(TX_LIST_REFRESH_TIME-elapsed_time);
-        else await sleep(5000);
-
-        this.updateTxList();
-
-
+        runningFlag['isUpdatingTxList'] = false;
+        Container.set('runningFlag', runningFlag);
     }
 
     //GETTER FUNCTIONS ....

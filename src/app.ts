@@ -23,10 +23,12 @@ async function startServer() {
    **/
   await require("./loaders").default({ expressApp: app });
   const poolService = Container.get(poolVolumeService);
-  const txService = Container.get(TxService);
-  txService.updateTxList();
-  const farmService = Container.get(FarmService);
   setInterval(() => poolService.updateVolumeData(), 300000);
+
+  const txService = Container.get(TxService);
+  setInterval(() => txService.updateTxList(), 60000);
+
+  const farmService = Container.get(FarmService);
   setInterval(() => farmService.massUpdateFarm(), 600000);
 
   app
