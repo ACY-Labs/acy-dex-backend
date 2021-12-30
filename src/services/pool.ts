@@ -54,7 +54,7 @@ export default class PoolService {
   }
 
   // TODO: Is chainId=4 when we use rinkeby?
-  public async updateValidPools(chainId) {
+  public async updateValidPools(chainId = 56) {
     this.logger.debug("getValidPairs() is called.");
 
     const provider = new InfuraProvider("rinkeby", process.env.INFURA_API_KEY);
@@ -80,7 +80,7 @@ export default class PoolService {
         if (token0.equals(token1)) continue;
 
         // queue get pair task
-        const pairTask = Fetcher.fetchPairData(token0, token1, provider);
+        const pairTask = Fetcher.fetchPairData(token0, token1, provider, chainId);
         checkLiquidityPositionTasks.push(pairTask);
         tokenIndexPairs.push([i, j]);
       }
@@ -176,7 +176,7 @@ export default class PoolService {
 
   ///// Fetch pool's general info
 
-  public async getPoolInfo(token0Symbol, token1Symbol) {
+  public async getPoolInfo(token0Symbol, token1Symbol, chainId = 56) {
     // FIXME: use pool address as input
     // FIXME: ACY token adressOnEth is changed to a very uncommon token addr for avoiding confliction with ETH
     // if this collides with other token addr, the generated pairAddr will also collide.
@@ -189,9 +189,9 @@ export default class PoolService {
         ? [token0AddrOnMain, token1AddrOnMain]
         : [token1AddrOnMain, token0AddrOnMain];
     const pairAddress = getCreate2Address(
-      FACTORY_ADDRESS,
+      FACTORY_ADDRESS[chainId],
       keccak256(["bytes"], [pack(["address", "address"], [_token0, _token1])]),
-      INIT_CODE_HASH
+      INIT_CODE_HASH[chainId]
     );
     console.log("onMainnet token0", token0AddrOnMain);
     console.log("onMainnet token1", token1AddrOnMain);

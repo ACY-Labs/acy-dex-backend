@@ -29,7 +29,7 @@ async function startServer() {
   setInterval(() => txService.updateTxList(), 60000);
 
   const farmService = Container.get(FarmService);
-  setInterval(() => farmService.massUpdateFarm(), 600000);
+  setInterval(() => farmService.massUpdateFarm(97), 30000);
 
   app
     .listen(config.port, () => {

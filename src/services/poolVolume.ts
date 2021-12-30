@@ -148,7 +148,7 @@ export default class PoolVolumeService {
             else return data.historicalData.slice(data.historicalData.length - HISTORICAL_DATA_UPDATE_COUNT,data.historicalData.length);
         }
     }
-    public async updateSinglePair(token0,token1,decimal0,decimal1,blockNum){
+    public async updateSinglePair(token0,token1,decimal0,decimal1,blockNum, chainId=56){
 
             // console.log("looking for tokenss... -- > " , token0, token1);
 
@@ -170,7 +170,7 @@ export default class PoolVolumeService {
             // INIT_CODE_HASH
             // );
             //ACY DATA ....
-            let pairAddress = getPairAddress(token0,token1);
+            let pairAddress = getPairAddress(token0,token1,chainId);
         
             let contract = new this.web3.eth.Contract(PAIR_CONTRACT_ABI, pairAddress);
 

@@ -93,15 +93,15 @@ export function decodeTokenAmount(tokenAddr, amount) {
 
 import { getCreate2Address } from "@ethersproject/address";
 import { pack, keccak256 } from "@ethersproject/solidity";
-export const getPairAddress = (token0Addr, token1Addr) => {
+export const getPairAddress = (token0Addr, token1Addr, chainId) => {
     const [_token0, _token1] =
     token0Addr.toLowerCase() < token1Addr.toLowerCase()
         ? [token0Addr, token1Addr]
         : [token1Addr, token0Addr];
     const pairAddress = getCreate2Address(
-      FACTORY_ADDRESS,
+      FACTORY_ADDRESS[chainId],
       keccak256(["bytes"], [pack(["address", "address"], [_token0, _token1])]),
-      INIT_CODE_HASH
+      INIT_CODE_HASH[chainId]
     );
     return pairAddress;
 }
@@ -140,10 +140,10 @@ export async function getACYPrice(library){
   const acyToken  = new Token(CHAINID, ACY.address, 18, ACY.symbol);
   const usdToken  = new Token(CHAINID, USDT.address, 18, USDT.symbol);
   const busdToken = new Token(CHAINID, BUSD.address, 18, BUSD.symbol);
-  const acyUsdtPair = await Fetcher.fetchPairData(acyToken, usdToken, library).catch(e => {
+  const acyUsdtPair = await Fetcher.fetchPairData(acyToken, usdToken, library, chainId).catch(e => {
     return false
   });
-  const acyBusdPair = await Fetcher.fetchPairData(acyToken, busdToken, library).catch(e => {
+  const acyBusdPair = await Fetcher.fetchPairData(acyToken, busdToken, library, chainId).catch(e => {
     return false
   });
   if(!acyUsdtPair && !acyBusdPair) {

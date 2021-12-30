@@ -1,12 +1,31 @@
-export const FACTORY_ADDRESS = "0x3d077c05c3AbCE52257E453607209f81D9db01fC";
+export const FACTORY_ADDRESS = {
+    56: "0x3d077c05c3AbCE52257E453607209f81D9db01fC",
+    97: "0x89D20aB13D093Eecea6C5af0a22566d4e780892A",
+    137: "0x3d077c05c3AbCE52257E453607209f81D9db01fC"
+};
+export const INIT_CODE_HASH = {
+    56: "0xfbf3b88d6f337be529b00f1dc9bff44bb43fa3c6b5b7d58a2149e59ac5e0c4a8",
+    97: "0xfbf3b88d6f337be529b00f1dc9bff44bb43fa3c6b5b7d58a2149e59ac5e0c4a8",
+    137: "0xfbf3b88d6f337be529b00f1dc9bff44bb43fa3c6b5b7d58a2149e59ac5e0c4a8"
+};
+
+export const FARM_ADDRESS    = {
+  56: "0xcd0b5136d2e9972077cd769714ade9c3506fb5d6",
+  97: "0x6ef448ecb7f650c3a1157acf37ca19ae86dee8da",
+  137: "0x8feb878391E1152D728bEdFd0bf3A967ddC0c60B"
+};
+
+export const RPC_URL         = {
+  56: "https://bsc-dataseed.binance.org/",
+  97: "https://data-seed-prebsc-1-s1.binance.org:8545/",
+  137: "https://polygon-rpc.com"
+};
+
 export const ACY_ROUTER = "0x4DCa8E42634abdE1925ebB7f82AC29Ea00d34bA2";
 
-export const FARM_ADDRESS    = "0xcd0b5136d2e9972077cd769714ade9c3506fb5d6";
-export const RPC_URL         = "https://bsc-dataseed.binance.org/";
-export const CHAINID         = 56;
 
-export const INIT_CODE_HASH =
-  "0xfbf3b88d6f337be529b00f1dc9bff44bb43fa3c6b5b7d58a2149e59ac5e0c4a8";
+
+export const CHAINID         = 56;
 
 export const BSCSCAN_API = 'https://api.bscscan.com/api';
 export const TX_LIST_GLOBAL_START_BLOCK = 13500000; // block before our contract is created in BSC
@@ -707,7 +726,23 @@ export const UPDATE_TIME_INTERVAL = 1 * 60 * 1000; // 5 min to refresh expressed
 export const HISTORICAL_DATA_UPDATE_COUNT = 22 ; // max number of records to store in historical data.
 
 //BSC generate 1 block every 3 sec
-export const BLOCK_TIME = 3;
-export const BLOCKS_PER_YEAR = 60*60*24*365/BLOCK_TIME;
-export const BLOCKS_PER_MONTH = 60*60*24*31/BLOCK_TIME; 
+export const BLOCK_TIME = {
+  56: 3,
+  97: 3,
+  137: 2.1
+};
+
+export const BLOCKS_PER_YEAR = {
+  56: 60*60*24*365/BLOCK_TIME[56],
+  97: 60*60*24*365/BLOCK_TIME[97],
+  137: 60*60*24*365/BLOCK_TIME[137],
+};
+
+export const BLOCKS_PER_MONTH = {
+  56: 60*60*24*31/BLOCK_TIME[56],
+  97: 60*60*24*31/BLOCK_TIME[97],
+  137: 60*60*24*31/BLOCK_TIME[137],
+}
+
+
 

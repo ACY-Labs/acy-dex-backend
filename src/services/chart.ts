@@ -267,7 +267,8 @@ export default class ChartService {
     token0: string,
     token1: string,
     range: string,
-    updateExisting = false
+    updateExisting = false,
+    chainId = 56
   ) {
     this.logger.debug(`start updateSwapData ${token0}/${token1}`);
 
@@ -277,9 +278,9 @@ export default class ChartService {
         : [token1, token0];
 
     let pairAddress = getCreate2Address(
-      FACTORY_ADDRESS,
+      FACTORY_ADDRESS[chainId],
       keccak256(["bytes"], [pack(["address", "address"], [_token0, _token1])]),
-      INIT_CODE_HASH
+      INIT_CODE_HASH[chainId]
     );
 
     this.logger.debug(`Uniswap V2 Pair address ${pairAddress}`);
