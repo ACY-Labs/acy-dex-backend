@@ -24,6 +24,5 @@ const Rate = new mongoose.Schema(
   { timestamps: true }
 );
 
-// convert to model
-export default mongoose.model("Rate", Rate);
+export default Rate;
 

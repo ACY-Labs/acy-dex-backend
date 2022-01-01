@@ -4,6 +4,7 @@ import cors from "cors";
 import routes from "../api";
 import config from "../config";
 import morgan from "morgan";
+import { Container } from "typedi";
 
 export default ({ app }: { app: express.Application }) => {
   /**
@@ -39,6 +40,24 @@ export default ({ app }: { app: express.Application }) => {
 
   // Middleware that transforms the raw string of req.body into json
   app.use(bodyParser.json());
+
+  // inject chainId and models to req
+  app.use('/', (req, res, next) => {
+    const url: string = req.url;
+    const network = url.split('/')[1];
+
+    if(!(network in config.NetworkMap)) {
+      const err = new Error("Network not valid");
+      err["status"] = 404;
+      next(err);
+    }
+
+    req.network = config.NetworkMap[network];
+    req.models = Container.get('connections')['bsc-main'];
+    // rewrite url to actual process function
+    req.url = url.replace(`/${network}`, '');
+    next();
+  })
 
   // Load API routes
   app.use(config.api.prefix, routes());

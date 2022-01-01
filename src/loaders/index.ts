@@ -1,90 +1,44 @@
 import expressLoader from "./express";
-import mongooseLoader from "./mongoose";
+import mongooseConnector from "./mongoose";
 import dependencyInjectorLoader from "./dependencyInjector";
 import Logger from "./logger";
-import userLaunch from "../models/userLaunch";
+import config from "../config";
+import { Connection } from "mongoose";
 
 export default async ({ expressApp }) => {
-  const mongoConnection = await mongooseLoader();
+
+  // 连接所有DB，并加载所有Schema，因为await的原因所以暂时没法用for
+  // TODO: async Foreach
+  const mongoConnections = {
+    'bsc-main': {},
+    'bsc-test': {}
+  };
+
+  mongoConnections['bsc-main'] = {
+    'conn': await mongooseConnector(config.databases['bsc-main'])
+  }
+  mongoConnections['bsc-test'] = {
+    'conn': await mongooseConnector(config.databases['bsc-test'])
+  }
   Logger.info("✌️ DB loaded and connected!");
+  Logger.info(Object.keys(mongoConnections));
+  Object.keys(mongoConnections).forEach(network => {
+    let conn: Connection = mongoConnections[network]['conn'];
+    Logger.info('network:: ', network);
+    mongoConnections[network]['pairModel'] = conn.model('pair', require("../models/pair").default);
+    mongoConnections[network]['rateModel'] = conn.model('rate', require("../models/rate").default);
+    mongoConnections[network]['subscriberModel'] = conn.model('subscriber', require("../models/subscriber").default);
+    mongoConnections[network]['userPoolModel'] = conn.model('userPool', require("../models/userPool").default);
+    mongoConnections[network]['pairVolumeModel'] = conn.model('pairVolume', require("../models/pairVolume").default);
+    mongoConnections[network]['txListModel'] = conn.model('txList', require("../models/tx").default);
+    mongoConnections[network]['launchModel'] = conn.model('launch', require("../models/launch").default);
+    mongoConnections[network]['userLaunchModel'] = conn.model('userLaunch', require("../models/userLaunch").default);
+    mongoConnections[network]['userModel'] = conn.model('user', require("../models/userInfo").default);
+    mongoConnections[network]['farmModel'] = conn.model('farm', require("../models/farm").default);
+  })
+  Logger.info("✌️ DB Models establised");
 
-  /**
-   * We are injecting the mongoose models into the DI container.
-   * I know this is controversial but will provide a lot of flexibility at the time
-   * of writing unit tests, just go and check how beautiful they are!
-   */
-  const pairModel = {
-    name: "pairModel",
-    // Notice the require syntax and the '.default'
-    model: require("../models/pair").default,
-  };
-
-  const rateModel = {
-    name: "rateModel",
-    // Notice the require syntax and the '.default'
-    model: require("../models/rate").default,
-  };
-
-  const subscriberModel = {
-    name: "subscriberModel",
-    // Notice the require syntax and the '.default'
-    model: require("../models/subscriber").default,
-  };
-
-  const userPoolModel = {
-    name: "userPoolModel",
-    model: require("../models/userPool").default,
-  };
-
-  const pairVolumeModel = {
-    name: "pairVolumeModel",
-    model: require("../models/pairVolume").default,
-  };
-
-  const txListModel = {
-    name: "txListModel",
-    model : require("../models/tx").default,
-  }
-
-  const launchModel = {
-    name: "launchModel",
-    model: require("../models/launch").default,
-  };
-
-  const userLaunchModel = {
-    name: "userLaunchModel",
-    model: require("../models/userLaunch").default,
-  }
-
-  const userModel = {
-    name:"userModel",
-    model:require("../models/userInfo").default,
-  }
-  
-  const farmModel = {
-    name: "farmModel",
-    model: require("../models/farm").default,
-  };
-
-
-  await dependencyInjectorLoader({
-
-    mongoConnection,
-    models: [
-      pairModel,
-      rateModel,
-      subscriberModel,
-      userPoolModel,
-      pairVolumeModel,
-      launchModel,
-      userLaunchModel,
-      userModel,
-      farmModel,
-      txListModel
-      // salaryModel,
-      // whateverModel
-    ],
-  });
+  await dependencyInjectorLoader({mongoConnections});
   Logger.info("✌️ Dependency Injector loaded");
 
   expressLoader({ app: expressApp });

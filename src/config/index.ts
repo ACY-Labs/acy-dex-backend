@@ -10,21 +10,38 @@ if (envFound.error) {
   throw new Error("⚠️  Couldn't find .env file  ⚠️");
 }
 
+export interface DatabaseUser {
+  databaseURI: string,
+  databaseName: string,
+  databaseUser: string,
+  databasePass: string
+}
+
 export default {
   /**
    * Your favorite port
    */
   port: parseInt(process.env.PORT, 10),
 
-  /**
-   * That long string from mlab
-   */
-  databaseURL: process.env.MONGODB_URI,
-  databaseName: process.env.MONGO_AUTHENTICATION_DATABASE,
-  databaseUser: process.env.MONGO_NON_ROOT_USERNAME,
-  databasePass: process.env.MONGO_NON_ROOT_PASSWORD,
-  
+  NetworkMap: {
+    'bsc-main': 'bsc-main',
+    'bsc-test': 'bsc-test'
+  },
 
+  databases: {
+    'bsc-main': {
+      'databaseURI': process.env.MONGO_BSCMAIN_URI,
+      'databaseName': process.env.MONGO_BSCMAIN_DATABASE,
+      'databaseUser': process.env.MONGO_BSCMAIN_ADMIN_USERNAME,
+      'databasePass': process.env.MONGO_BSCMAIN_ADMIN_PASSWORD
+    },
+    'bsc-test': {
+      'databaseURI': process.env.MONGO_BSCTEST_URI,
+      'databaseName': process.env.MONGO_BSCTEST_DATABASE,
+      'databaseUser': process.env.MONGO_BSCTEST_ADMIN_USERNAME,
+      'databasePass': process.env.MONGO_BSCTEST_ADMIN_PASSWORD
+    }
+  },
   
   /**
    * Used by winston logger
@@ -32,7 +49,9 @@ export default {
   logs: {
     level: process.env.LOG_LEVEL || "silly",
   },
-  rpcURL: process.env.WEB3_RPC_URL,
+  rpcURL: {
+    'bsc-main': 'https://bsc-dataseed.binance.org/'
+  },
   /**
    * API configs
    */

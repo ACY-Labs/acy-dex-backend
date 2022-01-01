@@ -68,5 +68,5 @@ const Launch = new mongoose.Schema(
   { timestamps: true }
 );
 
-// convert to model
-export default mongoose.model("Launch", Launch);
+// export Schema only
+export default Launch;

@@ -1,18 +1,22 @@
-import { Service, Inject, Container } from "typedi";
 import Web3 from "web3";
+import { Logger } from "winston";
 import { ERC20_ABI, FARM_ADDRESS} from "../constants";
 import {TESTNET_RINKEBY_TOKENADDR} from "../constants/tokenAddress"
 import { sleep } from "../util";
-// import format from 'date-fns/format'
 
-
-@Service()
 export default class LaunchService {
+  launchModel: any;
+  userLaunchModel: any;
+  logger: Logger;
+
   constructor(
-    @Inject("launchModel") private launchModel,
-    @Inject("userLaunchModel") private userLaunchModel,
-    @Inject("logger") private logger
-  ) { }
+    models,
+    logger
+  ) { 
+    this.launchModel = models.launchModel;
+    this.userLaunchModel = models.userLaunchModel;
+    this.logger = logger;
+  }
 
   public async getProjects() {
     this.logger.info(`Retrieve project from db`);

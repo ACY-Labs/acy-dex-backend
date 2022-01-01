@@ -20,5 +20,4 @@ const Subscriber = new mongoose.Schema(
   { timestamps: true }
 );
 
-// convert to model
-export default mongoose.model("Subscriber", Subscriber);
+export default Subscriber;

@@ -40,5 +40,5 @@ const Farm = new mongoose.Schema(
   { timestamps: true }
 );
 
-// convert to model
-export default mongoose.model("Farm", Farm);
+// export Schema only
+export default Farm;

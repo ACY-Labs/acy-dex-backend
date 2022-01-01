@@ -26,5 +26,5 @@ const Pair = new mongoose.Schema(
   { timestamps: true }
 );
 
-// convert to model
-export default mongoose.model("Pair", Pair);
+// export Schema only
+export default Pair;

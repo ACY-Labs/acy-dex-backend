@@ -16,5 +16,4 @@ const UserPool = new mongoose.Schema(
   { timestamps: true }
 );
 
-// convert to model
-export default mongoose.model("UserPool", UserPool);
+export default UserPool;

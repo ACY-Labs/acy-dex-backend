@@ -4,20 +4,37 @@ import config from "../config";
 import Web3 from "web3";
 
 export default ({
-  mongoConnection, // for agenda
-  models,
+  mongoConnections
 }: {
-  mongoConnection;
-  models: { name: string; model: any }[];
+  mongoConnections: Object
 }) => {
   try {
-    models.forEach((m) => {
-      Container.set(m.name, m.model);
-    });
+    Container.set('connections', mongoConnections);
 
-    let Web3Instance: Web3 = new Web3(config.rpcURL);
+    
+    const modelList = [
+      'pairModel',
+      'rateModel',
+      'subscriberModel',
+      'userPoolModel',
+      'pairVolumeModel',
+      'txListModel',
+      'launchModel',
+      'userLaunchModel',
+      'userModel',
+      'farmModel'
+    ]
+
+    // TODO: to be removed
+    for(var connection in mongoConnections) {
+      modelList.forEach(modelName => {
+        Container.set(modelName, connection[modelName])
+      })
+    }
+
     Container.set("cache", {});
-    Container.set("web3", Web3Instance);
+    let Web3Instances: Web3[] = Object.keys(config.rpcURL).map(network => new Web3(config.rpcURL[network]))
+    Container.set("web3", Web3Instances);
     Container.set("logger", LoggerInstance);
     Container.set("runningFlag", {});
   } catch (e) {

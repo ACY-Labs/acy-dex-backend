@@ -14,5 +14,4 @@ const TxList = new mongoose.Schema(
     { timestamps: true }
 );
 
-// convert to model
-export default mongoose.model("TxList", TxList);
+export default TxList;

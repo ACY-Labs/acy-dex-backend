@@ -18,5 +18,4 @@ const UserLaunch = new mongoose.Schema(
     { timestamps: true }
 );
 
-// convert to model
-export default mongoose.model("UserLaunch", UserLaunch);
+export default UserLaunch;

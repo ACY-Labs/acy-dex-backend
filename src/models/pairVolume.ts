@@ -61,5 +61,5 @@ const PairVolume = new mongoose.Schema(
   { timestamps: true }  // we will utilize updatedAt to check its validity
 );
 
-// convert to model
-export default mongoose.model("PairVolume", PairVolume);
+// export Schema only
+export default PairVolume;

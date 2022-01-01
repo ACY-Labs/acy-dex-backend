@@ -7,10 +7,10 @@ import express from "express";
 import Logger from "./loaders/logger";
 
 import { Container } from "typedi";
-import indexService from "./indexer";
-import poolVolumeService from "./services/poolVolume";
-import TxService from "./services/tx"
-import FarmService from "./services/farm"
+// import indexService from "./indexer";
+// import poolVolumeService from "./services/poolVolume";
+// import TxService from "./services/tx"
+// import FarmService from "./services/farm"
 
 async function startServer() {
   const app = express();
@@ -22,14 +22,14 @@ async function startServer() {
    * So we are using good old require.
    **/
   await require("./loaders").default({ expressApp: app });
-  const poolService = Container.get(poolVolumeService);
-  setInterval(() => poolService.updateVolumeData(), 300000);
+  // const poolService = Container.get(poolVolumeService);
+  // setInterval(() => poolService.updateVolumeData(), 300000);
 
-  const txService = Container.get(TxService);
-  setInterval(() => txService.updateTxList(), 60000);
+  // const txService = Container.get(TxService);
+  // setInterval(() => txService.updateTxList(), 60000);
 
-  const farmService = Container.get(FarmService);
-  setInterval(() => farmService.massUpdateFarm(97), 30000);
+  // const farmService = Container.get(FarmService);
+  // setInterval(() => farmService.massUpdateFarm(97), 30000);
 
   app
     .listen(config.port, () => {

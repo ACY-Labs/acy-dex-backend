@@ -27,5 +27,4 @@ const UserInfo = new mongoose.Schema(
     { timestamps: true }
 );
 
-// convert to model
-export default mongoose.model("UserInfo", UserInfo);
+export default UserInfo;

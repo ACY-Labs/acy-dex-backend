@@ -1,16 +1,19 @@
 import mongoose from "mongoose";
-import { Db } from "mongodb";
-import config from "../config";
 
-export default async (): Promise<Db> => {
-  const connection = await mongoose.connect(config.databaseURL, {
-    dbName: config.databaseName,
-    user: config.databaseUser,
-    pass: config.databasePass,
+export default async (props: {
+  databaseURI: string,
+  databaseName: string,
+  databaseUser: string,
+  databasePass: string
+}): Promise<mongoose.Connection> => {
+  const connection = await mongoose.createConnection(props.databaseURI, {
+    dbName: props.databaseName,
+    user: props.databaseUser,
+    pass: props.databasePass,
     
     useNewUrlParser: true,
     useCreateIndex: true,
     useUnifiedTopology: true,
   });
-  return connection.connection.db;
+  return connection;
 };
