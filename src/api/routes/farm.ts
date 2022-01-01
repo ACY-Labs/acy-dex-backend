@@ -19,7 +19,7 @@ export default (app: Router) => {
         req.query
       );
       try {
-        const farmServiceInstance = Container.get(FarmService);
+        const farmServiceInstance = new FarmService(req.models, logger, req.constants.chainId);
         const data = await farmServiceInstance.massUpdateFarm();
         return res.status(201).json(data);
       } catch (e) {
@@ -36,7 +36,7 @@ export default (app: Router) => {
         "Calling chart GET endpoint /farm/getAllPools with query: %o",
       );
       try {
-        const farmServiceInstance = Container.get(FarmService);
+        const farmServiceInstance = new FarmService(req.models, logger, req.constants.chainId);
         const data = await farmServiceInstance.getAllPools();
         return res.status(201).json(data);
       } catch (e) {
@@ -53,7 +53,7 @@ export default (app: Router) => {
         req.query
       );
       try {
-        const farmServiceInstance = Container.get(FarmService);
+        const farmServiceInstance = new FarmService(req.models, logger, req.constants.chainId);
         // 0x1954F985F1086caBDc0Ea5FCC2a55732e7e43DD5
         // 0x0000000000000000000000000000000000000000
         const data = await farmServiceInstance.getPool(req.query.poolId);
@@ -72,7 +72,7 @@ export default (app: Router) => {
         req.query
       );
       try {
-        const farmServiceInstance = Container.get(FarmService);
+        const farmServiceInstance = new FarmService(req.models, logger, req.constants.chainId);
         const data = await farmServiceInstance.updatePool(req.query.poolId);
         return res.status(201).json(data);
       } catch (e) {

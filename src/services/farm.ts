@@ -1,41 +1,39 @@
-import { Service, Inject, Container } from "typedi";
+import { Service } from "typedi";
 import FARM_ABI from "../constants/farm_abi";
-import { FARM_ADDRESS, PAIR_CONTRACT_ABI, ERC20_ABI, RPC_URL, BLOCKS_PER_YEAR} from "../constants";
+import { Logger } from "winston";
+import { FARM_ADDRESS, PAIR_CONTRACT_ABI, RPC_URL, BLOCKS_PER_YEAR} from "../constants";
 import supportedTokens from "../constants/chainTokens";
-import { formatUnits, parseUnits } from '@ethersproject/units';
-import { Fetcher, Token, Pair, TokenAmount, JSBI, BigintIsh } from '@acyswap/sdk';
-import { InfuraProvider } from "@ethersproject/providers"
-import { getAllSuportedTokensPrice } from "../util"
+
 import Web3 from "web3";
 @Service()
 export default class FarmService {
-  constructor(
-    @Inject("farmModel") private farmModel,
-    @Inject("logger") private logger,
-  ) {}
 
-//   public async getProjects() {
-//     this.logger.info(`Retrieve project from db`);
-//     let data = await this.launchModel.find().exec();
-//     if(!data) 
-//         this.logger.info(`Retrieve data failed`);
-//     this.logger.debug("end getProjects");
-//     return data;
-//   }
-  public getTokenSymbol(address, chainId) {
-      return supportedTokens[chainId].find(token => token.address.toLowerCase() == address.toLowerCase()).symbol;
+    farmModel: any;
+    chainId: any;
+    logger: Logger;
+
+  constructor(
+    models,
+    logger,
+    chainId
+  ) { 
+    this.farmModel = models.farmModel;
+    this.chainId = chainId;
+    this.logger = logger;
+  }
+  public getTokenSymbol(address) {
+      return supportedTokens[this.chainId].find(token => token.address.toLowerCase() == address.toLowerCase()).symbol;
   }
 
-  public async updatePool(poolId, chainId = 56) {
-    const web3 = new Web3(RPC_URL[chainId]);
-    const contract = new web3.eth.Contract(FARM_ABI, FARM_ADDRESS[chainId]);
+  public async updatePool(poolId) {
+    const web3 = new Web3(RPC_URL[this.chainId]);
+    const contract = new web3.eth.Contract(FARM_ABI, FARM_ADDRESS[this.chainId]);
     const poolInfo = await contract.methods.poolInfo(poolId).call();
     const poolRewardTokens = await contract.methods.getPoolRewardTokens(poolId).call();
     const rewardTokensAddresses = await contract.methods.getPoolRewardTokenAddresses(poolId).call();
     // const rewardTokensSymbols = [];
-    console.log(poolId, chainId, rewardTokensAddresses);
     const rewardTokensSymbols = rewardTokensAddresses.map(address => 
-        supportedTokens[chainId].find(token => token.address.toLowerCase() == address.toLowerCase())
+        supportedTokens[this.chainId].find(token => token.address.toLowerCase() == address.toLowerCase())
     );
     let token0;
     let token1;
@@ -76,7 +74,7 @@ export default class FarmService {
     });
     
     const tokens = pairTokens.map(address => {
-        let token =  supportedTokens[chainId].find(token => token.address.toLowerCase() == address.toLowerCase());
+        let token =  supportedTokens[this.chainId].find(token => token.address.toLowerCase() == address.toLowerCase());
         return {
             symbol: token.symbol,
             logoURI: token.logoURI,
@@ -140,20 +138,17 @@ export default class FarmService {
     
     return true;
   }
-  public async massUpdateFarm(chainId = 56) {
+  public async massUpdateFarm() {
 
     try {
 
         this.logger.debug("updating in massUdpdateFarm...");
-        this.logger.debug(RPC_URL[chainId]);
-        this.logger.debug(chainId);
 
-        const web3 = new Web3(RPC_URL[chainId]);
-        const contract = new web3.eth.Contract(FARM_ABI, FARM_ADDRESS[chainId]);
+        const web3 = new Web3(RPC_URL[this.chainId]);
+        const contract = new web3.eth.Contract(FARM_ABI, FARM_ADDRESS[this.chainId]);
         const numPools = await contract.methods.numPools().call();
-        this.logger.debug(numPools);
         for(var poolId = 0 ; poolId < numPools ; poolId++) {
-            this.updatePoolNew(poolId, chainId)
+            this.updatePoolNew(poolId)
         }
         return true;
 
@@ -180,9 +175,9 @@ export default class FarmService {
     const testPrice = this.updatePoolNew(0);
     return testPrice
   }
-  public async updatePoolNew(poolId, chainId=56) {
-    const web3 = new Web3(RPC_URL[chainId]);
-    const contract = new web3.eth.Contract(FARM_ABI, FARM_ADDRESS[chainId]);
+  public async updatePoolNew(poolId) {
+    const web3 = new Web3(RPC_URL[this.chainId]);
+    const contract = new web3.eth.Contract(FARM_ABI, FARM_ADDRESS[this.chainId]);
 
     const [poolInfo, poolRewardTokens, rewardTokensAddresses, poolPositons] = await Promise.all([
         contract.methods.poolInfo(poolId).call(),
@@ -190,9 +185,8 @@ export default class FarmService {
         contract.methods.getPoolRewardTokenAddresses(poolId).call(),
         contract.methods.getPoolPositions(poolId).call()
     ]);
-    console.log("TEST HERE:",poolId, chainId,rewardTokensAddresses);
     const rewardTokensSymbols = rewardTokensAddresses.map(address => 
-        supportedTokens[chainId].find(token => token.address.toLowerCase() == address.toLowerCase())
+        supportedTokens[this.chainId].find(token => token.address.toLowerCase() == address.toLowerCase())
     );
     let token0;
     let token1;
@@ -221,9 +215,8 @@ export default class FarmService {
     }
     const startBlock = poolInfo[4];
     const endBlock = poolInfo[5];
-    console.log("HERE:",chainId);
     const tokens = pairTokens.map(address => {
-        let token =  supportedTokens[chainId].find(token => token.address.toLowerCase() == address.toLowerCase());
+        let token =  supportedTokens[this.chainId].find(token => token.address.toLowerCase() == address.toLowerCase());
         return {
             symbol: token.symbol,
             logoURI: token.logoURI,
@@ -232,10 +225,10 @@ export default class FarmService {
         }
     })
 
-    const [positions, allTokenAmount, poolRewardsPerYear] = await Promise.all([
-        this.getPoolPositionInfo(poolId, poolPositons, contract),
+    const [allTokenAmount, poolRewardsPerYear] = await Promise.all([
+        // this.getPoolPositionInfo(poolId, poolPositons, contract),
         this.getPoolAccumulateRewards(poolId, poolRewardTokens, poolPositons, contract),
-        this.getPoolRewardsPerYear(poolId, poolRewardTokens, contract, chainId)
+        this.getPoolRewardsPerYear(poolId, poolRewardTokens, contract)
     ]);
     const  rewardTokens = rewardTokensSymbols.map((token,i) => {
         return {
@@ -261,8 +254,7 @@ export default class FarmService {
                 tokens,
                 rewardTokens,
                 startBlock,
-                endBlock,
-                positions
+                endBlock
             }, (err, data) => {
         if (err) {
             this.logger.debug(`Mongo update new farm error ${err}`);
@@ -279,8 +271,7 @@ export default class FarmService {
                 tokens,
                 rewardTokens,
                 startBlock,
-                endBlock,
-                positions
+                endBlock
             }, (err, data) => {
         if (err) {
             this.logger.debug(`Mongo update new farm error ${err}`);
@@ -302,12 +293,12 @@ export default class FarmService {
             return rewards.map(reward => reward.reduce((total, currentAmount) => total += parseInt(currentAmount),0));
         });
     }
-    public async getPoolRewardsPerYear(poolId, poolRewardTokens, contract, chainId) {
+    public async getPoolRewardsPerYear(poolId, poolRewardTokens, contract) {
         const poolTokenRewardInfoPromise = poolRewardTokens.map(rewardToken => 
             contract.methods.getPoolTokenRewardInfo(poolId,rewardToken).call()
         );
         return Promise.all(poolTokenRewardInfoPromise).then(result => 
-            result.map(info => info[3] * BLOCKS_PER_YEAR[chainId])
+            result.map(info => info[3] * BLOCKS_PER_YEAR[this.chainId])
         )
     }
 

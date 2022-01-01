@@ -29,13 +29,6 @@ const Farm = new mongoose.Schema(
     }],
     startBlock: {type: Number},
     endBlock: {type: Number},
-    positions: [{
-        positionId: {type: Number},
-        address: {type: String},
-        lpAmount: {type: Number},
-        stakeTimestamp: {type: Number},
-        lockDuration: {type: Number}
-    }]
   },
   { timestamps: true }
 );
