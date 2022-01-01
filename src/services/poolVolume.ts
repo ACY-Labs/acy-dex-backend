@@ -1,29 +1,41 @@
-import { Service, Inject, Container } from "typedi";
-import { getCreate2Address, getAddress } from "@ethersproject/address";
-import { pack, keccak256 } from "@ethersproject/solidity";
+import { Service } from "typedi";
+import { getAddress } from "@ethersproject/address";
 import BigNumber from "bignumber.js";
 import {
-    FACTORY_ADDRESS,
-    INIT_CODE_HASH,
     PAIR_CONTRACT_ABI,
-    ERC20_ABI,
     AVERAGE_BLOCK_COUNT_PER_DAY,
     GLOBAL_VOLUME_TIME_RANGE,
     AVERAGE_BLOCK_GEN_TIME,
     HISTORICAL_DATA_UPDATE_COUNT,
-    NO_VOLUME_UPDATE_INTERVAL
+    RPC_URL
   } from "../constants";
-import supportedTokens from "../constants/uniqueTokens";
-import {getPairAddress} from "../util/index"
-import { loggers } from "winston";
+import tokenList from "../constants/chainTokens";
+import {getPairAddress} from "../util/index";
+import Web3 from "web3";
 @Service()
 export default class PoolVolumeService {
 
-    constructor(
-        @Inject("web3") private web3,
-        @Inject("pairVolumeModel") private pairVolumeModel
-    ) {
-    }
+    pairVolumeModel: any;
+    chainId: any;
+    web3: any;
+    supportedTokens: any;
+
+  constructor(
+    models,
+    web3,
+    chainId
+  ) { 
+    this.pairVolumeModel = models.pairVolumeModel;
+    this.chainId = chainId;
+    this.web3 = new Web3(RPC_URL[this.chainId]);
+    this.supportedTokens = tokenList[chainId];
+  }
+
+    // constructor(
+    //     @Inject("web3") private web3,
+    //     @Inject("pairVolumeModel") private pairVolumeModel
+    // ) {
+    // }
 
     private async getEventsFromInterval (contract,lb,rb) {
 
@@ -148,7 +160,7 @@ export default class PoolVolumeService {
             else return data.historicalData.slice(data.historicalData.length - HISTORICAL_DATA_UPDATE_COUNT,data.historicalData.length);
         }
     }
-    public async updateSinglePair(token0,token1,decimal0,decimal1,blockNum, chainId=56){
+    public async updateSinglePair(token0,token1,decimal0,decimal1,blockNum){
 
             // console.log("looking for tokenss... -- > " , token0, token1);
 
@@ -170,7 +182,7 @@ export default class PoolVolumeService {
             // INIT_CODE_HASH
             // );
             //ACY DATA ....
-            let pairAddress = getPairAddress(token0,token1,chainId);
+            let pairAddress = getPairAddress(token0,token1,this.chainId);
         
             let contract = new this.web3.eth.Contract(PAIR_CONTRACT_ABI, pairAddress);
 
@@ -292,12 +304,12 @@ export default class PoolVolumeService {
 
             let all_tasks = [];
 
-            for(let i=0;i<supportedTokens.length-1;i++){
-                for(let j=i+1;j<supportedTokens.length;j++){
+            for(let i=0;i<this.supportedTokens.length-1;i++){
+                for(let j=i+1;j<this.supportedTokens.length;j++){
 
-                    all_tasks.push(this.updateSinglePair(supportedTokens[i].address,
-                    supportedTokens[j].address,supportedTokens[i].decimals,
-                    supportedTokens[j].decimals,blockNum));
+                    all_tasks.push(this.updateSinglePair(this.supportedTokens[i].address,
+                    this.supportedTokens[j].address,this.supportedTokens[i].decimals,
+                    this.supportedTokens[j].decimals,blockNum));
                     
                 }
             }
@@ -309,7 +321,7 @@ export default class PoolVolumeService {
             console.log("failed to fetch transactions with error : ", e);
         }
 
-        
+        return true;
         
 
     }

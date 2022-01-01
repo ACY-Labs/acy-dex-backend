@@ -1,15 +1,27 @@
-import { Service, Inject, Container } from "typedi";
-import tokenList from "../constants/supportedTokens";
+import { Service, Inject } from "typedi";
+import chainTokens from "../constants/chainTokens";
 import BigNumber from "bignumber.js";
 
 
 @Service()
 export default class UserService {
 
-    constructor(
-        @Inject("userModel") private userInfoModel,
-    ) {
-    }
+    userInfoModel: any;
+    chainId: any;
+    tokenList: any;
+
+  constructor(
+    models,
+    chainId
+  ) { 
+    this.userInfoModel = models.userInfoModel;
+    this.chainId = chainId;
+    this.tokenList = chainTokens[chainId];
+  }
+    // constructor(
+    //     @Inject("userModel") private userInfoModel,
+    // ) {
+    // }
     public async initUser(account){
         await this.userInfoModel.create({
             walletId : account,
@@ -40,7 +52,7 @@ export default class UserService {
         let newTotalSwappedValue =  new BigNumber(data.valueSwapped).plus(userRecord.totalSwappedValue);
         let newTotalFeesPaid = new BigNumber(data.feesPaid).plus(userRecord.totalFeesPaid) ;
 
-        let usdToken = tokenList.find(item => item.symbol == 'USDC');
+        let usdToken = this.tokenList.find(item => item.symbol == 'USDC');
         let decimal = usdToken.decimals;
 
 

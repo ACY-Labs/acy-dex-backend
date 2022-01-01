@@ -21,14 +21,24 @@ export const RPC_URL         = {
   137: "https://polygon-rpc.com"
 };
 
-export const ACY_ROUTER = "0x4DCa8E42634abdE1925ebB7f82AC29Ea00d34bA2";
-
-
+export const ROUTER_ADDRESS = {
+  56:  "0x4DCa8E42634abdE1925ebB7f82AC29Ea00d34bA2",
+  97:  "0xFc54693d805F5CFe81fd3B6Cbfe6B06dA4e88003",
+  137: "0x4DCa8E42634abdE1925ebB7f82AC29Ea00d34bA2"
+}
 
 export const CHAINID         = 56;
 
-export const BSCSCAN_API = 'https://api.bscscan.com/api';
-export const TX_LIST_GLOBAL_START_BLOCK = 13500000; // block before our contract is created in BSC
+// export const BSCSCAN_API = 'https://api.bscscan.com/api';
+export const SCAN_API = {
+  56: 'https://api.bscscan.com/api',
+  97: 'https://api-testnet.bscscan.com/api'
+}
+export const TX_LIST_GLOBAL_START_BLOCK = {
+  56: 13500000,
+  97: 15040000
+}
+// export const TX_LIST_GLOBAL_START_BLOCK = 13500000; // block before our contract is created in BSC
 export const TX_LIST_MAX_BLOCK_NUMBER = 10000;
 export const OFFSET = 1000; // max number of tx stored in db;
 export const BSCSCAN_API_KEY = 'H2W1JHHRFB5H7V735N79N75UVG86E9HFH2';

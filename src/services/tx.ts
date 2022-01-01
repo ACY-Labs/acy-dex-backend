@@ -1,30 +1,45 @@
-import { Service, Inject, Container } from "typedi";
+import { Service, Container } from "typedi";
 import {
-    BSCSCAN_API,
-    TX_LIST_GLOBAL_START_BLOCK,
-    TX_LIST_MAX_BLOCK_NUMBER,
+    SCAN_API,
     BSCSCAN_API_KEY,
-    TX_LIST_REFRESH_TIME,
     OFFSET,
-    ACY_ROUTER
-
+    ROUTER_ADDRESS,
+    RPC_URL
 } from "../constants";
-import supportedTokens from "../constants/uniqueTokens";
-import {getPairAddress} from "../util/index"
 import { Logger } from "winston";
 import axios from 'axios';
 import {parseTxData} from '../util/txData';
 import { JsonRpcProvider } from "@ethersproject/providers";
-import txList from "../api/routes/txList";
+import Web3 from "web3";
 @Service()
 export default class TxService {
 
-    constructor(
-        @Inject("web3") private web3,
-        @Inject("txListModel") private txListModel,
-    ) {}
+    txListModel: any;
+    chainId: any;
+    web3: any;
+    ACY_ROUTER: any;
+    BSCSCAN_API: any;
+    libraryOut: any;
 
-    public libraryOut = new JsonRpcProvider('https://bsc-dataseed1.defibit.io/');
+    constructor(
+        models,
+        web3,
+        chainId
+    ) { 
+        this.txListModel = models.txListModel;
+        this.chainId = chainId;
+        this.web3 = new Web3(RPC_URL[this.chainId]);
+        this.ACY_ROUTER = ROUTER_ADDRESS[chainId];
+        this.BSCSCAN_API = SCAN_API[chainId];
+        this.libraryOut = new JsonRpcProvider(RPC_URL[chainId]);
+    }
+
+    // constructor(
+    //     @Inject("web3") private web3,
+    //     @Inject("txListModel") private txListModel,
+    // ) {}
+
+    // public libraryOut = new JsonRpcProvider('https://bsc-dataseed1.defibit.io/');
 
     private logger: Logger = Container.get("logger");
     
@@ -64,7 +79,7 @@ export default class TxService {
         let currTxList = user_tx ? user_tx.txList : [];
 
         let startBlock = user_tx ? user_tx.lastBlockNumber+1 : 0;
-        let request = BSCSCAN_API+'?module=account&action=txlist&address='+address+'&startblock=13548140&endblock='+blockNum+'&page=1&offset='+OFFSET+'&sort=desc&apikey='+BSCSCAN_API_KEY;
+        let request = this.BSCSCAN_API+'?module=account&action=txlist&address='+address+'&startblock=13548140&endblock='+blockNum+'&page=1&offset='+OFFSET+'&sort=desc&apikey='+BSCSCAN_API_KEY;
         let response = await axios.get(request);
         let data = await response.data.result;
 
@@ -120,7 +135,7 @@ export default class TxService {
         //if records dont exist, start recording slowly bcs of a limit of data for request
         try {
             let blockNum = await this.web3.eth.getBlockNumber();
-            await this.updateUnique(ACY_ROUTER,blockNum);
+            await this.updateUnique(this.ACY_ROUTER,blockNum);
             this.logger.debug("SUCCESSFULLY fetched data for 1 ROUTER");
         } catch (e){
             this.logger.debug("FETCH DATA UNSUCCESSFUL with error -- > ",e);

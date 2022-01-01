@@ -7,7 +7,7 @@ const route = Router();
 
 export default (app: Router) => {
   app.use("/users", route);
-const userService = Container.get(UserService);
+// const userService = Container.get(UserService);
   const logger: Logger = Container.get("logger");
   
  
@@ -20,6 +20,7 @@ const userService = Container.get(UserService);
         req.query
       );
       try {
+        const userService = new UserService(req.models, req.constants.chainId);
         await userService.performTx(req.query);
         return res.status(201).json({response : "Success!"});
       } catch (e) {
@@ -38,6 +39,7 @@ const userService = Container.get(UserService);
         req.query
       );
       try {
+        const userService = new UserService(req.models, req.constants.chainId);
         await userService.addUser(req.query);
         return res.status(201).json({response : "Success!"});
       } catch (e) {
@@ -56,7 +58,8 @@ const userService = Container.get(UserService);
         req.query
       );
       try {
-        let data = await userService.getAllUsers(req.query);
+        const userService = new UserService(req.models, req.constants.chainId);
+        let data = await userService.getAllUsers();
         return res.status(201).json(data);
       } catch (e) {
         logger.error("🔥 error: %o", e);
@@ -73,6 +76,7 @@ const userService = Container.get(UserService);
         req.query
       );
       try {
+        const userService = new UserService(req.models, req.constants.chainId);
         let data = await userService.getUserStats(req.query);
         return res.status(201).json(data);
       } catch (e) {
