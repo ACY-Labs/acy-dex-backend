@@ -21,7 +21,7 @@ export default ({
       'txListModel',
       'launchModel',
       'userLaunchModel',
-      'userModel',
+      'userInfoModel',
       'farmModel'
     ]
 

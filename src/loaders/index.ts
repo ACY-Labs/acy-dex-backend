@@ -33,7 +33,7 @@ export default async ({ expressApp }) => {
     mongoConnections[network]['txListModel'] = conn.model('txList', require("../models/tx").default);
     mongoConnections[network]['launchModel'] = conn.model('launch', require("../models/launch").default);
     mongoConnections[network]['userLaunchModel'] = conn.model('userLaunch', require("../models/userLaunch").default);
-    mongoConnections[network]['userModel'] = conn.model('user', require("../models/userInfo").default);
+    mongoConnections[network]['userInfoModel'] = conn.model('user', require("../models/userInfo").default);
     mongoConnections[network]['farmModel'] = conn.model('farm', require("../models/farm").default);
   })
   Logger.info("✌️ DB Models establised");
