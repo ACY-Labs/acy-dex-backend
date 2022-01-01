@@ -37,6 +37,21 @@ export default ({
     Container.set("web3", Web3Instances);
     Container.set("logger", LoggerInstance);
     Container.set("runningFlag", {});
+
+    const constantLoader = {
+      'bsc-main': {
+        chainId: 56,
+        web3: Web3Instances["bsc-main"],
+        logger: Container.get("logger")
+      },
+      'bsc-test': {
+        chainId: 97,
+        web3: Web3Instances["bsc-test"],
+        logger: Container.get("logger")
+      }
+    }
+    Container.set("constantLoader", constantLoader);
+
   } catch (e) {
     LoggerInstance.error("🔥 Error on dependency injector loader: %o", e);
     throw e;

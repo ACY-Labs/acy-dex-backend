@@ -6,19 +6,6 @@ import config from "../config";
 import morgan from "morgan";
 import { Container } from "typedi";
 
-const constantLoader = {
-  'bsc-main': {
-    chainId: 56,
-    web3: Container.get("web3")["bsc-main"],
-    logger: Container.get("logger")
-  },
-  'bsc-test': {
-    chainId: 97,
-    web3: Container.get("web3")["bsc-test"],
-    logger: Container.get("logger")
-  }
-}
-
 export default ({ app }: { app: express.Application }) => {
   /**
    * Health Check endpoints
@@ -65,8 +52,8 @@ export default ({ app }: { app: express.Application }) => {
       next(err);
     }
 
-    req.constants = constantLoader[network];
-    req.models = Container.get('connections')['bsc-main'];
+    req.constants = Container.get("constantLoader")[network];
+    req.models = Container.get('connections')[network];
     // rewrite url to actual process function
     req.url = url.replace(`/${network}`, '');
     next();
