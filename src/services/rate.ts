@@ -1,13 +1,19 @@
 import { Service, Inject, Container } from "typedi";
 import { resolveModuleName } from "typescript";
+import Web3 from "web3";
+import { Logger } from "winston";
 
 @Service()
 export default class Rate {
-  constructor(
-    @Inject("rateModel") private rateModel,
-    @Inject("logger") private logger,
-    @Inject("web3") private web3
-  ) {}
+  rateModel: any;
+  logger: Logger;
+  web3: Web3;
+
+  constructor(constants, models) {
+    this.rateModel = models.rateModel;
+    this.logger = constants.logger;
+    this.web3 = constants.web3;
+  }
 
   public async processSwapData(
     token0: string,
