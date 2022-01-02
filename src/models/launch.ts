@@ -16,6 +16,9 @@ const Launch = new mongoose.Schema(
       required: [true],
       index: true,
     },
+    projectTokenUrl :{
+      type: String,
+    },
     tokenPrice: {
       type: Number,
       required: [true],

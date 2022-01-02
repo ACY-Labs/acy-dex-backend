@@ -50,9 +50,12 @@ export default class LaunchService {
         tempRes["projectStatus"] = "Ongoing"
       }
 
-      let temp = new Date(obj.saleEnd)
-      let dateTime = temp.toLocaleDateString() + ' ' + temp.toTimeString().substring(0, temp.toTimeString().indexOf("GMT"));
-      tempRes["saleEnd"] = dateTime;
+      let temp1 = new Date(obj.saleEnd)
+      let temp2 = new Date(obj.saleStart)
+      let dateTime1 = temp1.toLocaleDateString() + ' ' + temp1.toTimeString().substring(0, temp1.toTimeString().indexOf("GMT"));
+      let dateTime2 = temp2.toLocaleDateString() + ' ' + temp2.toTimeString().substring(0, temp2.toTimeString().indexOf("GMT"));
+      tempRes["saleStart"] = dateTime1;
+      tempRes["saleEnd"] = dateTime2;
       result.push(tempRes);
     });
     this.logger.debug("end getProjects");
