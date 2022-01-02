@@ -25,7 +25,8 @@ export default {
 
   NetworkMap: {
     'bsc-main': 'bsc-main',
-    'bsc-test': 'bsc-test'
+    'bsc-test': 'bsc-test',
+    'polygon-main': 'polygon-main'
   },
 
   databases: {
@@ -50,7 +51,10 @@ export default {
     level: process.env.LOG_LEVEL || "silly",
   },
   rpcURL: {
-    'bsc-main': 'https://bsc-dataseed.binance.org/'
+    'bsc-main': 'https://bsc-dataseed.binance.org/',
+    // TODO: fill ?
+    // 'bsc-test': '?',
+    // 'polygon-main': '?'
   },
   /**
    * API configs
