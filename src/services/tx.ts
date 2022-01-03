@@ -1,7 +1,6 @@
 import { Service, Container } from "typedi";
 import {
     SCAN_API,
-    BSCSCAN_API_KEY,
     OFFSET,
     ROUTER_ADDRESS,
     RPC_URL,
@@ -79,7 +78,7 @@ export default class TxService {
             
         let currTxList = user_tx ? user_tx.txList : [];
 
-        let request = this.BSCSCAN_API+'?module=account&action=txlist&address='+address+'&startblock='+CONTRACT_CREATION_BLOCK[this.chainId]+'&endblock='+blockNum+'&page=1&offset='+10+'&sort=desc';
+        let request = this.BSCSCAN_API+'?module=account&action=txlist&address='+address+'&startblock='+CONTRACT_CREATION_BLOCK[this.chainId]+'&endblock='+blockNum+'&page=1&offset='+OFFSET+'&sort=desc';
         console.log(request);
         let response = await axios.get(request);
         let data = await response.data.result;
