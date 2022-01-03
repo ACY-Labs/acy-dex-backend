@@ -152,7 +152,7 @@ export default class TxService {
         let range = data.range;
         let txList: any = await this.txListModel.find();
 
-        if(!txList) return {data : 'no data'};
+        if(!txList.length) return {data : 'no data'};
         else txList = txList[0].txList;
 
         if(txList.length <= range) return {data : txList};
@@ -163,9 +163,8 @@ export default class TxService {
 
         let range = data.range;
         let txList: any = await this.txListModel.find();
-        if(!txList) return {data : 'no data'};
+        if(!txList.length) return {data : 'no data'};
         else txList = txList[0];
-
         let _txList = txList.txList.filter(item => item.token1Symbol == data.symbol || item.token2Symbol == data.symbol );
 
 
@@ -179,7 +178,7 @@ export default class TxService {
         let range = data.range;
         let txList: any = await this.txListModel.find();
 
-        if(!txList) return {data : 'no data'};
+        if(!txList.length) return {data : 'no data'};
         else txList = txList[0];
 
 
