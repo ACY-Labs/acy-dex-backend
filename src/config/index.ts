@@ -59,8 +59,8 @@ export default {
   rpcURL: {
     'bsc-main': 'https://bsc-dataseed.binance.org/',
     // TODO: fill ?
-    // 'bsc-test': '?',
-    // 'polygon-main': '?'
+    'bsc-test': "https://data-seed-prebsc-1-s1.binance.org:8545/",
+    'polygon-main': 'https://polygon-rpc.com'
   },
   /**
    * API configs
