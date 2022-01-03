@@ -36,7 +36,10 @@ export default ({
     let Web3Instances: Web3[] = Object.keys(config.rpcURL).map(network => new Web3(config.rpcURL[network]))
     Container.set("web3", Web3Instances);
     Container.set("logger", LoggerInstance);
-    Container.set("runningFlag", {});
+
+    Container.set(`net${56}runningFlag`, {});
+    Container.set(`net${97}runningFlag`, {});
+    Container.set(`net${137}runningFlag`, {});
 
     const constantLoader = {
       'bsc-main': {

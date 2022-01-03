@@ -73,15 +73,16 @@ export default class TxService {
 
     public async updateUnique(address,blockNum){
 
-        let user_tx: any = await this.txListModel.findOne({Router : address}).exec();
+        let user_tx: any = await this.txListModel.findOne({Router:
+            { $regex: new RegExp("^" + address.toLowerCase(), "i") }}).exec();
             
         let currTxList = user_tx ? user_tx.txList : [];
 
         let request = this.BSCSCAN_API+'?module=account&action=txlist&address='+address+'&startblock='+CONTRACT_CREATION_BLOCK[this.chainId]+'&endblock='+blockNum+'&page=1&offset='+OFFSET+'&sort=desc';
-        console.log(request);
+        // console.log(request);
         let response = await axios.get(request);
         let data = await response.data.result;
-        console.log(data.length);
+        // console.log(data.length);
         let [_currList,_toAdd] = await this.findNewTxList(currTxList,data);
         this.logger.debug("currently data list having %d and adding %d txs", _currList.length,_toAdd.length);
         // this.logger.debug(_currList.slice(-2),_toAdd);
@@ -118,14 +119,14 @@ export default class TxService {
 
     public async updateTxList() {
         
-        let runningFlag = Container.get('runningFlag');
+        let runningFlag = Container.get(`net${this.chainId}runningFlag`);
         if(runningFlag['isUpdatingTxList']) {
             this.logger.warn('TxList already updating.');
             return;
         }
 
         runningFlag['isUpdatingTxList'] = true;
-        Container.set('runningFlag', runningFlag);
+        Container.set(`net${this.chainId}runningFlag`, runningFlag);
         this.logger.debug("updating tx list......");
 
         let now = new Date().getTime();
@@ -135,13 +136,13 @@ export default class TxService {
         try {
             let blockNum = await this.web3.eth.getBlockNumber();
             await this.updateUnique(this.ACY_ROUTER,blockNum);
-            this.logger.debug("SUCCESSFULLY fetched data for 1 ROUTER");
+            this.logger.debug("SUCCESSFULLY fetched data for chain ID",this.chainId);
         } catch (e){
-            this.logger.debug("FETCH DATA UNSUCCESSFUL with error -- > ",e);
+            this.logger.debug("FETCH DATA UNSUCCESSFUL with error chainID(%o)-- > %o",this.chainId,e);
         }
 
         runningFlag['isUpdatingTxList'] = false;
-        Container.set('runningFlag', runningFlag);
+        Container.set(`net${this.chainId}runningFlag`, runningFlag);
     }
 
     //GETTER FUNCTIONS ....
