@@ -51,7 +51,7 @@ async function fetchUniqueETHToToken (hash, timestamp, libraryOut,chainID){
 
         let now = Date.now();
         let transactionTime ;
-        if(timestamp) transactionTime = moment(parseInt(timestamp * 1000)).format('YYYY-MM-DD HH:mm:ss');
+        if(timestamp) transactionTime = timestamp;
         else transactionTime = moment(now).format('YYYY-MM-DD HH:mm:ss');
 
 
@@ -110,7 +110,7 @@ async function fetchUniqueTokenToETH(hash, timestamp, libraryOut,chainID){
         // outTokenNumber = outTokenNumber.toString();
         let now = Date.now();
         let transactionTime ;
-        if(timestamp) transactionTime = moment(parseInt(timestamp * 1000)).format('YYYY-MM-DD HH:mm:ss');
+        if(timestamp) transactionTime = timestamp;
         else transactionTime = moment(now).format('YYYY-MM-DD HH:mm:ss');
 
         // let totalAmount = totalInUSD([
@@ -169,7 +169,7 @@ async function fetchUniqueTokenToToken(hash, timestamp, libraryOut,chainID){
     
         let now = Date.now();
         let transactionTime ;
-        if(timestamp) transactionTime = moment(parseInt(timestamp * 1000)).format('YYYY-MM-DD HH:mm:ss');
+        if(timestamp) transactionTime = timestamp;
         else transactionTime = moment(now).format('YYYY-MM-DD HH:mm:ss');
     
     
@@ -234,7 +234,7 @@ async function fetchUniqueAddLiquidity(hash, timestamp, libraryOut,chainID){
         // token2Number = token2Number.toString();
         let now = Date.now();
         let transactionTime ;
-        if(timestamp) transactionTime = moment(parseInt(timestamp * 1000)).format('YYYY-MM-DD HH:mm:ss');
+        if(timestamp) transactionTime = timestamp;
         else transactionTime = moment(now).format('YYYY-MM-DD HH:mm:ss');
 
         // let totalAmount = totalInUSD([
@@ -303,7 +303,7 @@ export async function fetchUniqueRemoveLiquidity(hash, timestamp, libraryOut,cha
 
         let now = Date.now();
         let transactionTime ;
-        if(timestamp) transactionTime = moment(parseInt(timestamp * 1000)).format('YYYY-MM-DD HH:mm:ss');
+        if(timestamp) transactionTime = timestamp;
         else transactionTime = moment(now).format('YYYY-MM-DD HH:mm:ss');
 
         // let totalAmount = totalInUSD([
@@ -358,7 +358,7 @@ export async function fetchUniqueAddLiquidityEth(hash, timestamp, libraryOut,cha
     
         let now = Date.now();
         let transactionTime ;
-        if(timestamp) transactionTime = moment(parseInt(timestamp * 1000)).format('YYYY-MM-DD HH:mm:ss');
+        if(timestamp) transactionTime = timestamp;
         else transactionTime = moment(now).format('YYYY-MM-DD HH:mm:ss');
     
         // let totalAmount = totalInUSD([
@@ -419,7 +419,7 @@ export async function fetchUniqueRemoveLiquidityEth(hash, timestamp, libraryOut,
 
         let now = Date.now();
         let transactionTime ;
-        if(timestamp) transactionTime = moment(parseInt(timestamp * 1000)).format('YYYY-MM-DD HH:mm:ss');
+        if(timestamp) transactionTime = timestamp;
         else transactionTime = moment(now).format('YYYY-MM-DD HH:mm:ss');
 
         // let totalAmount = totalInUSD([
