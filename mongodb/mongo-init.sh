@@ -29,6 +29,19 @@ mongo admin --host localhost -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROO
     });
 "
 
+mongo admin --host localhost -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD --eval \
+"
+    db = db.getSiblingDB('$MONGO_POLYGONMAIN_DATABASE');
+    db.createUser({
+        user: '$MONGO_POLYGONMAIN_ADMIN_USERNAME', 
+        pwd: '$MONGO_POLYGONMAIN_ADMIN_PASSWORD',
+        roles: [{
+            role: 'readWrite', 
+            db: '$MONGO_POLYGONMAIN_DATABASE'
+        }]
+    });
+"
+
 # 暂时为了方便，设置为readWrite，只会改成read
 mongo admin --host localhost -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD --eval \
 "
@@ -42,6 +55,9 @@ mongo admin --host localhost -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROO
         }, {
             role: 'readWrite',
             db: '$MONGO_BSCTEST_DATABASE'
+        }, {
+            role: 'readWrite',
+            db: '$MONGO_POLYGONMAIN_DATABASE'
         }]
     });
 "

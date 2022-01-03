@@ -11,7 +11,8 @@ export default async ({ expressApp }) => {
   // TODO: async Foreach
   const mongoConnections = {
     'bsc-main': {},
-    'bsc-test': {}
+    'bsc-test': {},
+    'polygon-main': {}
   };
 
   mongoConnections['bsc-main'] = {
@@ -20,6 +21,10 @@ export default async ({ expressApp }) => {
   mongoConnections['bsc-test'] = {
     'conn': await mongooseConnector(config.databases['bsc-test'])
   }
+  mongoConnections['polygon-main'] = {
+    'conn': await mongooseConnector(config.databases['polygon-main'])
+  }
+  
   Logger.info("✌️ DB loaded and connected!");
   Logger.info(Object.keys(mongoConnections));
   Object.keys(mongoConnections).forEach(network => {

@@ -52,13 +52,6 @@ export default class UserService {
         let newTotalSwappedValue =  new BigNumber(data.valueSwapped).plus(userRecord.totalSwappedValue);
         let newTotalFeesPaid = new BigNumber(data.feesPaid).plus(userRecord.totalFeesPaid) ;
 
-        let usdToken = this.tokenList.find(item => item.symbol == 'USDC');
-        let decimal = usdToken.decimals;
-
-
-
-
-
         let newTotalTransactions = userRecord.totalTransactions + 1;
 
         await this.userInfoModel.updateOne(
