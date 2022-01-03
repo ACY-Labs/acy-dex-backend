@@ -23,7 +23,6 @@ export default class TxService {
 
     constructor(
         models,
-        web3,
         chainId
     ) { 
         this.txListModel = models.txListModel;

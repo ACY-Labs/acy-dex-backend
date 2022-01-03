@@ -736,7 +736,6 @@ export const INTERVAL_1M_COUNT = Math.floor(month / INTERVAL_1M_STEP) + 1;
 
 export const AVERAGE_BLOCK_COUNT_PER_DAY = 4 * 60 * 12; // init with data from last 4 hrs 
 export const GLOBAL_VOLUME_TIME_RANGE = 24 * 60 * 60 * 1000; // 1 day  in msec
-export const AVERAGE_BLOCK_GEN_TIME = 15 * 1000; // in msec.
 export const SUBSCRIPTION_INTERVAL = 1 * 4 * 1; // # of blocks for each update // 1 min of blocks DEFAULT 20 b
 export const NO_VOLUME_UPDATE_INTERVAL = 3 * 4 * 5; // # of blocks for each update IFF lastvolumes was 0.0
 export const UPDATE_TIME_INTERVAL = 1 * 60 * 1000; // 5 min to refresh expressed in msec
@@ -748,6 +747,12 @@ export const BLOCK_TIME = {
   97: 3,
   137: 2.1
 };
+
+export const AVERAGE_BLOCK_GEN_TIME = {
+  56: BLOCK_TIME[56] * 1000,
+  97: BLOCK_TIME[97] * 1000,
+  137: BLOCK_TIME[137] * 1000,
+}
 
 export const BLOCKS_PER_YEAR = {
   56: 60*60*24*365/BLOCK_TIME[56],

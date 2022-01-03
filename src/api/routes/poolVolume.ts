@@ -80,23 +80,5 @@ export default (app: Router) => {
         return next(e);
       }
     }
-  ),
-  route.get(
-    "/updateVolumeData",
-    async (req: Request, res: Response, next: NextFunction) => {
-      logger.debug(
-        "Calling pool GET endpoint /poolchart/pair",
-        req.query
-      );
-      try {
-        const poolVolumeService = new PoolVolumeService(req.models, req.constants.web3, req.constants.chainId);
-        const data = await poolVolumeService.updateVolumeData();
-        return res.status(201).json(data);
-      } catch (e) {
-        logger.error("🔥 error: %o", e);
-        return next(e);
-      }
-    }
-  )
-
+  );
 };

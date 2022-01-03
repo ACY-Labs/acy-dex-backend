@@ -22,7 +22,6 @@ export default class PoolVolumeService {
 
   constructor(
     models,
-    web3,
     chainId
   ) { 
     this.pairVolumeModel = models.pairVolumeModel;
@@ -59,7 +58,7 @@ export default class PoolVolumeService {
             let { sender, amount0In, amount0Out, amount1In, amount1Out } =
             swapLogs[i].returnValues;
             let log_time = new Date(now);
-            let log_time_msec = ((rb-swapLogs[i].blockNumber)*AVERAGE_BLOCK_GEN_TIME);
+            let log_time_msec = ((rb-swapLogs[i].blockNumber)*AVERAGE_BLOCK_GEN_TIME[this.chainId]);
             log_time.setMilliseconds(now.getMilliseconds() - log_time_msec);
             let _swap = {
                 time : log_time,

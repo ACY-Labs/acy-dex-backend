@@ -64,21 +64,4 @@ export default (app: Router) => {
       }
     }
   );
-  route.get(
-    "/updatePool",
-    async (req: Request, res: Response, next: NextFunction) => {
-      logger.debug(
-        "Calling chart GET endpoint /farm/updatePool with query: %o",
-        req.query
-      );
-      try {
-        const farmServiceInstance = new FarmService(req.models, logger, req.constants.chainId);
-        const data = await farmServiceInstance.updatePool(req.query.poolId);
-        return res.status(201).json(data);
-      } catch (e) {
-        logger.error("🔥 error: %o", e);
-        return next(e);
-      }
-    }
-  );
 };
