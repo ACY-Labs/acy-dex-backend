@@ -41,6 +41,12 @@ export default {
       'databaseName': process.env.MONGO_BSCTEST_DATABASE,
       'databaseUser': process.env.MONGO_BSCTEST_ADMIN_USERNAME,
       'databasePass': process.env.MONGO_BSCTEST_ADMIN_PASSWORD
+    },
+    'polygon-main': {
+      'databaseURI': process.env.MONGO_POLYGONMAIN_URI,
+      'databaseName': process.env.MONGO_POLYGONMAIN_DATABASE,
+      'databaseUser': process.env.MONGO_POLYGONMAIN_ADMIN_USERNAME,
+      'databasePass': process.env.MONGO_POLYGONMAIN_ADMIN_PASSWORD
     }
   },
   
