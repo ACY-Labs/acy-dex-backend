@@ -50,11 +50,11 @@ export default ({
         logger: Container.get("logger")
       },
       // TODO: fill ?
-      // 'polygon-main': {
-      //   chainId: ?,
-      //   web3: Web3Instances["polygon-main"],
-      //   logger: Container.get("logger")
-      // }
+      'polygon-main': {
+        chainId: 137,
+        web3: Web3Instances["polygon-main"],
+        logger: Container.get("logger")
+      }
     }
     Container.set("constantLoader", constantLoader);
 

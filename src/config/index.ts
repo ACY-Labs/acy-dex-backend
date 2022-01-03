@@ -41,6 +41,12 @@ export default {
       'databaseName': process.env.MONGO_BSCTEST_DATABASE,
       'databaseUser': process.env.MONGO_BSCTEST_ADMIN_USERNAME,
       'databasePass': process.env.MONGO_BSCTEST_ADMIN_PASSWORD
+    },
+    'polygon-main': {
+      'databaseURI': process.env.MONGO_POLYGONMAIN_URI,
+      'databaseName': process.env.MONGO_POLYGONMAIN_DATABASE,
+      'databaseUser': process.env.MONGO_POLYGONMAIN_ADMIN_USERNAME,
+      'databasePass': process.env.MONGO_POLYGONMAIN_ADMIN_PASSWORD
     }
   },
   
@@ -53,8 +59,8 @@ export default {
   rpcURL: {
     'bsc-main': 'https://bsc-dataseed.binance.org/',
     // TODO: fill ?
-    // 'bsc-test': '?',
-    // 'polygon-main': '?'
+    'bsc-test': "https://data-seed-prebsc-1-s1.binance.org:8545/",
+    'polygon-main': 'https://polygon-rpc.com'
   },
   /**
    * API configs

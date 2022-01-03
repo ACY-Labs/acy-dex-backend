@@ -14,7 +14,7 @@ export default {
             address: '0xc94595b56e301f3ffedb8ccc2d672882d623e53a',
             decimals: 18,
             logoURI: 'https://acy.finance/static/media/logo.78c0179c.svg',
-            idOnCoingecko: "usd-coin",
+            idOnCoingecko: "acy-finance",
         },
         {
             name: 'Binance',
@@ -32,15 +32,15 @@ export default {
             logoURI: 'https://cryptologos.cc/logos/binance-usd-busd-logo.svg?v=014',
             idOnCoingecko: "tether",
         },
-        // {
-        //   name: 'Wrapped Binance',
-        //   symbol: 'WBNB',
-        //   address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
-        //   addressOnEth: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-        //   decimals: 18,
-        //   logoURI: 'https://cryptologos.cc/logos/binance-coin-bnb-logo.svg?v=014',
-        //   idOnCoingecko: "binancecoin",
-        // },
+        {
+          name: 'Wrapped Binance',
+          symbol: 'WBNB',
+          address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+          addressOnEth: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+          decimals: 18,
+          logoURI: 'https://cryptologos.cc/logos/binance-coin-bnb-logo.svg?v=014',
+          idOnCoingecko: "binancecoin",
+        },
         {
             name: 'Ethereum',
             symbol: 'ETH',
@@ -93,7 +93,7 @@ export default {
             addressOnEth: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
             decimals: 18,
             logoURI: 'https://acy.finance/static/media/logo.78c0179c.svg',
-            idOnCoingecko: "usd-coin",
+            idOnCoingecko: "acy-finance",
         },
 
         {
@@ -299,7 +299,7 @@ export default {
             address: '0x8b1f836491903743fe51acd13f2cc8ab95b270f6',
             decimals: 18,
             logoURI: 'https://acy.finance/static/media/logo.78c0179c.svg',
-            idOnCoingecko: "usd-coin",
+            idOnCoingecko: "acy-finance",
         },
         {
             name: 'Polygon',
