@@ -5,6 +5,8 @@
 # misc
 .DS_Store
 .env
+.env.*
+!.env.example
 /.idea
 .vscode
 
