@@ -294,8 +294,8 @@ export default class PoolVolumeService {
         // let blockNum = await this.web3.eth.getBlockNumber();
         // let token0 = '0x55d398326f99059ff775485246999027b3197955';
         // let token1 = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
-        // let decimal0 = supportedTokens.find(item => item.address.toLowerCase() == token0.toLowerCase()).decimals;
-        // let decimal1 = supportedTokens.find(item => item.address.toLowerCase() == token1.toLowerCase()).decimals;
+        // let decimal0 = this.supportedTokens.find(item => item.address.toLowerCase() == token0.toLowerCase()).decimals;
+        // let decimal1 = this.supportedTokens.find(item => item.address.toLowerCase() == token1.toLowerCase()).decimals;
         // await this.updateSinglePair(token0,token1,decimal0,decimal1,blockNum);
 
         try{

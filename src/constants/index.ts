@@ -3,6 +3,11 @@ export const FACTORY_ADDRESS = {
     97: "0x89D20aB13D093Eecea6C5af0a22566d4e780892A",
     137: "0x3d077c05c3AbCE52257E453607209f81D9db01fC"
 };
+export const GAS_TOKEN = {
+    56 : "BNB",
+    97 : "BNB",
+    137 : "MATIC"
+}
 export const INIT_CODE_HASH = {
     56: "0xfbf3b88d6f337be529b00f1dc9bff44bb43fa3c6b5b7d58a2149e59ac5e0c4a8",
     97: "0xfbf3b88d6f337be529b00f1dc9bff44bb43fa3c6b5b7d58a2149e59ac5e0c4a8",
@@ -32,11 +37,13 @@ export const CHAINID         = 56;
 // export const BSCSCAN_API = 'https://api.bscscan.com/api';
 export const SCAN_API = {
   56: 'https://api.bscscan.com/api',
-  97: 'https://api-testnet.bscscan.com/api'
+  97: 'https://api-testnet.bscscan.com/api',
+  137: 'https://api.polygonscan.com/api'
 }
-export const TX_LIST_GLOBAL_START_BLOCK = {
+export const CONTRACT_CREATION_BLOCK = {
   56: 13500000,
-  97: 15040000
+  97: 15040000,
+  137: 23000000
 }
 // export const TX_LIST_GLOBAL_START_BLOCK = 13500000; // block before our contract is created in BSC
 export const TX_LIST_MAX_BLOCK_NUMBER = 10000;
@@ -733,7 +740,7 @@ export const AVERAGE_BLOCK_GEN_TIME = 15 * 1000; // in msec.
 export const SUBSCRIPTION_INTERVAL = 1 * 4 * 1; // # of blocks for each update // 1 min of blocks DEFAULT 20 b
 export const NO_VOLUME_UPDATE_INTERVAL = 3 * 4 * 5; // # of blocks for each update IFF lastvolumes was 0.0
 export const UPDATE_TIME_INTERVAL = 1 * 60 * 1000; // 5 min to refresh expressed in msec
-export const HISTORICAL_DATA_UPDATE_COUNT = 22 ; // max number of records to store in historical data.
+export const HISTORICAL_DATA_UPDATE_COUNT = 60 ; // max number of records to store in historical data.
 
 //BSC generate 1 block every 3 sec
 export const BLOCK_TIME = {

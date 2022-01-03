@@ -1,13 +1,8 @@
 import { JsonRpcProvider } from "@ethersproject/providers";
 import moment from 'moment';
-import axios from 'axios';
-// import INITIAL_TOKEN_LIST from '@/constants/uniqueTokens';
-// import INITIAL_TOKEN_LIST from '@/constants/_TokenList';
-import INITIAL_TOKEN_LIST from '../constants/uniqueTokens';
 import { findTokenInList,findTokenWithSymbol } from "./TokenUtils";
-import {totalInUSD} from './TokenUtils';
 import {methodList, actionList} from '../constants/MethodList';
-import { BigNumber } from '@ethersproject/bignumber';
+import {GAS_TOKEN} from '../constants/index';
 
 async function failedTransaction(hash){
     return {
@@ -23,7 +18,7 @@ async function failedTransaction(hash){
     "transactionTime": null
     }
 }
-async function fetchUniqueETHToToken (hash, timestamp, libraryOut){
+async function fetchUniqueETHToToken (hash, timestamp, libraryOut,chainID){
     console.log("fetchUniqueETHToToken",hash);
 
     try{
@@ -36,8 +31,8 @@ async function fetchUniqueETHToToken (hash, timestamp, libraryOut){
         let inLogs = response.logs.filter(log => log.topics.length > 2 && log.topics[0]===actionList.transfer.hash && log.topics[1].includes(TO_HASH));
         let outLogs = response.logs.filter(log => log.topics.length > 2 && log.topics[0]===actionList.transfer.hash && log.topics[2].includes(FROM_HASH));
         // console.log("pringting data of tx::::::",response,inLogs,outLogs);
-        let inToken = findTokenInList(inLogs[0]);
-        let outToken =  findTokenInList(outLogs[0]);
+        let inToken = findTokenInList(inLogs[0],chainID);
+        let outToken =  findTokenInList(outLogs[0],chainID);
 
         inLogs = inLogs.filter(log => log.address.toLowerCase() == inToken.address.toLowerCase());
         outLogs = outLogs.filter(log => log.address.toLowerCase() == outToken.address.toLowerCase());
@@ -88,7 +83,7 @@ async function fetchUniqueETHToToken (hash, timestamp, libraryOut){
         
 }
 
-async function fetchUniqueTokenToETH(hash, timestamp, libraryOut){
+async function fetchUniqueTokenToETH(hash, timestamp, libraryOut,chainID){
 
     console.log("fetchUniqueTokenToETH",hash);
 
@@ -101,8 +96,8 @@ async function fetchUniqueTokenToETH(hash, timestamp, libraryOut){
         let TO_HASH = response.to.toLowerCase().slice(2);
         let inLogs = response.logs.filter(log => log.topics.length > 2 && log.topics[0]===actionList.transfer.hash && log.topics[1].includes(FROM_HASH));
         let outLogs = response.logs.filter(log => log.topics.length > 2 && log.topics[0]===actionList.transfer.hash && log.topics[2].includes(TO_HASH));
-        let inToken = findTokenInList(inLogs[0]);
-        let outToken =  findTokenInList(outLogs[0]);
+        let inToken = findTokenInList(inLogs[0],chainID);
+        let outToken =  findTokenInList(outLogs[0],chainID);
         let inTokenNumber = 0;
         let outTokenNumber = 0;
 
@@ -145,20 +140,21 @@ async function fetchUniqueTokenToETH(hash, timestamp, libraryOut){
     
 }
 
-async function fetchUniqueTokenToToken(hash, timestamp, libraryOut){
+async function fetchUniqueTokenToToken(hash, timestamp, libraryOut,chainID){
 
     console.log("fetchUniqueTokenToToken",hash);
 
     try{
     
         let response = await libraryOut.getTransactionReceipt(hash);
+        // console.log(response);
         let FROM_HASH = response.from.toLowerCase().slice(2);
         if(!response.status) return {};
         let inLogs = response.logs.filter(log => log.topics.length > 2 && log.topics[0]==actionList.transfer.hash && log.topics[1].includes(FROM_HASH));
         let outLogs = response.logs.filter(log => log.topics.length > 2 && log.topics[0]==actionList.transfer.hash && log.topics[2].includes(FROM_HASH));
     
-        let inToken = findTokenInList(inLogs[0]);
-        let outToken =  findTokenInList(outLogs[0]);
+        let inToken = findTokenInList(inLogs[0],chainID);
+        let outToken =  findTokenInList(outLogs[0],chainID);
     
         let inTokenNumber = 0;
         let outTokenNumber = 0;
@@ -203,7 +199,7 @@ async function fetchUniqueTokenToToken(hash, timestamp, libraryOut){
     
 }
 
-async function fetchUniqueAddLiquidity(hash, timestamp, libraryOut){
+async function fetchUniqueAddLiquidity(hash, timestamp, libraryOut,chainID){
 
     console.log("fetchUniqueAddLiquidity",hash);
 
@@ -222,8 +218,8 @@ async function fetchUniqueAddLiquidity(hash, timestamp, libraryOut){
         let logsToken1 = outLogs.filter(log => log.address==tokensOut[0]);
         let logsToken2 = outLogs.filter(log => log.address==tokensOut[1]);
 
-        let token1 = findTokenInList(logsToken1[0]);
-        let token2 =  findTokenInList(logsToken2[0]);
+        let token1 = findTokenInList(logsToken1[0],chainID);
+        let token2 =  findTokenInList(logsToken2[0],chainID);
 
         let token1Number = 0;
         for(let log of logsToken1){
@@ -273,7 +269,7 @@ async function fetchUniqueAddLiquidity(hash, timestamp, libraryOut){
             
 }
         
-export async function fetchUniqueRemoveLiquidity(hash, timestamp, libraryOut){
+export async function fetchUniqueRemoveLiquidity(hash, timestamp, libraryOut,chainID){
 
     console.log("fetchUniqueRemoveLiquidity",hash);
 
@@ -295,8 +291,8 @@ export async function fetchUniqueRemoveLiquidity(hash, timestamp, libraryOut){
         let logsToken1 = inLogs.filter(log => log.address==tokensIn[0]);
         let logsToken2 = inLogs.filter(log => log.address==tokensIn[1]);
 
-        let token1 = findTokenInList(logsToken1[0]);
-        let token2 =  findTokenInList(logsToken2[0]);
+        let token1 = findTokenInList(logsToken1[0],chainID);
+        let token2 =  findTokenInList(logsToken2[0],chainID);
 
         let token1Number = 0;
         for(let log of logsToken1){token1Number = token1Number + (log.data / Math.pow(10, token1.decimals))};
@@ -339,7 +335,7 @@ export async function fetchUniqueRemoveLiquidity(hash, timestamp, libraryOut){
     
 }
 
-export async function fetchUniqueAddLiquidityEth(hash, timestamp, libraryOut){
+export async function fetchUniqueAddLiquidityEth(hash, timestamp, libraryOut,chainID){
     console.log("fetchUniqueAddLiquidityEth",hash);
 
     try{
@@ -350,8 +346,8 @@ export async function fetchUniqueAddLiquidityEth(hash, timestamp, libraryOut){
         let logsToken1 = response.logs.filter(log => log.topics.length > 2 && log.topics[0]===actionList.transfer.hash && log.topics[1].includes(FROM_HASH));
         let logsToken2 = response.logs.filter(log => log.topics.length > 2 && log.topics[0]===actionList.transfer.hash && log.topics[1].includes(TO_HASH));
     
-        let token1 = findTokenInList(logsToken1[0]);
-        let token2 =  findTokenInList(logsToken2[0]);
+        let token1 = findTokenInList(logsToken1[0],chainID);
+        let token2 =  findTokenInList(logsToken2[0],chainID);
     
         let token1Number = 0;
         for(let log of logsToken1){token1Number = token1Number + (log.data / Math.pow(10, token1.decimals))};
@@ -395,7 +391,7 @@ export async function fetchUniqueAddLiquidityEth(hash, timestamp, libraryOut){
 
 }
 
-export async function fetchUniqueRemoveLiquidityEth(hash, timestamp, libraryOut){
+export async function fetchUniqueRemoveLiquidityEth(hash, timestamp, libraryOut,chainID){
 
     console.log("fetchUniqueRemoveLiquidityEth",hash);
 
@@ -407,8 +403,8 @@ export async function fetchUniqueRemoveLiquidityEth(hash, timestamp, libraryOut)
         let logsToken1 = response.logs.filter(log => log.topics.length > 2 && log.topics[0]===actionList.transfer.hash && log.topics[2].includes(FROM_HASH));
         let logsToken2 = response.logs.filter(log => log.topics.length > 2 && log.topics[0]===actionList.transfer.hash && log.topics[2].includes(TO_HASH));
 
-        let token1 = findTokenInList(logsToken1[0]);
-        let token2 =  findTokenWithSymbol('BNB');
+        let token1 = findTokenInList(logsToken1[0],chainID);
+        let token2 =  findTokenWithSymbol(GAS_TOKEN[chainID],chainID);
 
 
         let token1Number = 0;
@@ -455,7 +451,7 @@ export async function fetchUniqueRemoveLiquidityEth(hash, timestamp, libraryOut)
 
 }
 
-export async function parseTxData(receiptHash,timestamp,input, libraryOut){
+export async function parseTxData(receiptHash,timestamp,input, libraryOut, chainID){
 
     // console.log(libraryOut);
 
@@ -466,33 +462,33 @@ export async function parseTxData(receiptHash,timestamp,input, libraryOut){
 
     if(input == methodList.ethToToken.id || input==methodList.ethToExactToken.id || input==methodList.ethToTokenAbr.id || input==methodList.ethToExactTokenAbr.id){
 
-        newData = await fetchUniqueETHToToken(receiptHash,timestamp, libraryOut);      
+        newData = await fetchUniqueETHToToken(receiptHash,timestamp, libraryOut,chainID);      
 
     }
     else if(input==methodList.tokenToEth.id || input==methodList.tokenToEthAbr.id || input==methodList.tokenToExactEth.id || input==methodList.tokenToExactEthAbr.id){
         
-        newData  = await fetchUniqueTokenToETH(receiptHash,timestamp, libraryOut);
+        newData  = await fetchUniqueTokenToETH(receiptHash,timestamp, libraryOut, chainID);
         
     }
     else if(input==methodList.tokenToToken.id || input==methodList.tokenToTokenAbr.id || input==methodList.tokenToExactTokenAbr.id || input==methodList.tokenToExactToken.id){
         
-        newData = await fetchUniqueTokenToToken(receiptHash,timestamp, libraryOut);
+        newData = await fetchUniqueTokenToToken(receiptHash,timestamp, libraryOut, chainID);
     }
     else if(input==methodList.addLiquidity.id){
 
-        newData = await fetchUniqueAddLiquidity(receiptHash,timestamp, libraryOut);
+        newData = await fetchUniqueAddLiquidity(receiptHash,timestamp, libraryOut, chainID);
         
     }else if(input==methodList.removeLiquidity.id || input==methodList.removeLiquidityWithPermit.id){
 
-        newData = await fetchUniqueRemoveLiquidity(receiptHash,timestamp, libraryOut);
+        newData = await fetchUniqueRemoveLiquidity(receiptHash,timestamp, libraryOut, chainID);
         
     }else if(input==methodList.removeLiquidityETH.id || input==methodList.removeLiquidityETHwithPermit.id){
 
-        newData = await fetchUniqueRemoveLiquidityEth(receiptHash,timestamp, libraryOut);
+        newData = await fetchUniqueRemoveLiquidityEth(receiptHash,timestamp, libraryOut, chainID);
 
     }else {
 
-        newData = await fetchUniqueAddLiquidityEth(receiptHash,timestamp, libraryOut);
+        newData = await fetchUniqueAddLiquidityEth(receiptHash,timestamp, libraryOut, chainID);
     }
 
     // console.log(newData);

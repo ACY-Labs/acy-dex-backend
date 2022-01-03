@@ -4,7 +4,8 @@ import {
     BSCSCAN_API_KEY,
     OFFSET,
     ROUTER_ADDRESS,
-    RPC_URL
+    RPC_URL,
+    CONTRACT_CREATION_BLOCK
 } from "../constants";
 import { Logger } from "winston";
 import axios from 'axios';
@@ -78,16 +79,16 @@ export default class TxService {
             
         let currTxList = user_tx ? user_tx.txList : [];
 
-        let startBlock = user_tx ? user_tx.lastBlockNumber+1 : 0;
-        let request = this.BSCSCAN_API+'?module=account&action=txlist&address='+address+'&startblock=13548140&endblock='+blockNum+'&page=1&offset='+OFFSET+'&sort=desc&apikey='+BSCSCAN_API_KEY;
+        let request = this.BSCSCAN_API+'?module=account&action=txlist&address='+address+'&startblock='+CONTRACT_CREATION_BLOCK[this.chainId]+'&endblock='+blockNum+'&page=1&offset='+10+'&sort=desc';
+        console.log(request);
         let response = await axios.get(request);
         let data = await response.data.result;
-
+        console.log(data.length);
         let [_currList,_toAdd] = await this.findNewTxList(currTxList,data);
         this.logger.debug("currently data list having %d and adding %d txs", _currList.length,_toAdd.length);
         // this.logger.debug(_currList.slice(-2),_toAdd);
         for(let i=0;i<_toAdd.length;i++){
-            _toAdd[i] = await parseTxData(_toAdd[i].hash, _toAdd[i].timeStamp, _toAdd[i].input.substring(0,10),this.libraryOut)
+            _toAdd[i] = await parseTxData(_toAdd[i].hash, _toAdd[i].timeStamp, _toAdd[i].input.substring(0,10),this.libraryOut, this.chainId);
         }
 
         _toAdd.push(..._currList);

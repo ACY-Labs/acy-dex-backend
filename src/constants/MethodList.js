@@ -1,89 +1,88 @@
 export const methodList = {
-    ethToToken :    {
-                    name: 'swapExactETHForTokens',
-                    id: '0x7ff36ab5'
-                },
-    ethToExactToken : {
-                    name : 'swapETHForExactTokens',
-                    id : '0xfb3bdb41'
-    },
-
-    ethToTokenAbr :    {
-        name: 'swapExactTokensForETH',
-        id: '0xf4ff4e22'
-    },
-
-    ethToExactTokenAbr :    {
-        name: 'swapExactTokensForETH',
-        id: 'aaaa'
-    },
-
-    tokenToEth :    {
-                    name: 'swapExactTokensForETH',
-                    id: '0x18cbafe5'
-                },
-
-    tokenToEthAbr :    {
-                    name: 'swapExactTokensForETH',
-                    id: '0x00423e88'
-    },
-                
-    tokenToExactEthAbr :    {
-                    name: 'swapTokensForExactETH',
-                    id: '0xdc1892da'
-                }, 
-    tokenToExactEth :    {
-                    name: 'swapTokensForExactETH',
-                    id: '0x4a25d94a'
-                }, 
-
-    tokenToToken :  {
-                    name: 'swapExactTokensForTokens',
-                    id: '0x38ed1739'
-                },
+        ethToToken :    {
+                        name: 'swapExactETHForTokens',
+                        id: '0x7ff36ab5'
+        },
+        ethToExactToken : {
+                        name : 'swapETHForExactTokens',
+                        id : '0xfb3bdb41'
+        },
     
-    tokenToExactTokenAbr :  {
-                    name: 'swapExactTokensForExactTokens',
-                    id: '0xad5639fe'
-                },
+        ethToTokenAbr :    {
+                        name: 'swapETHforTokenByArbitrage',
+                        id: '0xf4ff4e22'
+        },
     
-    tokenToTokenAbr : {
-                    name: 'swapExactTokensForTokensbyAbr',
-                    id:'0x38f0b154'
-    },
-    tokenToExactToken : {
-                    name : 'swapExactTokensForTokensbyAbr',
-                    id : '0x8803dbee'
-    },
-
-    addLiquidity : {
-                    name: 'addLiquidity',
-                    id: '0xe8e33700'
-                },
-
-    addLiquidityEth : {
-                    name: 'addLiquidityETH',
-                    id: '0xf305d719'
-                },
+        ethToExactTokenAbr :    {
+                        name: 'swapExactTokensForETH',
+                        id: 'aaaa'
+        },
     
-    removeLiquidityWithPermit : {
-                    name: 'removeLiquidityWithPermit',
-                    id: '0x2195995c'
-                },
-    removeLiquidity : {
-                    name: 'removeLiquidity',
-                    id: '0xbaa2abde'
-                },
-    removeLiquidityETHwithPermit : {
-                    name : 'removeLiquidityETHWithPermit',
-                    id : '0xded9382a'
-                },
-    removeLiquidityETH : {
-                    name : 'removeLiquidityETH',
-                    id : '0x02751cec'
-    }
-
-}
+        tokenToEth :    {
+                        name: 'swapExactTokensForETH',
+                        id: '0x18cbafe5'
+        },
+    
+        tokenToEthAbr :    {
+                        name: 'swapExactTokensForETH',
+                        id: '0x00423e88'
+        },
+                    
+        tokenToExactEthAbr :    {
+                        name: 'swapTokensForExactETH',
+                        id: '0xdc1892da'
+        }, 
+        tokenToExactEth :    {
+                        name: 'swapTokensForExactETH',
+                        id: '0x4a25d94a'
+        }, 
+    
+        tokenToToken :  {
+                        name: 'swapExactTokensForTokens',
+                        id: '0x38ed1739'
+        },
+        
+        tokenToExactTokenAbr :  {
+                        name: 'swapExactTokensForExactTokens',
+                        id: '0xad5639fe'
+        },
+        
+        tokenToTokenAbr : {
+                        name: 'swapExactTokensForTokensbyAbr',
+                        id:'0x38f0b154'
+        },
+        tokenToExactToken : {
+                        name : 'swapExactTokensForTokensbyAbr',
+                        id : '0x8803dbee'
+        },
+    
+        addLiquidity : {
+                        name: 'addLiquidity',
+                        id: '0xe8e33700'
+        },
+    
+        addLiquidityEth : {
+                        name: 'addLiquidityETH',
+                        id: '0xf305d719'
+        },
+        
+        removeLiquidityWithPermit : {
+                        name: 'removeLiquidityWithPermit',
+                        id: '0x2195995c'
+        },
+        removeLiquidity : {
+                        name: 'removeLiquidity',
+                        id: '0xbaa2abde'
+        },
+        removeLiquidityETHwithPermit : {
+                        name : 'removeLiquidityETHWithPermit',
+                        id : '0xded9382a'
+        },
+        removeLiquidityETH : {
+                        name : 'removeLiquidityETH',
+                        id : '0x02751cec'
+        }
+} 
 export const actionList = {
 
     transfer :    {
