@@ -12,7 +12,8 @@ export default async ({ expressApp }) => {
   const mongoConnections = {
     'bsc-main': {},
     'bsc-test': {},
-    'polygon-main': {}
+    'polygon-main': {},
+    'polygon-test': {}
   };
 
   mongoConnections['bsc-main'] = {
@@ -23,6 +24,9 @@ export default async ({ expressApp }) => {
   }
   mongoConnections['polygon-main'] = {
     'conn': await mongooseConnector(config.databases['polygon-main'])
+  }
+  mongoConnections['polygon-test'] = {
+    'conn': await mongooseConnector(config.databases['polygon-test'])
   }
   
   Logger.info("✌️ DB loaded and connected!");

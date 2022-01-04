@@ -349,5 +349,31 @@ export default {
           logoURI: 'https://cryptologos.cc/logos/polygon-matic-logo.svg?v=014',
           idOnCoingecko: "matic-network",
         },
-      ]
+    ],
+    80001: [
+        {
+          name: 'MATIC',
+          symbol: 'MATIC',
+          address: '0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889',
+          decimals: 18,
+          logoURI: 'https://cryptologos.cc/logos/polygon-matic-logo.svg?v=017', 
+          idOnCoingecko: "tether",
+        },
+        {
+          name: 'Test Token',
+          symbol: 'TST',
+          address: '0x2d7882bedcbfddce29ba99965dd3cdf7fcb10a1e',
+          decimals: 18,
+          logoURI: 'https://acy.finance/static/media/logo.78c0179c.svg',
+          idOnCoingecko: "acy-finance",
+        },
+        {
+          name: 'Dummy Token',
+          symbol: 'DMY',
+          address: '0xfe4f5145f6e09952a5ba9e956ed0c25e3fa4c7f1',
+          decimals: 18,
+          logoURI: 'https://cryptologos.cc/logos/binance-coin-bnb-logo.svg?v=014',
+          idOnCoingecko: "binancecoin",
+        }
+    ]
 }
