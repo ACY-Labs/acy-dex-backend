@@ -32,6 +32,9 @@ async function startServer() {
   const constantsPolaygonMain = Container.get("constantLoader")['polygon-main'];
   const modelsPolaygonMain    = Container.get('connections')['polygon-main'];
 
+  const constantsPolaygonTest = Container.get("constantLoader")['polygon-test'];
+  const modelsPolaygonTest    = Container.get('connections')['polygon-test'];
+
   const logger = Container.get("logger");
 
   //Pool service

@@ -26,7 +26,8 @@ export default {
   NetworkMap: {
     'bsc-main': 'bsc-main',
     'bsc-test': 'bsc-test',
-    'polygon-main': 'polygon-main'
+    'polygon-main': 'polygon-main',
+    'polygon-test': 'polygon-test'
   },
 
   databases: {
@@ -47,6 +48,12 @@ export default {
       'databaseName': process.env.MONGO_POLYGONMAIN_DATABASE,
       'databaseUser': process.env.MONGO_POLYGONMAIN_ADMIN_USERNAME,
       'databasePass': process.env.MONGO_POLYGONMAIN_ADMIN_PASSWORD
+    },
+    'polygon-test': {
+      'databaseURI': process.env.MONGO_POLYGONTEST_URI,
+      'databaseName': process.env.MONGO_POLYGONTEST_DATABASE,
+      'databaseUser': process.env.MONGO_POLYGONTEST_ADMIN_USERNAME,
+      'databasePass': process.env.MONGO_POLYGONTEST_ADMIN_PASSWORD
     }
   },
   
@@ -58,9 +65,10 @@ export default {
   },
   rpcURL: {
     'bsc-main': 'https://bsc-dataseed.binance.org/',
-    // TODO: fill ?
     'bsc-test': "https://data-seed-prebsc-1-s1.binance.org:8545/",
-    'polygon-main': 'https://polygon-rpc.com'
+    'polygon-main': 'https://polygon-rpc.com',
+    // TODO: fill ?
+    // 'polygon-test': '?'
   },
   /**
    * API configs
