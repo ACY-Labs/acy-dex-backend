@@ -1,38 +1,38 @@
 version: "3"
 
 services:
-  # nginx:
-  #   container_name: nginx
-  #   restart: always
-  #   build: ./nginx
-  #   ports:
-  #     - target: 6001
-  #       published: 6001
-  #       mode: host
-  #   depends_on:
-  #     - backend
-  #   volumes:
-  #     - ./nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf
-  #   networks:
-  #     - web_network
+  nginx:
+    container_name: nginx
+    restart: always
+    build: ./nginx
+    ports:
+      - target: 6001
+        published: 6001
+        mode: host
+    depends_on:
+      - backend
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf
+    networks:
+      - web_network
 
-  # backend:
-  #   container_name: acy_backend
-  #   restart: always
-  #   build: .
-  #   expose:
-  #     - "3001"
-  #   depends_on:
-  #     - mongodb
-  #   volumes:
-  #     - ./src:/code/src
-  #     - ./node_modules:/code/node_modules
-  #     - ./public:/code/public
-  #     - .env:/code/.env
-  #   networks:
-  #     - web_network
-  #     - db_network
-  #   command: npm run deploy
+  backend:
+    container_name: acy_backend
+    restart: always
+    build: .
+    expose:
+      - "3001"
+    depends_on:
+      - mongodb
+    volumes:
+      - ./src:/code/src
+      - ./node_modules:/code/node_modules
+      - ./public:/code/public
+      - .env:/code/.env
+    networks:
+      - web_network
+      - db_network
+    command: npm run deploy
 
   mongodb:
     container_name: mongodb
