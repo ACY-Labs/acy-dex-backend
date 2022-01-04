@@ -38,36 +38,36 @@ async function startServer() {
   const logger = Container.get("logger");
 
   //bsc-main service
-  const poolServiceBscMain = new poolVolumeService(modelsBscMain, constantsBscMain.chainId);
-  setInterval(() => poolServiceBscMain.updateVolumeData(), 300000);
-  const txServiceBscMain = new TxService(modelsBscMain, constantsBscMain.chainId);
-  setInterval(() => txServiceBscMain.updateTxList(), 60000);
-  const farmServiceBscMain = new FarmService(modelsBscMain, logger, constantsBscMain.chainId);
-  setInterval(() => farmServiceBscMain.massUpdateFarm(), 600000);
+  // const poolServiceBscMain = new poolVolumeService(modelsBscMain, constantsBscMain.chainId);
+  // setInterval(() => poolServiceBscMain.updateVolumeData(), 300000);
+  // const txServiceBscMain = new TxService(modelsBscMain, constantsBscMain.chainId);
+  // setInterval(() => txServiceBscMain.updateTxList(), 60000);
+  // const farmServiceBscMain = new FarmService(modelsBscMain, logger, constantsBscMain.chainId);
+  // setInterval(() => farmServiceBscMain.massUpdateFarm(), 600000);
 
-  //bsc-test service
-  const poolServiceBscTest = new poolVolumeService(modelsBscTest, constantsBscTest.chainId);
-  setInterval(() => poolServiceBscTest.updateVolumeData(), 300000);
-  const txServiceBscTest = new TxService(modelsBscTest, constantsBscTest.chainId);
-  setInterval(() => txServiceBscTest.updateTxList(), 60000);
-  const farmServiceBscTest = new FarmService(modelsBscTest, logger, constantsBscTest.chainId);
-  setInterval(() => farmServiceBscTest.massUpdateFarm(), 600000);
+  // //bsc-test service
+  // const poolServiceBscTest = new poolVolumeService(modelsBscTest, constantsBscTest.chainId);
+  // setInterval(() => poolServiceBscTest.updateVolumeData(), 300000);
+  // const txServiceBscTest = new TxService(modelsBscTest, constantsBscTest.chainId);
+  // setInterval(() => txServiceBscTest.updateTxList(), 60000);
+  // const farmServiceBscTest = new FarmService(modelsBscTest, logger, constantsBscTest.chainId);
+  // setInterval(() => farmServiceBscTest.massUpdateFarm(), 600000);
 
-  //polygon-main service
-  const poolServicePolygonMain = new poolVolumeService(modelsPolaygonMain, constantsPolaygonMain.chainId);
-  setInterval(() => poolServicePolygonMain.updateVolumeData(), 300000);
-  const txServicePolygonMain = new TxService(modelsPolaygonMain, constantsPolaygonMain.chainId);
-  setInterval(() => txServicePolygonMain.updateTxList(), 60000);
-  const farmServicePolygonMain = new FarmService(modelsPolaygonMain, logger, constantsPolaygonMain.chainId);
-  setInterval(() => farmServicePolygonMain.massUpdateFarm(), 600000);
+  // //polygon-main service
+  // const poolServicePolygonMain = new poolVolumeService(modelsPolaygonMain, constantsPolaygonMain.chainId);
+  // setInterval(() => poolServicePolygonMain.updateVolumeData(), 300000);
+  // const txServicePolygonMain = new TxService(modelsPolaygonMain, constantsPolaygonMain.chainId);
+  // setInterval(() => txServicePolygonMain.updateTxList(), 60000);
+  // const farmServicePolygonMain = new FarmService(modelsPolaygonMain, logger, constantsPolaygonMain.chainId);
+  // setInterval(() => farmServicePolygonMain.massUpdateFarm(), 600000);
 
   //polygon-test service
   const poolServicePolygonTest = new poolVolumeService(modelsPolaygonTest, constantsPolaygonTest.chainId);
-  setInterval(() => poolServicePolygonMain.updateVolumeData(), 300000);
+  setInterval(() => poolServicePolygonTest.updateVolumeData(), 300000);
   const txServicePolygonTest = new TxService(modelsPolaygonTest, constantsPolaygonTest.chainId);
-  setInterval(() => txServicePolygonMain.updateTxList(), 60000);
+  setInterval(() => txServicePolygonTest.updateTxList(), 60000);
   const farmServicePolygonTest = new FarmService(modelsPolaygonTest, logger, constantsPolaygonTest.chainId);
-  setInterval(() => farmServicePolygonMain.massUpdateFarm(), 600000);
+  setInterval(() => farmServicePolygonTest.massUpdateFarm(), 600000);
 
   // const poolService = Container.get(poolVolumeService);
   // setInterval(() => poolService.updateVolumeData(), 300000);
