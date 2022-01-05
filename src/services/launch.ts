@@ -1,3 +1,4 @@
+import { parseJsonSourceFileConfigFileContent } from "typescript";
 import Web3 from "web3";
 import { Logger } from "winston";
 import { ERC20_ABI, FARM_ADDRESS} from "../constants";
@@ -137,6 +138,8 @@ export default class LaunchService {
     return userProject;
   }
 
+
+
   public async getBalance(addr: String) {
     this.logger.info(`getBalance`, addr);
     const web3 = new Web3("https://rinkeby.infura.io/v3/1e70bbd1ae254ca4a7d583bc92a067a2");
@@ -161,12 +164,58 @@ export default class LaunchService {
       return format_list;
     }).catch((err)=>{
       console.log(err);
-    }
+    });
+    
     this.logger.info("Promise all out");
     return allBalance;
   }
 
+  private calcAllocationLeft(userProject: any) {
+    const reduceAddBonus = (prevValue, currentValue) => prevValue + currentValue.bonusAmount;
+    let bonusAmount = userProject.allocationBonus.reduce(reduceAddBonus);
+    let totalAllocationAmount = userProject.allocationAmount + bonusAmount;
+    let allocationLeft = totalAllocationAmount - userProject.allocationUsed;
+    return allocationLeft;
+  } 
+
   public async useAllocation(walletId: String, projectToken: String, amount: Number) {
+    this.logger.info(`useAllocation ${walletId} - ${projectToken} - ${amount}`);
+    let user = await this.userLaunchModel.findOne({
+      walletId: walletId
+    }).exec()
+    let projectIndex = user.projects.findIndex(item => item.projectToken === projectToken);
+    let userProject = user.projects[projectIndex];
+
+    let allocationLeft = this.calcAllocationLeft(userProject);
+    if(amount > allocationLeft) {
+      throw new Error("not enough allocation");
+    }
+
+    userProject.allocationUsed += amount;
+    await user.save();
+    return true;
+  }
+
+  public async bonusAllocation(walletId: String, projectToken: String, bonusName: String) {
+    this.logger.info(`bonusAllocation ${walletId} - ${projectToken} - ${bonusName}`);
+    let user = await this.userLaunchModel.findOne({
+      walletId: walletId
+    }).exec()
+    let projectIndex = user.projects.findIndex(item => item.projectToken === projectToken);
+    let userProject = user.projects[projectIndex];
+  }
+
+  public async purchaseRecord(walletId: String, projectToken: String, amount: Number) {
+    this.logger.info(`useAllocation ${walletId} - ${projectToken} - ${amount}`);
+    // TODO: finish this function
+    let user = await this.userLaunchModel.findOne({
+      walletId: walletId
+    }).exec()
+    let allocationRemainder = user.allocationAmount - user.allocationUsed
+    // token
+  }
+
+  public async vestingRecord(walletId: String, projectToken: String, amount: Number) {
     this.logger.info(`useAllocation ${walletId} - ${projectToken} - ${amount}`);
     // TODO: finish this function
     let user = await this.userLaunchModel.findOne({
@@ -187,7 +236,7 @@ export default class LaunchService {
       this.logger.warn(`Retrieve data failed`)
       return {};
     } else {
-      let projectIndex = user.projects.findIndex(item => item.projectToken === item.projectToken)
+      let projectIndex = user.projects.findIndex(item => item.projectToken === item.projectToken);
       if (projectIndex === -1) {
         return {};
       } else {
@@ -196,4 +245,5 @@ export default class LaunchService {
       }
     }
   }
+
 }

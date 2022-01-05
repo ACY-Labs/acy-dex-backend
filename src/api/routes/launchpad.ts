@@ -70,7 +70,53 @@ export default (app: Router) => {
         return next(e);
       }
     }
-  )
+  );
+
+  route.get(
+    "/allocation/use",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { walletId, projectToken, amount } = req.query;
+        if (!walletId || !projectToken || !amount) {
+          throw new Error("lack of request parameters");
+        }
+
+        const launchServiceInstance = new LaunchService(req.models, logger);
+        const result = await launchServiceInstance.useAllocation(walletId, projectToken, amount);
+        if(result) {
+          return res.status(201).json({
+            msg: 'use allocation success'
+          });
+        } else {
+          return res.status(400).json({
+            msg: 'use allocation failed'
+          })
+        }
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
+
+  route.get(
+    "/allocation/bonus",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { walletId, projectToken, bonusName } = req.query;
+        if (!walletId || !projectToken || !bonusName) {
+          throw new Error("lack of request parameters");
+        }
+
+        const launchServiceInstance = new LaunchService(req.models, logger);
+        const data = await launchServiceInstance.bonusAllocation(walletId, projectToken, bonusName);
+        return res.status(201).json(data);
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
 
   route.get(
     "/allocation",
@@ -94,5 +140,44 @@ export default (app: Router) => {
         return next(e);
       }
     }
-  )
+  );
+
+  route.get(
+    "/purchase/record",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { walletId, projectToken, amount } = req.query;
+        if (!walletId || !projectToken || !amount) {
+          throw new Error("lack of request parameters");
+        }
+
+        const launchServiceInstance = new LaunchService(req.models, logger);
+        const data = await launchServiceInstance.purchaseRecord(walletId, projectToken, amount);
+        return res.status(201).json(data);
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
+
+  route.get(
+    "/vesting/record",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { walletId, projectToken, amount } = req.query;
+        if (!walletId || !projectToken || !amount) {
+          throw new Error("lack of request parameters");
+        }
+
+        const launchServiceInstance = new LaunchService(req.models, logger);
+        const data = await launchServiceInstance.vestingRecord(walletId, projectToken, amount);
+        return res.status(201).json(data);
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
+
 };
