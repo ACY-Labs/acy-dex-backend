@@ -38,12 +38,12 @@ async function startServer() {
   const logger = Container.get("logger");
 
   //bsc-main service
-  // const poolServiceBscMain = new poolVolumeService(modelsBscMain, constantsBscMain.chainId);
-  // setInterval(() => poolServiceBscMain.updateVolumeData(), 300000);
-  // const txServiceBscMain = new TxService(modelsBscMain, constantsBscMain.chainId);
-  // setInterval(() => txServiceBscMain.updateTxList(), 60000);
-  // const farmServiceBscMain = new FarmService(modelsBscMain, logger, constantsBscMain.chainId);
-  // setInterval(() => farmServiceBscMain.massUpdateFarm(), 600000);
+  const poolServiceBscMain = new poolVolumeService(modelsBscMain, constantsBscMain.chainId);
+  setInterval(() => poolServiceBscMain.updateVolumeData(), 300000);
+  const txServiceBscMain = new TxService(modelsBscMain, constantsBscMain.chainId);
+  setInterval(() => txServiceBscMain.updateTxList(), 60000);
+  const farmServiceBscMain = new FarmService(modelsBscMain, logger, constantsBscMain.chainId);
+  setInterval(() => farmServiceBscMain.massUpdateFarm(), 600000);
 
   // //bsc-test service
   // const poolServiceBscTest = new poolVolumeService(modelsBscTest, constantsBscTest.chainId);
@@ -54,12 +54,12 @@ async function startServer() {
   // setInterval(() => farmServiceBscTest.massUpdateFarm(), 600000);
 
   // //polygon-main service
-  // const poolServicePolygonMain = new poolVolumeService(modelsPolaygonMain, constantsPolaygonMain.chainId);
-  // setInterval(() => poolServicePolygonMain.updateVolumeData(), 300000);
-  // const txServicePolygonMain = new TxService(modelsPolaygonMain, constantsPolaygonMain.chainId);
-  // setInterval(() => txServicePolygonMain.updateTxList(), 60000);
-  // const farmServicePolygonMain = new FarmService(modelsPolaygonMain, logger, constantsPolaygonMain.chainId);
-  // setInterval(() => farmServicePolygonMain.massUpdateFarm(), 600000);
+  const poolServicePolygonMain = new poolVolumeService(modelsPolaygonMain, constantsPolaygonMain.chainId);
+  setInterval(() => poolServicePolygonMain.updateVolumeData(), 300000);
+  const txServicePolygonMain = new TxService(modelsPolaygonMain, constantsPolaygonMain.chainId);
+  setInterval(() => txServicePolygonMain.updateTxList(), 60000);
+  const farmServicePolygonMain = new FarmService(modelsPolaygonMain, logger, constantsPolaygonMain.chainId);
+  setInterval(() => farmServicePolygonMain.massUpdateFarm(), 600000);
 
   //polygon-test service
   // const poolServicePolygonTest = new poolVolumeService(modelsPolaygonTest, constantsPolaygonTest.chainId);
