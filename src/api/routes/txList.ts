@@ -63,5 +63,22 @@ export default (app: Router) => {
       }
     }
   );
+  route.get(
+    "/updateTxList",
+    async (req: Request, res: Response, next: NextFunction) => {
+      logger.debug(
+        "Calling txlist GET endpoint /pair with query: %o",
+        req.query
+      );
+      try {
+        const txService = new TxService(req.models, req.constants.chainId);
+        let data = await txService.updateTxList();
+        return res.status(201).json(data);
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
 
 };

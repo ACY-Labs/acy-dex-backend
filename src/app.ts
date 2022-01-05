@@ -62,12 +62,12 @@ async function startServer() {
   // setInterval(() => farmServicePolygonMain.massUpdateFarm(), 600000);
 
   //polygon-test service
-  const poolServicePolygonTest = new poolVolumeService(modelsPolaygonTest, constantsPolaygonTest.chainId);
-  setInterval(() => poolServicePolygonTest.updateVolumeData(), 300000);
-  const txServicePolygonTest = new TxService(modelsPolaygonTest, constantsPolaygonTest.chainId);
-  setInterval(() => txServicePolygonTest.updateTxList(), 60000);
-  const farmServicePolygonTest = new FarmService(modelsPolaygonTest, logger, constantsPolaygonTest.chainId);
-  setInterval(() => farmServicePolygonTest.massUpdateFarm(), 600000);
+  // const poolServicePolygonTest = new poolVolumeService(modelsPolaygonTest, constantsPolaygonTest.chainId);
+  // setInterval(() => poolServicePolygonTest.updateVolumeData(), 300000);
+  // const txServicePolygonTest = new TxService(modelsPolaygonTest, constantsPolaygonTest.chainId);
+  // setInterval(() => txServicePolygonTest.updateTxList(), 60000);
+  // const farmServicePolygonTest = new FarmService(modelsPolaygonTest, logger, constantsPolaygonTest.chainId);
+  // setInterval(() => farmServicePolygonTest.massUpdateFarm(), 600000);
 
   // const poolService = Container.get(poolVolumeService);
   // setInterval(() => poolService.updateVolumeData(), 300000);
