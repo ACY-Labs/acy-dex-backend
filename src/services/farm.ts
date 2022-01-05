@@ -117,6 +117,7 @@ export default class FarmService {
         this.getPoolAccumulateRewards(poolId, poolRewardTokens, poolPositons, contract),
         this.getPoolRewardsPerYear(poolId, poolRewardTokens, contract)
     ]);
+    console.log("poolRewardsPerYear:", poolRewardsPerYear);
     const  rewardTokens = rewardTokensSymbols.map((token,i) => {
         return {
             symbol: token.symbol,
@@ -181,12 +182,14 @@ export default class FarmService {
         });
     }
     public async getPoolRewardsPerYear(poolId, poolRewardTokens, contract) {
+        console.log("poolId poolRewardTokens:", poolId, poolRewardTokens);
         const poolTokenRewardInfoPromise = poolRewardTokens.map(rewardToken => 
             contract.methods.getPoolTokenRewardInfo(poolId,rewardToken).call()
         );
-        return Promise.all(poolTokenRewardInfoPromise).then(result => 
-            result.map(info => info[3] * BLOCKS_PER_YEAR[this.chainId])
-        )
+        return Promise.all(poolTokenRewardInfoPromise).then(result => {
+            console.log("TEST HERE :",result,BLOCKS_PER_YEAR[this.chainId]);
+            return result.map(info => info[3] * BLOCKS_PER_YEAR[this.chainId])
+        })
     }
 
     public async getPoolPositionInfo(poolId, poolPositons, contract) {
