@@ -11,9 +11,37 @@ const UserLaunch = new mongoose.Schema(
             {
                 projectToken: { type: String },
                 allocationAmount: { type: Number},
-                allocationUsed: { type: Number }
+                allocationBonus: [
+                    {
+                        bonusName: { type: String },
+                        bonusAmount: { type: Number },
+                        achieveTime: { type: Date }
+                    }
+                ],
+                allocationUsed: { type: Number },
+                purchaseHistory: [
+                    {
+                        purchaseTime: { type: Date },
+                        purchaseAmount: { type: Number }
+                    }
+                ],
+                vestringHistory: [
+                    {
+                        vestingTime: { type: Date },
+                        vestingAmount: { type: Number }
+                    }
+                ]
             }
         ],
+        assessment: {
+            balance: { type: Number },
+            contribution: {
+                exchange: { type: Number },
+                liquidity: { type: Number },
+                farm: { type: Number }
+            },
+            other: { type: Number }
+        }
     },
     { timestamps: true }
 );

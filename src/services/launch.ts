@@ -118,13 +118,13 @@ export default class LaunchService {
 
     // TODO: a concrete allocation method
     // use simple random right now
-    console.log("allBalance:");
-    let allBalance = await this.getBalance(walletId);
-    console.log("allBalance:", allBalance);
-    console.log(allBalance);
+    // console.log("allBalance:");
+    // let allBalance = await this.getBalance(walletId);
+    // console.log("allBalance:", allBalance);
+    // console.log(allBalance);
     
     let allocationAmount = Math.round(
-      10 + Math.random() * 200
+      50 + Math.random() * 200
     )
     userProject.allocationAmount = allocationAmount;
     await user.save((err) => {
@@ -161,7 +161,7 @@ export default class LaunchService {
       return format_list;
     }).catch((err)=>{
       console.log(err);
-    });
+    }
     this.logger.info("Promise all out");
     return allBalance;
   }
