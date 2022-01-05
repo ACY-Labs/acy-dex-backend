@@ -82,16 +82,8 @@ export default (app: Router) => {
         }
 
         const launchServiceInstance = new LaunchService(req.models, logger);
-        const result = await launchServiceInstance.useAllocation(walletId, projectToken, amount);
-        if(result) {
-          return res.status(201).json({
-            msg: 'use allocation success'
-          });
-        } else {
-          return res.status(400).json({
-            msg: 'use allocation failed'
-          })
-        }
+        const data = await launchServiceInstance.useAllocation(walletId, projectToken, amount);
+        return res.status(201).json(data);
       } catch (e) {
         logger.error("🔥 error: %o", e);
         return next(e);

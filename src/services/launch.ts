@@ -115,7 +115,7 @@ export default class LaunchService {
 
     let userProject = user.projects[projectIndex];
     // already allocated, cannot allocate again, return old allocation amount
-    // if(userProject.allocationAmount !== 0) return userProject;
+    if(userProject.allocationAmount !== 0) return userProject;
 
     // TODO: a concrete allocation method
     // use simple random right now
@@ -171,29 +171,41 @@ export default class LaunchService {
   }
 
   private calcAllocationLeft(userProject: any) {
-    const reduceAddBonus = (prevValue, currentValue) => prevValue + currentValue.bonusAmount;
-    let bonusAmount = userProject.allocationBonus.reduce(reduceAddBonus);
+    let bonusAmount = 0;
+    if(userProject.allocationBonus.length !== 0) {
+      const reduceAddBonus = (prevValue, currentValue) => prevValue + currentValue.bonusAmount;
+      bonusAmount = userProject.allocationBonus.reduce(reduceAddBonus);
+    }
     let totalAllocationAmount = userProject.allocationAmount + bonusAmount;
     let allocationLeft = totalAllocationAmount - userProject.allocationUsed;
     return allocationLeft;
   } 
 
-  public async useAllocation(walletId: String, projectToken: String, amount: Number) {
+  public async useAllocation(walletId: String, projectToken: String, amount: number) {
     this.logger.info(`useAllocation ${walletId} - ${projectToken} - ${amount}`);
+    // only allow integer amount
+    amount = Math.floor(amount);
     let user = await this.userLaunchModel.findOne({
       walletId: walletId
     }).exec()
     let projectIndex = user.projects.findIndex(item => item.projectToken === projectToken);
     let userProject = user.projects[projectIndex];
 
+    this.logger.info(`userProject ${userProject}`);
+
     let allocationLeft = this.calcAllocationLeft(userProject);
     if(amount > allocationLeft) {
       throw new Error("not enough allocation");
     }
 
-    userProject.allocationUsed += amount;
-    await user.save();
-    return true;
+    userProject.allocationUsed = Math.round(Number(userProject.allocationUsed) + Number(amount));
+    await user.save((err) => {
+      if (err) {
+        this.logger.error(`Mongo saving user record error: ${err}`);
+        throw new Error("error when saving allocation")
+      }
+    })
+    return userProject;
   }
 
   public async bonusAllocation(walletId: String, projectToken: String, bonusName: String) {
