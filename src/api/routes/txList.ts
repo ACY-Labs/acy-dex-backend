@@ -18,7 +18,7 @@ export default (app: Router) => {
         req.query
       );
       try {
-        const txService = new TxService(req.models, req.constants.web3, req.constants.chainId);
+        const txService = new TxService(req.models, req.constants.chainId);
         let data = await txService.getAllTx(req.query);
         return res.status(201).json(data);
       } catch (e) {
@@ -36,7 +36,7 @@ export default (app: Router) => {
         req.query
       );
       try {
-        const txService = new TxService(req.models, req.constants.web3, req.constants.chainId);
+        const txService = new TxService(req.models, req.constants.chainId);
         let data = await txService.getTxListForToken(req.query);
         return res.status(201).json(data);
       } catch (e) {
@@ -54,7 +54,7 @@ export default (app: Router) => {
         req.query
       );
       try {
-        const txService = new TxService(req.models, req.constants.web3, req.constants.chainId);
+        const txService = new TxService(req.models, req.constants.chainId);
         let data = await txService.getTxListForPair(req.query);
         return res.status(201).json(data);
       } catch (e) {
