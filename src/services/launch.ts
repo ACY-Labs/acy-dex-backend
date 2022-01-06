@@ -2,7 +2,7 @@ import { parseJsonSourceFileConfigFileContent } from "typescript";
 import Web3 from "web3";
 import { Logger, loggers } from "winston";
 import { ERC20_ABI, FARM_ADDRESS} from "../constants";
-import {TESTNET_RINKEBY_TOKENADDR} from "../constants/tokenAddress"
+import TokenListSelector from "../constants/tokenAddress"
 import { sleep } from "../util";
 
 export default class LaunchService {
@@ -147,7 +147,9 @@ export default class LaunchService {
   public async getBalance(addr: String) {
     // return 100;
     console.log(`getBalance`, addr);
-    const web3 = this.web3;
+    // const web3 = this.web3;
+    const web3 = new Web3('https://data-seed-prebsc-1-s1.binance.org:8545');
+
     const logger = this.logger
     console.log("web3", web3)
     // 2022.1.4
@@ -156,10 +158,13 @@ export default class LaunchService {
     // const addr = "0xa04d7588Ddcc9dc6Bd24A948E0C918Fb7136f44E"
 
     var plist = [];
-    TESTNET_RINKEBY_TOKENADDR.map(function(n){
+    var tokenlist = TokenListSelector('97')
+    tokenlist.map(function(n){
       plist.push(new Promise(function(resolve, reject) {
+        console.log("The address is :",n.address)
         let contract = new web3.eth.Contract(ERC20_ABI, n.address);
         let balance = contract.methods.balanceOf(addr).call(); // 余额
+        // console.log("the contract is :",contract)
         resolve(balance);
         console.log(balance)
       }))
@@ -175,10 +180,12 @@ export default class LaunchService {
       })
       return format_list;
     }).catch((err)=>{
-      console.log(err);
+      console.log("Errrrrrrrrrrrrrrrr",err);
     });
     console.log("Promise all out", allBalance);
     return allBalance;
+
+
   }
 
   private calcAllocationLeft(userProject: any) {
