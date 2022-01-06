@@ -11,6 +11,10 @@ const Launch = new mongoose.Schema(
       required: [true],
       index: true,
     },
+    poolID:{
+      type: Number,
+      required: [true],
+    },
     projectToken: {
       type: String,
       required: [true],
