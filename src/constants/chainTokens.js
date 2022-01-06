@@ -312,7 +312,7 @@ export default {
         {
           name: 'USD Coin',
           symbol: 'USDC',
-          address: '0xe9e7cea3dedca5984780bafc599bd69add087d56',
+          address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',//0xe9e7cea3dedca5984780bafc599bd69add087d56
           decimals: 6,
           logoURI: 'https://storageapi.fleek.co/chwizdo-team-bucket/ACY Token List/USDC.svg',
           idOnCoingecko: "usd-coin",
@@ -324,14 +324,6 @@ export default {
           decimals: 18,
           logoURI: 'https://dapp.ptokens.io/assets/svg/pETH.svg',
           idOnCoingecko: "weth",
-        },
-        {
-          name: 'pTokens Bitcoin',
-          symbol: 'pBTC',
-          address: '0xd7ecf95cf7ef5256990beaf4ac895cd9e64cb947',
-          decimals: 18,
-          logoURI: 'https://dapp.ptokens.io/assets/svg/pBTC.svg',
-          idOnCoingecko: "ptokens-btc",
         },
         {
           name: 'Wrapped Bitcoin',
