@@ -1,6 +1,6 @@
 import { parseJsonSourceFileConfigFileContent } from "typescript";
 import Web3 from "web3";
-import { Logger } from "winston";
+import { Logger, loggers } from "winston";
 import { ERC20_ABI, FARM_ADDRESS} from "../constants";
 import {TESTNET_RINKEBY_TOKENADDR} from "../constants/tokenAddress"
 import { sleep } from "../util";
@@ -8,14 +8,17 @@ import { sleep } from "../util";
 export default class LaunchService {
   launchModel: any;
   userLaunchModel: any;
+  web3: Web3;
   logger: Logger;
 
   constructor(
     models,
+    constants,
     logger
   ) { 
     this.launchModel = models.launchModel;
     this.userLaunchModel = models.userLaunchModel;
+    this.web3 = constants.web3
     this.logger = logger;
   }
 
@@ -119,10 +122,11 @@ export default class LaunchService {
 
     // TODO: a concrete allocation method
     // use simple random right now
-    // console.log("allBalance:");
-    // let allBalance = await this.getBalance(walletId);
-    // console.log("allBalance:", allBalance);
-    // console.log(allBalance);
+    console.log("allBalance:");
+    // TODO (Gary 2021.1.5: the getBalance should be called only once a day, update the amount in database)
+    let allBalance = await this.getBalance(walletId);
+    console.log("allBalance:", allBalance);
+    console.log(allBalance);
     
     let allocationAmount = Math.round(
       50 + Math.random() * 200
@@ -141,20 +145,28 @@ export default class LaunchService {
 
 
   public async getBalance(addr: String) {
-    this.logger.info(`getBalance`, addr);
-    const web3 = new Web3("https://rinkeby.infura.io/v3/1e70bbd1ae254ca4a7d583bc92a067a2");
-    //const web3 = new Web3("web3");
-    //const addr = "0xa04d7588Ddcc9dc6Bd24A948E0C918Fb7136f44E"
+    // return 100;
+    console.log(`getBalance`, addr);
+    const web3 = this.web3;
+    const logger = this.logger
+    console.log("web3", web3)
+    // 2022.1.4
+    // const web3 = new Web3("https://data-seed-prebsc-1-s1.binance.org:8545");
+    // const web3 = new Web3("web3");
+    // const addr = "0xa04d7588Ddcc9dc6Bd24A948E0C918Fb7136f44E"
 
     var plist = [];
     TESTNET_RINKEBY_TOKENADDR.map(function(n){
-      plist.push(new Promise(function(resolve, reject){
+      plist.push(new Promise(function(resolve, reject) {
         let contract = new web3.eth.Contract(ERC20_ABI, n.address);
         let balance = contract.methods.balanceOf(addr).call(); // 余额
         resolve(balance);
+        console.log(balance)
       }))
     })
     this.logger.info("Promise all in");
+    console.log("plist", plist)
+    
     let allBalance = await Promise.all(plist).then(function(res){
       console.log(res,'Promise then');
       let format_list = [];
@@ -165,8 +177,7 @@ export default class LaunchService {
     }).catch((err)=>{
       console.log(err);
     });
-    
-    this.logger.info("Promise all out");
+    console.log("Promise all out", allBalance);
     return allBalance;
   }
 

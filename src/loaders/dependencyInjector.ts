@@ -44,17 +44,17 @@ export default ({
     const constantLoader = {
       'bsc-main': {
         chainId: 56,
-        web3: Web3Instances["bsc-main"],
+        web3: config.rpcURL["bsc-main"],
         logger: Container.get("logger")
       },
       'bsc-test': {
         chainId: 97,
-        web3: Web3Instances["bsc-test"],
+        web3: config.rpcURL["bsc-test"],
         logger: Container.get("logger")
       },
       'polygon-main': {
         chainId: 137,
-        web3: Web3Instances["polygon-main"],
+        web3: config.rpcURL["polygon-main"],
         logger: Container.get("logger")
       }
       // TODO: fill ?

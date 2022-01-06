@@ -19,7 +19,7 @@ export default (app: Router) => {
         req.query
       );
       try {
-        const launchServiceInstance = new LaunchService(req.models, logger);
+        const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
         const data = await launchServiceInstance.getProjects();
         return res.status(201).json(data);
       } catch (e) {
@@ -38,7 +38,7 @@ export default (app: Router) => {
       );
       try {
         const {projectsId} = req.params;
-        const launchServiceInstance = new LaunchService(req.models, logger);
+        const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
         const data = await launchServiceInstance.getProjectsByID(projectsId);
         return res.status(201).json(data);
       } catch (e) {
@@ -61,8 +61,8 @@ export default (app: Router) => {
         if (!walletId || !projectToken) {
           throw new Error("lack of request parameters");
         }
-
-        const launchServiceInstance = new LaunchService(req.models, logger);
+        logger.debug("req", req)
+        const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
         const data = await launchServiceInstance.requireAllocation(walletId, projectToken);
         return res.status(201).json(data);
       } catch (e) {
@@ -81,7 +81,7 @@ export default (app: Router) => {
           throw new Error("lack of request parameters");
         }
 
-        const launchServiceInstance = new LaunchService(req.models, logger);
+        const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
         const data = await launchServiceInstance.useAllocation(walletId, projectToken, amount);
         return res.status(201).json(data);
       } catch (e) {
@@ -100,7 +100,7 @@ export default (app: Router) => {
           throw new Error("lack of request parameters");
         }
 
-        const launchServiceInstance = new LaunchService(req.models, logger);
+        const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
         const data = await launchServiceInstance.bonusAllocation(walletId, projectToken, bonusName);
         return res.status(201).json(data);
       } catch (e) {
@@ -123,9 +123,10 @@ export default (app: Router) => {
         if (!walletId || !projectToken) {
           throw new Error("lack of request parameters");
         }
-
-        const launchServiceInstance = new LaunchService(req.models, logger);
+        console.log("constants", req)
+        const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
         const data = await launchServiceInstance.getAllocationInfo(walletId, projectToken);
+        console.log("allocation data", data)
         return res.status(201).json(data);
       } catch (e) {
         logger.error("🔥 error: %o", e);
@@ -143,7 +144,7 @@ export default (app: Router) => {
           throw new Error("lack of request parameters");
         }
 
-        const launchServiceInstance = new LaunchService(req.models, logger);
+        const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
         const data = await launchServiceInstance.purchaseRecord(walletId, projectToken, amount);
         return res.status(201).json(data);
       } catch (e) {
@@ -162,7 +163,7 @@ export default (app: Router) => {
           throw new Error("lack of request parameters");
         }
 
-        const launchServiceInstance = new LaunchService(req.models, logger);
+        const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
         const data = await launchServiceInstance.vestingRecord(walletId, projectToken, amount);
         return res.status(201).json(data);
       } catch (e) {
