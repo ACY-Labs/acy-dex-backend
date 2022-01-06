@@ -302,14 +302,6 @@ export default {
           idOnCoingecko: "acy-finance",
         },
         {
-          name: 'Binance Coin',
-          symbol: 'BNB',
-          address: '0x3BA4c387f786bFEE076A58914F5Bd38d668B42c3',
-          decimals: 18,
-          logoURI: 'https://cryptologos.cc/logos/binance-coin-bnb-logo.svg?v=014',
-          idOnCoingecko: "binancecoin",
-        },
-        {
           name: 'USD Coin',
           symbol: 'USDC',
           address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',//0xe9e7cea3dedca5984780bafc599bd69add087d56
