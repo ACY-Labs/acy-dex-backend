@@ -25,7 +25,7 @@ const UserLaunch = new mongoose.Schema(
                         purchaseAmount: { type: Number }
                     }
                 ],
-                vestringHistory: [
+                vestingHistory: [
                     {
                         vestingTime: { type: Date },
                         vestingAmount: { type: Number }

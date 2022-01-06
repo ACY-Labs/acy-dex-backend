@@ -8,7 +8,8 @@ import { sleep } from "../util";
 export default class LaunchService {
   launchModel: any;
   userLaunchModel: any;
-  web3: Web3;
+  web3: any;
+  chainId: any;
   logger: Logger;
 
   constructor(
@@ -18,7 +19,8 @@ export default class LaunchService {
   ) { 
     this.launchModel = models.launchModel;
     this.userLaunchModel = models.userLaunchModel;
-    this.web3 = constants.web3
+    this.web3 = constants.web3;
+    this.chainId = constants.chainId;
     this.logger = logger;
   }
 
@@ -120,8 +122,7 @@ export default class LaunchService {
     // already allocated, cannot allocate again, return old allocation amount
     if(userProject.allocationAmount !== 0) return userProject;
 
-    // TODO: a concrete allocation method
-    // use simple random right now
+    // TODO (Gary 2021.1.6): float with time and total pool size
     console.log("allBalance:");
     // TODO (Gary 2021.1.5: the getBalance should be called only once a day, update the amount in database)
     let allBalance = await this.getBalance(walletId);
@@ -145,32 +146,21 @@ export default class LaunchService {
 
 
   public async getBalance(addr: String) {
-    // return 100;
     console.log(`getBalance`, addr);
-    // const web3 = this.web3;
-    const web3 = new Web3('https://data-seed-prebsc-1-s1.binance.org:8545');
-
+    const web3 = new Web3(this.web3);
     const logger = this.logger
-    console.log("web3", web3)
-    // 2022.1.4
-    // const web3 = new Web3("https://data-seed-prebsc-1-s1.binance.org:8545");
-    // const web3 = new Web3("web3");
-    // const addr = "0xa04d7588Ddcc9dc6Bd24A948E0C918Fb7136f44E"
-
+    
     var plist = [];
-    var tokenlist = TokenListSelector('97')
+    var tokenlist = TokenListSelector(this.chainId)
     tokenlist.map(function(n){
       plist.push(new Promise(function(resolve, reject) {
-        console.log("The address is :",n.address)
         let contract = new web3.eth.Contract(ERC20_ABI, n.address);
-        let balance = contract.methods.balanceOf(addr).call(); // 余额
+        let balance = contract.methods.balanceOf(addr).call(); // call balance method
         // console.log("the contract is :",contract)
         resolve(balance);
-        console.log(balance)
       }))
     })
     this.logger.info("Promise all in");
-    console.log("plist", plist)
     
     let allBalance = await Promise.all(plist).then(function(res){
       console.log(res,'Promise then');
@@ -180,12 +170,10 @@ export default class LaunchService {
       })
       return format_list;
     }).catch((err)=>{
-      console.log("Errrrrrrrrrrrrrrrr",err);
+      console.log("Errrrrrrrrrrrrrrrr", err);
     });
     console.log("Promise all out", allBalance);
     return allBalance;
-
-
   }
 
   private calcAllocationLeft(userProject: any) {
