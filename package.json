@@ -47,6 +47,7 @@
     "typedi": "^0.10.0",
     "web3": "^1.4.0",
     "winston": "^3.3.3",
-    "nodemon": "*"
+    "nodemon": "*",
+    "node-cron": "^3.0.0"
   }
 }

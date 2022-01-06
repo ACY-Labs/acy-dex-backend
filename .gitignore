@@ -17,3 +17,6 @@ build
 
 *.lock
 env.test
+
+nohup*
+package-lock.json
