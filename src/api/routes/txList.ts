@@ -18,7 +18,7 @@ export default (app: Router) => {
         req.query
       );
       try {
-        const txService = new TxService(req.models, req.constants.web3, req.constants.chainId);
+        const txService = new TxService(req.models, req.constants.chainId);
         let data = await txService.getAllTx(req.query);
         return res.status(201).json(data);
       } catch (e) {
@@ -36,7 +36,7 @@ export default (app: Router) => {
         req.query
       );
       try {
-        const txService = new TxService(req.models, req.constants.web3, req.constants.chainId);
+        const txService = new TxService(req.models, req.constants.chainId);
         let data = await txService.getTxListForToken(req.query);
         return res.status(201).json(data);
       } catch (e) {
@@ -54,8 +54,25 @@ export default (app: Router) => {
         req.query
       );
       try {
-        const txService = new TxService(req.models, req.constants.web3, req.constants.chainId);
+        const txService = new TxService(req.models, req.constants.chainId);
         let data = await txService.getTxListForPair(req.query);
+        return res.status(201).json(data);
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
+  route.get(
+    "/updateTxList",
+    async (req: Request, res: Response, next: NextFunction) => {
+      logger.debug(
+        "Calling txlist GET endpoint /pair with query: %o",
+        req.query
+      );
+      try {
+        const txService = new TxService(req.models, req.constants.chainId);
+        let data = await txService.updateTxList();
         return res.status(201).json(data);
       } catch (e) {
         logger.error("🔥 error: %o", e);

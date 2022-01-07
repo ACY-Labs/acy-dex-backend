@@ -30,7 +30,6 @@ export default class FarmService {
     try {
 
         this.logger.debug("updating in massUdpdateFarm...");
-
         const web3 = new Web3(RPC_URL[this.chainId]);
         const contract = new web3.eth.Contract(FARM_ABI, FARM_ADDRESS[this.chainId]);
         const numPools = await contract.methods.numPools().call();
@@ -184,9 +183,9 @@ export default class FarmService {
         const poolTokenRewardInfoPromise = poolRewardTokens.map(rewardToken => 
             contract.methods.getPoolTokenRewardInfo(poolId,rewardToken).call()
         );
-        return Promise.all(poolTokenRewardInfoPromise).then(result => 
-            result.map(info => info[3] * BLOCKS_PER_YEAR[this.chainId])
-        )
+        return Promise.all(poolTokenRewardInfoPromise).then(result => {
+            return result.map(info => info[3] * BLOCKS_PER_YEAR[this.chainId])
+        })
     }
 
     public async getPoolPositionInfo(poolId, poolPositons, contract) {

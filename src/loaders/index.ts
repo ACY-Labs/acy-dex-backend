@@ -12,7 +12,8 @@ export default async ({ expressApp }) => {
   const mongoConnections = {
     'bsc-main': {},
     'bsc-test': {},
-    'polygon-main': {}
+    'polygon-main': {},
+    'polygon-test': {}
   };
 
   mongoConnections['bsc-main'] = {

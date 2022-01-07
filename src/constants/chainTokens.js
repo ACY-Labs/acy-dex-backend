@@ -289,7 +289,7 @@ export default {
           name: 'USD Tether',
           symbol: 'USDT',
           address: '0xc2132d05d31c914a87c6611c10748aeb04b58e8f',
-          decimals: 18,
+          decimals: 6,
           logoURI: 'https://storageapi.fleek.co/chwizdo-team-bucket/ACY Token List/USDT.svg', // not changed
           idOnCoingecko: "tether",
         },
@@ -302,17 +302,9 @@ export default {
           idOnCoingecko: "acy-finance",
         },
         {
-          name: 'Binance Coin',
-          symbol: 'BNB',
-          address: '0x3BA4c387f786bFEE076A58914F5Bd38d668B42c3',
-          decimals: 18,
-          logoURI: 'https://cryptologos.cc/logos/binance-coin-bnb-logo.svg?v=014',
-          idOnCoingecko: "binancecoin",
-        },
-        {
           name: 'USD Coin',
           symbol: 'USDC',
-          address: '0xe9e7cea3dedca5984780bafc599bd69add087d56',
+          address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',//0xe9e7cea3dedca5984780bafc599bd69add087d56
           decimals: 6,
           logoURI: 'https://storageapi.fleek.co/chwizdo-team-bucket/ACY Token List/USDC.svg',
           idOnCoingecko: "usd-coin",
@@ -324,14 +316,6 @@ export default {
           decimals: 18,
           logoURI: 'https://dapp.ptokens.io/assets/svg/pETH.svg',
           idOnCoingecko: "weth",
-        },
-        {
-          name: 'pTokens Bitcoin',
-          symbol: 'pBTC',
-          address: '0xd7ecf95cf7ef5256990beaf4ac895cd9e64cb947',
-          decimals: 18,
-          logoURI: 'https://dapp.ptokens.io/assets/svg/pBTC.svg',
-          idOnCoingecko: "ptokens-btc",
         },
         {
           name: 'Wrapped Bitcoin',
@@ -349,5 +333,39 @@ export default {
           logoURI: 'https://cryptologos.cc/logos/polygon-matic-logo.svg?v=014',
           idOnCoingecko: "matic-network",
         },
-      ]
+    ],
+    80001: [
+        {
+            name: 'MATIC',
+            symbol: 'MATIC',
+            address: '0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889',
+            decimals: 18,
+            logoURI: 'https://cryptologos.cc/logos/polygon-matic-logo.svg?v=017', 
+            idOnCoingecko: "matic-network",
+          },
+          {
+            name: 'ACY',
+            symbol: 'ACY',
+            address: '0x95d4aA0324aABbF595F0C01F786c3bAB2A6a1b5e',
+            decimals: 18,
+            logoURI: 'https://acy.finance/static/media/logo.78c0179c.svg',
+            idOnCoingecko: "acy-finance",
+          },
+          {
+            name: 'USD Tether',
+            symbol: 'USDT',
+            address: '0x158653b66fd72555F68eDf983736781E471639Cc',
+            decimals: 18,
+            logoURI: 'https://storageapi.fleek.co/chwizdo-team-bucket/ACY Token List/USDT.svg',
+            idOnCoingecko: "tether",
+          },
+          {
+            name: 'Dummy Token',
+            symbol: 'BNB',
+            address: '0xfe4f5145f6e09952a5ba9e956ed0c25e3fa4c7f1',
+            decimals: 18,
+            logoURI: 'https://cryptologos.cc/logos/binance-coin-bnb-logo.svg?v=014',
+            idOnCoingecko: "binancecoin",
+          }
+    ]
 }

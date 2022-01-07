@@ -56,6 +56,11 @@ export default ({
         chainId: 137,
         web3: config.rpcURL["polygon-main"],
         logger: Container.get("logger")
+      },
+      'polygon-test': {
+        chainId: 80001,
+        web3: Web3Instances["polygon-test"],
+        logger: Container.get("logger")
       }
       // TODO: fill ?
       // 'polygon-test': {

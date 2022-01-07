@@ -154,9 +154,9 @@ export default class PoolService {
     }
 
     // locate the pair
-    let removeIdx = record.pools.findIndex(item => item.token0 === token0 && item.token1 === token1);
+    let removeIdx = record.pools.findIndex(item => item.token0.toLowerCase() === token0.toLowerCase() && item.token1.toLowerCase() === token1.toLowerCase());
     if (removeIdx === -1)
-      removeIdx = record.pools.findIndex(item => item.token0 === token1 && item.token1 === token0);
+      removeIdx = record.pools.findIndex(item => item.token0.toLowerCase() === token1.toLowerCase() && item.token1.toLowerCase() === token0.toLowerCase());
 
     switch (action) {
       case "add":
