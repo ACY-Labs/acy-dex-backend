@@ -8,6 +8,8 @@ import { JsonRpcProvider } from "@ethersproject/providers"
 import { Token, TokenAmount, Fetcher } from '@acyswap/sdk';
 import { Contract } from '@ethersproject/contracts';
 import uniqueTokens from "../constants/uniqueTokens";
+import TokenListSelector from "../constants/tokenAddress"
+
 
 export function timestampToDate(timestamp) {
   const date = moment.unix(timestamp);
@@ -190,5 +192,29 @@ export async function getTokenPriceByPair(pair, symbol, library) {
 }
 export function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export async function getTokensPrice(tokenlist) {
+  
+  const searchIdsArray = tokenlist.map(token => token.idOnCoingecko);
+
+  const searchIds = searchIdsArray.join('%2C');
+  console.log(`https://api.coingecko.com/api/v3/simple/price?ids=${searchIds}&vs_currencies=usd`)
+  const tokensPrice = await axios.get(
+    `https://api.coingecko.com/api/v3/simple/price?ids=${searchIds}&vs_currencies=usd`
+  ).then(async (result) =>{
+    const data = result.data;
+    console.log(data);
+    const tokensPrice = {};
+    tokenlist.forEach(token =>{
+      tokensPrice[token.symbol] = data[token.idOnCoingecko]['usd'];
+    })
+    return tokensPrice;
+  }).catch((e) => {
+
+    console.log("get price err",e)
+  });
+
+  return tokensPrice;
 }
 

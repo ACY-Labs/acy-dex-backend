@@ -3,7 +3,7 @@ import Web3 from "web3";
 import { Logger, loggers } from "winston";
 import { ERC20_ABI, FARM_ADDRESS} from "../constants";
 import TokenListSelector from "../constants/tokenAddress"
-import { sleep } from "../util";
+import { sleep,getTokensPrice  } from "../util";
 
 export default class LaunchService {
   launchModel: any;
@@ -150,12 +150,23 @@ export default class LaunchService {
     const web3 = new Web3(this.web3);
     const logger = this.logger
     
+
     var plist = [];
-    var tokenlist = TokenListSelector(this.chainId)
+    var tokenlist = TokenListSelector('56')
+    console.log("tokenlist" ,tokenlist)
+    var tokenPrice = await getTokensPrice(tokenlist).then((res)=>{
+      console.log("the token price list is ",res)
+
+
+    })
+    
+
+
+    
     tokenlist.map(function(n){
       plist.push(new Promise(function(resolve, reject) {
         let contract = new web3.eth.Contract(ERC20_ABI, n.address);
-        let balance = contract.methods.balanceOf(addr).call(); // call balance method
+        let balance =  contract.methods.balanceOf(addr).call();
         // console.log("the contract is :",contract)
         resolve(balance);
       }))
