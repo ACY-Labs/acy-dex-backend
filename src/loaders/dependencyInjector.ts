@@ -11,6 +11,7 @@ export default ({
   try {
     Container.set('connections', mongoConnections);
 
+    
     const modelList = [
       'pairModel',
       'rateModel',

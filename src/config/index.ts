@@ -67,8 +67,7 @@ export default {
     'bsc-main': 'https://bsc-dataseed.binance.org/',
     'bsc-test': "https://data-seed-prebsc-1-s1.binance.org:8545/",
     'polygon-main': 'https://polygon-rpc.com',
-    // TODO: fill ?
-    // 'polygon-test': '?'
+    'polygon-test': 'https://matic-testnet-archive-rpc.bwarelabs.com',
   },
   /**
    * API configs

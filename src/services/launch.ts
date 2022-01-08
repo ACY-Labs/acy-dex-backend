@@ -1,9 +1,9 @@
 import { parseJsonSourceFileConfigFileContent } from "typescript";
 import Web3 from "web3";
 import { Logger, loggers } from "winston";
-import { ERC20_ABI, FARM_ADDRESS} from "../constants";
+import { ERC20_ABI, FARM_ADDRESS, GAS_TOKEN} from "../constants";
 import TokenListSelector from "../constants/tokenAddress"
-import { sleep } from "../util";
+import { sleep, getTokensPrice } from "../util";
 
 export default class LaunchService {
   launchModel: any;
@@ -150,27 +150,35 @@ export default class LaunchService {
     const web3 = new Web3(this.web3);
     const logger = this.logger
     
-    var plist = [];
+    // var plist = [];
     var tokenlist = TokenListSelector(this.chainId)
-    tokenlist.map(function(n){
-      plist.push(new Promise(function(resolve, reject) {
+    console.log("tokenlist" ,tokenlist, this.chainId)
+    const chainId = this.chainId;
+    var tokenPrice = await getTokensPrice(tokenlist);
+    const plist = tokenlist.map(function(n){
         let contract = new web3.eth.Contract(ERC20_ABI, n.address);
-        let balance = contract.methods.balanceOf(addr).call(); // call balance method
-        // console.log("the contract is :",contract)
-        resolve(balance);
-      }))
+        if(GAS_TOKEN[chainId] == n.symbol)
+          return web3.eth.getBalance(addr).then(res => tokenPrice[n.symbol]/ 10**n.decimals* res);
+        return contract.methods.balanceOf(addr).call().then(res => tokenPrice[n.symbol]/ 10**n.decimals* res);
+        // .then(
+        //   res => tokenPrice[n.symbol]/ 10**n.decimals* res);
     })
-    this.logger.info("Promise all in");
+    console.log("Promise all in", plist);
     
-    let allBalance = await Promise.all(plist).then(function(res){
-      console.log(res,'Promise then');
-      let format_list = [];
-      res.map(function(b:string){
-        format_list.push(web3.utils.fromWei(b));
-      })
-      return format_list;
-    }).catch((err)=>{
-      console.log("Errrrrrrrrrrrrrrrr", err);
+    // let allBalance = await Promise.all(plist).then(function(res){
+    //   console.log('Promise then',res);
+    //   let format_list = [];
+    //   res.map(function(b:string){
+    //     format_list.push(web3.utils.fromWei(b));
+    //   })
+    //   return format_list;
+    // }).catch((err)=>{
+    //   console.log("Errrrrrrrrrrrrrrrr", err);
+    // });
+
+    let allBalance = await Promise.all(plist).then((res) => {
+      console.log("HERE:", res)
+      return res.reduce((total,a) => total+a,0)
     });
     console.log("Promise all out", allBalance);
     return allBalance;

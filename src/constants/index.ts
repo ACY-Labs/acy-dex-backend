@@ -1,35 +1,42 @@
 export const FACTORY_ADDRESS = {
     56: "0x3d077c05c3AbCE52257E453607209f81D9db01fC",
     97: "0x89D20aB13D093Eecea6C5af0a22566d4e780892A",
-    137: "0x3d077c05c3AbCE52257E453607209f81D9db01fC"
+    137: "0x3d077c05c3AbCE52257E453607209f81D9db01fC",
+    80001: "0x5cfc3885d58BfDa0B9F0A9709E414Fd345985AA0"
 };
 export const GAS_TOKEN = {
     56 : "BNB",
     97 : "BNB",
-    137 : "MATIC"
+    137 : "MATIC",
+    80001: "MATIC"
 }
 export const INIT_CODE_HASH = {
     56: "0xfbf3b88d6f337be529b00f1dc9bff44bb43fa3c6b5b7d58a2149e59ac5e0c4a8",
     97: "0xfbf3b88d6f337be529b00f1dc9bff44bb43fa3c6b5b7d58a2149e59ac5e0c4a8",
-    137: "0xfbf3b88d6f337be529b00f1dc9bff44bb43fa3c6b5b7d58a2149e59ac5e0c4a8"
+    137: "0xfbf3b88d6f337be529b00f1dc9bff44bb43fa3c6b5b7d58a2149e59ac5e0c4a8",
+    80001: "0xfbf3b88d6f337be529b00f1dc9bff44bb43fa3c6b5b7d58a2149e59ac5e0c4a8"
 };
 
 export const FARM_ADDRESS    = {
   56: "0xcd0b5136d2e9972077cd769714ade9c3506fb5d6",
   97: "0x6ef448ecb7f650c3a1157acf37ca19ae86dee8da",
-  137: "0x8feb878391E1152D728bEdFd0bf3A967ddC0c60B"
+  137: "0x8feb878391E1152D728bEdFd0bf3A967ddC0c60B",
+  80001: "0xd0da907ec2F98E23ecf75CA12b6C83744dFBDf30"
 };
 
 export const RPC_URL         = {
   56: "https://bsc-dataseed.binance.org/",
   97: "https://data-seed-prebsc-1-s1.binance.org:8545/",
-  137: "https://polygon-rpc.com"
+  137: "https://polygon-rpc.com",
+  80001: "https://matic-testnet-archive-rpc.bwarelabs.com"
+  
 };
 
 export const ROUTER_ADDRESS = {
   56:  "0x4DCa8E42634abdE1925ebB7f82AC29Ea00d34bA2",
   97:  "0xFc54693d805F5CFe81fd3B6Cbfe6B06dA4e88003",
-  137: "0x4DCa8E42634abdE1925ebB7f82AC29Ea00d34bA2"
+  137: "0x4DCa8E42634abdE1925ebB7f82AC29Ea00d34bA2",
+  80001: "0xb970e8d08e5176006abeb6eE75a54D49e6Bab6d3"
 }
 
 export const CHAINID         = 56;
@@ -38,12 +45,14 @@ export const CHAINID         = 56;
 export const SCAN_API = {
   56: 'https://api.bscscan.com/api',
   97: 'https://api-testnet.bscscan.com/api',
-  137: 'https://api.polygonscan.com/api'
+  137: 'https://api.polygonscan.com/api',
+  80001: "https://api-testnet.polygonscan.com/api"
 }
 export const CONTRACT_CREATION_BLOCK = {
   56: 13500000,
   97: 15040000,
-  137: 23000000
+  137: 23000000,
+  80001: 23480000,
 }
 // export const TX_LIST_GLOBAL_START_BLOCK = 13500000; // block before our contract is created in BSC
 export const TX_LIST_MAX_BLOCK_NUMBER = 10000;
@@ -745,23 +754,30 @@ export const HISTORICAL_DATA_UPDATE_COUNT = 60 ; // max number of records to sto
 export const BLOCK_TIME = {
   56: 3,
   97: 3,
-  137: 2.1
+  137: 2.1,
+  80001: 2.1
 };
 
 export const AVERAGE_BLOCK_GEN_TIME = {
   56: BLOCK_TIME[56] * 1000,
   97: BLOCK_TIME[97] * 1000,
   137: BLOCK_TIME[137] * 1000,
+  80001: BLOCK_TIME[80001] * 1000,
 }
 
 export const BLOCKS_PER_YEAR = {
   56: 60*60*24*365/BLOCK_TIME[56],
   97: 60*60*24*365/BLOCK_TIME[97],
   137: 60*60*24*365/BLOCK_TIME[137],
+  80001: 60*60*24*365/BLOCK_TIME[80001],
 };
 
 export const BLOCKS_PER_MONTH = {
   56: 60*60*24*31/BLOCK_TIME[56],
   97: 60*60*24*31/BLOCK_TIME[97],
   137: 60*60*24*31/BLOCK_TIME[137],
+  80001: 60*60*24*31/BLOCK_TIME[80001],
 }
+
+
+
