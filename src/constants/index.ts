@@ -765,6 +765,3 @@ export const BLOCKS_PER_MONTH = {
   97: 60*60*24*31/BLOCK_TIME[97],
   137: 60*60*24*31/BLOCK_TIME[137],
 }
-
-
-

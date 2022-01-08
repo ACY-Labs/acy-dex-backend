@@ -5,7 +5,7 @@ import Logger from "./logger";
 import config from "../config";
 import { Connection } from "mongoose";
 
-export default async ({ expressApp }) => {
+export default async ({ expressApp }, isExpress=false) => {
 
   // 连接所有DB，并加载所有Schema，因为await的原因所以暂时没法用for
   // TODO: async Foreach
@@ -43,12 +43,14 @@ export default async ({ expressApp }) => {
     mongoConnections[network]['userLaunchModel'] = conn.model('userLaunch', require("../models/userLaunch").default);
     mongoConnections[network]['userInfoModel'] = conn.model('user', require("../models/userInfo").default);
     mongoConnections[network]['farmModel'] = conn.model('farm', require("../models/farm").default);
-  })
+  });
   Logger.info("✌️ DB Models establised");
 
   await dependencyInjectorLoader({mongoConnections});
   Logger.info("✌️ Dependency Injector loaded");
 
-  expressLoader({ app: expressApp });
-  Logger.info("✌️ Express loaded");
+  if(isExpress) {
+    expressLoader({ app: expressApp });
+    Logger.info("✌️ Express loaded");
+  }
 };
