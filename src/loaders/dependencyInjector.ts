@@ -11,7 +11,6 @@ export default ({
   try {
     Container.set('connections', mongoConnections);
 
-    
     const modelList = [
       'pairModel',
       'rateModel',
@@ -36,6 +35,7 @@ export default ({
     let Web3Instances: Web3[] = Object.keys(config.rpcURL).map(network => new Web3(config.rpcURL[network]))
     Container.set("web3", Web3Instances);
     Container.set("logger", LoggerInstance);
+    Container.set("tasks", {});
 
     Container.set(`net${56}runningFlag`, {});
     Container.set(`net${97}runningFlag`, {});

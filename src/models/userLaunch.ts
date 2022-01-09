@@ -15,7 +15,7 @@ const UserLaunch = new mongoose.Schema(
                     {
                         bonusName: { type: String },
                         bonusAmount: { type: Number },
-                        achieveTime: { type: Date }
+                        achieveTime: { type: Date, default: Date.now }
                     }
                 ],
                 allocationUsed: { type: Number },

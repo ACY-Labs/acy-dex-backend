@@ -29,6 +29,21 @@ export default (app: Router) => {
     }
   );
 
+  // This route only used while developing
+  // route.get(
+  //   "/projects/add",
+  //   async (req: Request, res: Response, next: NextFunction) => {
+  //     try {
+  //       const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
+  //       const data = await launchServiceInstance.createProjects();
+  //       return res.status(201).json(data);
+  //     } catch (e) {
+  //       logger.error("🔥 error: %o", e);
+  //       return next(e);
+  //     }
+  //   }
+  // );
+
   route.get(
     "/projects/:projectsId",
     async (req: Request, res: Response, next: NextFunction) => {
@@ -47,6 +62,7 @@ export default (app: Router) => {
       }
     }
   );
+
 
   route.get(
     "/allocation/require",
@@ -95,14 +111,17 @@ export default (app: Router) => {
     "/allocation/bonus",
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const { walletId, projectToken, bonusName } = req.query;
-        if (!walletId || !projectToken || !bonusName) {
+        const { walletId, projectToken, bonusName, T } = req.query;
+        if (!walletId || !projectToken || !bonusName || !T) {
           throw new Error("lack of request parameters");
         }
 
         const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
-        const data = await launchServiceInstance.bonusAllocation(walletId, projectToken, bonusName);
-        return res.status(201).json(data);
+        const data = await launchServiceInstance.bonusAllocation(walletId, projectToken, bonusName, T);
+        return res.status(201).json({
+          code: 0,
+          msg: data
+        });
       } catch (e) {
         logger.error("🔥 error: %o", e);
         return next(e);

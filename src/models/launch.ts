@@ -2,46 +2,78 @@ import mongoose from "mongoose";
 
 const Launch = new mongoose.Schema(
   {
-    projectID:{
+    projectID: {
       type: Number,
-      required: [true],
+      required: true,
     },
-    projectName: {
-      type: String,
-      required: [true],
-      index: true,
+    basicInfo: {
+      projectName: {
+        type: String,
+        required: true,
+        index: true,
+      },
+      poolID: {
+        type: Number,
+        required: true,
+      },
+      projectToken: {
+        type: String,
+        required: true,
+        index: true,
+      },
+      projectTokenUrl: {
+        type: String,
+        required: true
+      },
     },
-    poolID:{
-      type: Number,
-      required: [true],
+    saleInfo: {
+      tokenPrice: {
+        type: Number,
+        required: true,
+      },
+      totalRaise: {
+        type: Number,
+        required: true,
+      },
+      totalSale: {
+        type: Number,
+        required: true,
+      },
     },
-    projectToken: {
-      type: String,
-      required: [true],
-      index: true,
+    scheduleInfo: {
+      regStart: {
+        type: Date,
+        default: Date.now,
+      },
+      regEnd: {
+        type: Date,
+        default: Date.now,
+      },
+      saleStart: {
+        type: Date,
+        default: Date.now,
+      },
+      saleEnd: {
+        type: Date,
+        default: Date.now,
+      }
     },
-    projectTokenUrl :{
-      type: String,
-    },
-    tokenPrice: {
-      type: Number,
-      required: [true],
-    },
-    regStart: {
-      type: Date,
-      default: Date.now,
-    },
-    regEnd: {
-      type: Date,
-      default: Date.now,
-    },
-    saleStart: {
-      type: Date,
-      default: Date.now,
-    },
-    saleEnd: {
-      type: Date,
-      default: Date.now,
+    allocationInfo: {
+      parameters: {
+        minAlloc: { type: Number },
+        maxAlloc: { type: Number },
+        rateBalance: { type: Number },
+        rateSwap: { type: Number },
+        rateLiquidity: { type: Number },
+        rateAcy: { type: Number },
+        alertProportion: { type: Number },
+        T: { type: Number }
+      },
+      processRecords: [{
+        startTime: { type: Date },
+        endTime: { type: Date },
+        w: { type: Number }
+      }]
     },
     social: [
       {
@@ -60,17 +92,7 @@ const Launch = new mongoose.Schema(
         confluxaddress: String,
       },
     ],
-    totalRaise: {
-      type: Number,
-      required: [true],
-    },
-    totalSale: {
-      type: Number,
-      required: [true],
-    },
-    contextData: {
-      type: String,
-    },
+    contextData: { type: String },
   },
   { timestamps: true }
 );

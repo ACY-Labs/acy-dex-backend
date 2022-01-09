@@ -4,6 +4,7 @@ import { Logger, loggers } from "winston";
 import { ERC20_ABI, FARM_ADDRESS, GAS_TOKEN} from "../constants";
 import TokenListSelector from "../constants/tokenAddress"
 import { sleep, getTokensPrice } from "../util";
+import moment from "moment";
 
 export default class LaunchService {
   launchModel: any;
@@ -37,16 +38,15 @@ export default class LaunchService {
       let tempRes = {}
       tempRes = {
         projectID: obj.projectID,
-        projectName: obj.projectName,
-        projectToken: obj.projectToken,
-        // projectStatus: obj.projectStatus,
-        tokenPrice: obj.tokenPrice,
-        totalRaise: obj.totalRaise,
-        totalSale: obj.totalSale,
+        projectName: obj.basicInfo.projectName,
+        projectToken: obj.basicInfo.projectToken,
+        tokenPrice: obj.saleInfo.tokenPrice,
+        totalRaise: obj.saleInfo.totalRaise,
+        totalSale: obj.saleInfo.totalSale,
       }
       // categorized project into Ongoing/Upcoming/Ended
-      let saleStart = obj.saleStart;
-      let saleEnd = obj.saleEnd;
+      let saleStart = obj.scheduleInfo.saleStart;
+      let saleEnd = obj.scheduleInfo.saleEnd;
       let current = new Date();
       if(current < saleStart) {
         tempRes["projectStatus"] = "Upcoming"
@@ -56,12 +56,13 @@ export default class LaunchService {
         tempRes["projectStatus"] = "Ongoing"
       }
 
-      let temp1 = new Date(obj.saleEnd)
-      let temp2 = new Date(obj.saleStart)
+      let temp1 = new Date(obj.scheduleInfo.saleEnd)
+      let temp2 = new Date(obj.scheduleInfo.saleStart)
       let dateTime1 = temp1.toLocaleDateString() + ' ' + temp1.toTimeString().substring(0, temp1.toTimeString().indexOf("GMT"));
       let dateTime2 = temp2.toLocaleDateString() + ' ' + temp2.toTimeString().substring(0, temp2.toTimeString().indexOf("GMT"));
       tempRes["saleStart"] = dateTime1;
       tempRes["saleEnd"] = dateTime2;
+
       result.push(tempRes);
     });
     this.logger.debug("end getProjects");
@@ -143,8 +144,6 @@ export default class LaunchService {
     return userProject;
   }
 
-
-
   public async getBalance(addr: String) {
     console.log(`getBalance`, addr);
     const web3 = new Web3(this.web3);
@@ -193,7 +192,7 @@ export default class LaunchService {
     let totalAllocationAmount = userProject.allocationAmount + bonusAmount;
     let allocationLeft = totalAllocationAmount - userProject.allocationUsed;
     return allocationLeft;
-  } 
+  }
 
   public async useAllocation(walletId: String, projectToken: String, amount: number) {
     this.logger.info(`useAllocation ${walletId} - ${projectToken} - ${amount}`);
@@ -222,13 +221,91 @@ export default class LaunchService {
     return userProject;
   }
 
-  public async bonusAllocation(walletId: String, projectToken: String, bonusName: String) {
-    this.logger.info(`bonusAllocation ${walletId} - ${projectToken} - ${bonusName}`);
+  public async bonusAllocation(walletId: String, projectToken: String, bonusName: String, T: Number) {
+    this.logger.info(`bonusAllocation ${walletId} - ${projectToken} - ${bonusName} - ${T}`);
     let user = await this.userLaunchModel.findOne({
       walletId: walletId
     }).exec()
+    if (!user) {
+      this.logger.info(`new user, start creation`);
+      let block = true;
+      await this.userLaunchModel.create({
+        walletId
+      }, (err, data) => {
+        if (err) {
+          this.logger.error(`Mongo create new record error ${err}`);
+          throw new Error("Create user Error.");
+        }
+        block = false;
+        this.logger.info(`Mongo created a new user launch record`);
+      })
+
+      // wait for user creation ready
+      while (block) {
+        await sleep(10);
+      }
+      user = await this.userLaunchModel.findOne({
+        walletId: walletId
+      }).exec()
+    }
+
     let projectIndex = user.projects.findIndex(item => item.projectToken === projectToken);
-    let userProject = user.projects[projectIndex];
+    if (projectIndex === -1) {
+      user.projects.push({
+        projectToken: projectToken,
+        allocationAmount: 0,
+        allocationUsed: 0
+      });
+      projectIndex = user.projects.length - 1;
+    }
+
+    let userProject = user.projects[projectIndex];    
+    let allocationBonus = userProject.allocationBonus;
+
+    let launchProject = await this.getLaunchProjectByToken(projectToken);
+    if (!launchProject) {
+      throw new Error("No such projectToken")
+    }
+
+    let bonusAmount = 0;
+    switch (bonusName) {
+      case "swap":
+        let rateSwap = launchProject.allocationInfo.parameters.rateSwap;
+        bonusAmount = Number(T) * Number(rateSwap);
+        break;
+      
+      case "liquidity":
+        let rateLiquidity = launchProject.allocationInfo.parameters.rateLiquidity;
+        bonusAmount = Number(T) * Number(rateLiquidity);
+        break;
+
+      case "acy":
+        let rateAcy = launchProject.allocationInfo.parameters.rateAcy;
+        bonusAmount = Number(T) * Number(rateAcy);
+        break;
+      
+      default:
+        return false;
+    }
+
+    let bonusIndex = allocationBonus.findIndex(item => item.bonusName === bonusName);
+    if (bonusIndex === -1) {
+      allocationBonus.push({
+        bonusName: bonusName,
+        bonusAmount: bonusAmount
+      })
+    } else {
+      allocationBonus[bonusIndex].bonusAmount = bonusAmount;
+      allocationBonus[bonusIndex].achieveTime = new Date();
+    }
+
+    await user.save((err) => {
+      if (err) {
+        this.logger.error(`Mongo saving user record error: ${err}`);
+        throw new Error("error when saving allocation")
+      }
+    })
+    return bonusAmount;
   }
 
   public async purchaseRecord(walletId: String, projectToken: String, amount: Number) {
@@ -237,8 +314,6 @@ export default class LaunchService {
     let user = await this.userLaunchModel.findOne({
       walletId: walletId
     }).exec()
-    let allocationRemainder = user.allocationAmount - user.allocationUsed
-    // token
   }
 
   public async vestingRecord(walletId: String, projectToken: String, amount: Number) {
@@ -247,8 +322,6 @@ export default class LaunchService {
     let user = await this.userLaunchModel.findOne({
       walletId: walletId
     }).exec()
-    let allocationRemainder = user.allocationAmount - user.allocationUsed
-    // token
   }
 
   public async getAllocationInfo(walletId: String, projectToken: String) {
@@ -272,4 +345,66 @@ export default class LaunchService {
     }
   }
 
+  public async createProjects() {
+    
+    await this.launchModel.create({
+      projectID: 1,
+      basicInfo: {
+        projectName: 'test project',
+        poolID: 2,
+        projectToken: 'TEST',
+        projectTokenUrl: 'http://www.baidu.com'
+      },
+      saleInfo: {
+        tokenPrice: 1,
+        totalRaise: 10,
+        totalSale: 10
+      },
+      // scheduleInfo: {
+      //   regStart: {
+      //     type: Date,
+      //     default: Date.now,
+      //   },
+      //   regEnd: {
+      //     type: Date,
+      //     default: Date.now,
+      //   },
+      //   saleStart: {
+      //     type: Date,
+      //     default: Date.now,
+      //   },
+      //   saleEnd: {
+      //     type: Date,
+      //     default: Date.now,
+      //   }
+      // },
+      allocationInfo: {
+        parameters: {
+          minAlloc: 0,
+          maxAlloc: 100,
+          rateBalance: 1,
+          rateSwap: 1,
+          rateLiquidity: 1,
+          rateAcy: 1,
+          alertProportion: 0.5,
+          T: 10
+        },
+        processRecords: []
+      },
+      contextData: "{}"
+    }, (err, data) => {
+      if (err) {
+        this.logger.error(`Mongo create new record error ${err}`);
+        throw new Error("Create launch project Error.");
+      }
+      this.logger.info(`Mongo created a new launch project record`);
+    })
+  }
+
+  private async getLaunchProjectByToken(projectToken: String) {
+    let data = await this.launchModel.findOne({
+      'basicInfo.projectToken': projectToken
+    }).exec();
+    return data;
+  }
 }
