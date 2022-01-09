@@ -36,6 +36,7 @@ export default ({
     Container.set("web3", Web3Instances);
     Container.set("logger", LoggerInstance);
     Container.set("tasks", {});
+    Container.set("allocationCache", {});
 
     Container.set(`net${56}runningFlag`, {});
     Container.set(`net${97}runningFlag`, {});

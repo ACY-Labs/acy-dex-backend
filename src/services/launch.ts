@@ -5,6 +5,7 @@ import { ERC20_ABI, FARM_ADDRESS, GAS_TOKEN} from "../constants";
 import TokenListSelector from "../constants/tokenAddress"
 import { sleep, getTokensPrice } from "../util";
 import moment from "moment";
+import { Container } from "typedi"; 
 
 export default class LaunchService {
   launchModel: any;
@@ -130,6 +131,7 @@ export default class LaunchService {
     console.log("allBalance:", allBalance);
     console.log(allBalance);
     
+    // TODO: actual allocation method
     let allocationAmount = Math.round(
       50 + Math.random() * 200
     )
@@ -203,14 +205,15 @@ export default class LaunchService {
     }).exec()
     let projectIndex = user.projects.findIndex(item => item.projectToken === projectToken);
     let userProject = user.projects[projectIndex];
-
     this.logger.info(`userProject ${userProject}`);
 
+    // only allow allocation less than limitation
     let allocationLeft = this.calcAllocationLeft(userProject);
     if(amount > allocationLeft) {
       throw new Error("not enough allocation");
     }
 
+    // actual record allocation used
     userProject.allocationUsed = Math.round(Number(userProject.allocationUsed) + Number(amount));
     await user.save((err) => {
       if (err) {
@@ -218,6 +221,16 @@ export default class LaunchService {
         throw new Error("error when saving allocation")
       }
     })
+
+    // store allocation in cache, in order to calc allocation using during period
+    let allocationCache: Object = Container.get("allocationCache");
+    let projectAllocationCache = allocationCache[projectToken.toString()];
+    if (!projectAllocationCache) {
+      projectAllocationCache = 0;
+    }
+    projectAllocationCache += amount;
+    Container.set("allocationCache", allocationCache);
+
     return userProject;
   }
 
@@ -249,6 +262,7 @@ export default class LaunchService {
       }).exec()
     }
 
+    // if project not exists, create first
     let projectIndex = user.projects.findIndex(item => item.projectToken === projectToken);
     if (projectIndex === -1) {
       user.projects.push({
@@ -258,7 +272,6 @@ export default class LaunchService {
       });
       projectIndex = user.projects.length - 1;
     }
-
     let userProject = user.projects[projectIndex];    
     let allocationBonus = userProject.allocationBonus;
 
@@ -267,6 +280,7 @@ export default class LaunchService {
       throw new Error("No such projectToken")
     }
 
+    // add specific bonus type
     let bonusAmount = 0;
     switch (bonusName) {
       case "swap":
@@ -288,6 +302,7 @@ export default class LaunchService {
         return false;
     }
 
+    // take care of allocationBonus data structure
     let bonusIndex = allocationBonus.findIndex(item => item.bonusName === bonusName);
     if (bonusIndex === -1) {
       allocationBonus.push({
@@ -406,5 +421,45 @@ export default class LaunchService {
       'basicInfo.projectToken': projectToken
     }).exec();
     return data;
+  }
+
+  private async updateAllocationParameters(projectToken: String) {
+    let launchProject = await this.getLaunchProjectByToken(projectToken);
+
+    // Example retrieve: 
+    let rateBalance = launchProject.allocationInfo.parameters.rateBalance;
+    // ... retrieve other parametes needed
+
+
+    // TODO for gary:
+    // actual update algo
+
+    // Example update:
+    launchProject.allocationInfo.parameters.minAlloc = 50;
+
+
+
+    let allocationCache = Container.get("allocationCache");
+    let w_latest = allocationCache[projectToken.toString()];
+    if (!w_latest) {
+      w_latest = 0;
+    }
+    launchProject.allocationInfo.processRecords.push({
+      w: w_latest
+    })
+
+    // reset allocation cache
+    allocationCache[projectToken.toString()] = 0;
+    Container.set("allocationCache", allocationCache);
+
+    // update launch project to db
+    await launchProject.save((err) => {
+      if (err) {
+        this.logger.error(`Mongo saving record error: ${err}`);
+        throw new Error("error when saving launch project")
+      }
+    })
+    return launchProject;
+
   }
 }

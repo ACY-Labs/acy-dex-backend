@@ -70,8 +70,7 @@ const Launch = new mongoose.Schema(
         T: { type: Number }
       },
       processRecords: [{
-        startTime: { type: Date },
-        endTime: { type: Date },
+        endTime: { type: Date, default: Date.now },
         w: { type: Number }
       }]
     },
