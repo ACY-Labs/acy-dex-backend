@@ -41,6 +41,7 @@ export default class LaunchService {
         projectID: obj.projectID,
         projectName: obj.basicInfo.projectName,
         projectToken: obj.basicInfo.projectToken,
+        projectTokenUrl: obj.basicInfo.projectTokenUrl,
         tokenPrice: obj.saleInfo.tokenPrice,
         totalRaise: obj.saleInfo.totalRaise,
         totalSale: obj.saleInfo.totalSale,
