@@ -30,19 +30,19 @@ export default (app: Router) => {
   );
 
   // This route only used while developing
-  // route.get(
-  //   "/projects/add",
-  //   async (req: Request, res: Response, next: NextFunction) => {
-  //     try {
-  //       const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
-  //       const data = await launchServiceInstance.createProjects();
-  //       return res.status(201).json(data);
-  //     } catch (e) {
-  //       logger.error("🔥 error: %o", e);
-  //       return next(e);
-  //     }
-  //   }
-  // );
+  route.get(
+    "/projects/add",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
+        const data = await launchServiceInstance.createProjects();
+        return res.status(201).json(data);
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
 
   route.get(
     "/projects/:projectsId",

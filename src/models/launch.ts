@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 
 const Launch = new mongoose.Schema(
   {
+    projectStatus: {
+      type: String,
+      default: "Ongoing"
+    },
     projectID: {
       type: Number,
       required: true,
