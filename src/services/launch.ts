@@ -126,7 +126,8 @@ export default class LaunchService {
 
     console.log("allBalance:");
     // TODO (Gary 2021.1.5): the getBalance should be called only once a day, update the amount in database
-    let allBalance = await this.getBalance(walletId);
+    // let allBalance = await this.getBalance(walletId);
+    let allBalance = 100;
     console.log("allBalance:", allBalance);
     console.log(allBalance);
 
@@ -136,15 +137,15 @@ export default class LaunchService {
     let launchProject = await this.getLaunchProjectByToken(projectToken);
     let allocationInfo = launchProject.allocationInfo
     // balance
-    let balanceAllocation = allBalance * allocationInfo.parameters.rateBalance * Math.random() * 2
-    if (balanceAllocation > allocationInfo.maxAlloc) {
-      balanceAllocation = allocationInfo.maxAlloc
+    let balanceAllocation = allBalance * launchProject.allocationInfo.parameters.rateBalance * Math.random() * 2
+    if (balanceAllocation > launchProject.allocationInfo.maxAlloc) {
+      balanceAllocation = launchProject.allocationInfo.maxAlloc
     }
-    if (balanceAllocation < allocationInfo.minAlloc) {
-      balanceAllocation = allocationInfo.minAlloc
+    if (balanceAllocation < launchProject.allocationInfo.minAlloc) {
+      balanceAllocation = launchProject.allocationInfo.minAlloc
     }
     // bonus
-    let bonusAllocation = bonus.swapBonus * allocationInfo.parameters.rateSwap + bonus.liquidityBonus * allocationInfo.parameters.rateLiquidity + bonus.acyBonus * allocationInfo.parameters.rateAcy
+    let bonusAllocation = bonus.swapBonus * launchProject.allocationInfo.parameters.rateSwap + bonus.liquidityBonus * launchProject.allocationInfo.parameters.rateLiquidity + bonus.acyBonus * launchProject.allocationInfo.parameters.rateAcy
     // total
     let allocationAmount = Math.round(balanceAllocation + bonusAllocation)
 
@@ -232,7 +233,7 @@ export default class LaunchService {
     for (var item in acyBonusList) {
       acyBonus += acyBonusList[item].bonusAmount
     }
-    
+    console.log("bonus made:", swapBonus, liquidityBonus, acyBonus)
     return {
       swapBonus: swapBonus,
       liquidityBonus: liquidityBonus,
@@ -463,6 +464,10 @@ export default class LaunchService {
           rateAcy: 1,
           alertProportion: 0.5,
           T: 10
+        },
+        states: {
+          allocatedAmount: 0,
+          soldAmount: 0
         },
         processRecords: []
       },
