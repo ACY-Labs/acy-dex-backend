@@ -9,8 +9,9 @@ import Logger from "./loaders/logger";
 import { Container } from "typedi";
 // import indexService from "./indexer";
 import poolVolumeService from "./services/poolVolume";
-import TxService from "./services/tx"
-import FarmService from "./services/farm"
+import TxService from "./services/tx";
+import FarmService from "./services/farm";
+import TokenPriceService from "./services/tokenPrice";
 
 async function startServer() {
   const app = express();
@@ -100,6 +101,9 @@ async function startServer() {
 
   // const farmService = Container.get(FarmService);
   // setInterval(() => farmService.massUpdateFarm(97), 30000);
+
+  // Fetch tokenprice list data
+  const tokenPriceService = Container.get(TokenPriceService)
 
   app
     .listen(config.port, () => {

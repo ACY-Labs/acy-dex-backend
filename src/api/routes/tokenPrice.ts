@@ -10,5 +10,10 @@ const route = Router();
 
 export default (app: Router) =>  {
     app.use("/tokenPrice", route);
+    const logger: Logger = Container.get("logger");
+
+    route.get("./getList",async (req: Request, res: Response, next: NextFunction)=>{
+        return ("Nothing")
+    })
 
 }
