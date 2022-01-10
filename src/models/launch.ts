@@ -29,6 +29,10 @@ const Launch = new mongoose.Schema(
         type: String,
         required: true
       },
+      contractAddress: {
+        type: String,
+        required: true
+      }
     },
     saleInfo: {
       tokenPrice: {
@@ -43,6 +47,10 @@ const Launch = new mongoose.Schema(
         type: Number,
         required: true,
       },
+      // totalSold: { // in USDT
+      //   type: Number,
+      //   default: 0
+      // }
     },
     scheduleInfo: {
       regStart: {
@@ -72,6 +80,10 @@ const Launch = new mongoose.Schema(
         rateAcy: { type: Number },
         alertProportion: { type: Number },
         T: { type: Number }
+      },
+      states: {
+        allocatedAmount: { type: Number },
+        soldAmount: { type: Number }
       },
       processRecords: [{
         endTime: { type: Date, default: Date.now },

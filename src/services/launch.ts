@@ -124,18 +124,39 @@ export default class LaunchService {
     // already allocated, cannot allocate again, return old allocation amount
     if(userProject.allocationAmount !== 0) return userProject;
 
-    // TODO (Gary 2021.1.6): float with time and total pool size
     console.log("allBalance:");
-    // TODO (Gary 2021.1.5: the getBalance should be called only once a day, update the amount in database)
+    // TODO (Gary 2021.1.5): the getBalance should be called only once a day, update the amount in database
     let allBalance = await this.getBalance(walletId);
     console.log("allBalance:", allBalance);
     console.log(allBalance);
+
+    let bonus = await this.getBonus(userProject)
     
     // TODO: actual allocation method
-    let allocationAmount = Math.round(
-      50 + Math.random() * 200
-    )
-    userProject.allocationAmount = allocationAmount;
+    let launchProject = await this.getLaunchProjectByToken(projectToken);
+    let allocationInfo = launchProject.allocationInfo
+    // balance
+    let balanceAllocation = allBalance * allocationInfo.parameters.rateBalance * Math.random() * 2
+    if (balanceAllocation > allocationInfo.maxAlloc) {
+      balanceAllocation = allocationInfo.maxAlloc
+    }
+    if (balanceAllocation < allocationInfo.minAlloc) {
+      balanceAllocation = allocationInfo.minAlloc
+    }
+    // bonus
+    let bonusAllocation = bonus.swapBonus * allocationInfo.parameters.rateSwap + bonus.liquidityBonus * allocationInfo.parameters.rateLiquidity + bonus.acyBonus * allocationInfo.parameters.rateAcy
+    // total
+    let allocationAmount = Math.round(balanceAllocation + bonusAllocation)
+
+    // if (Date.now > launchProject.scheduleInfo.saleStart && Date.now < launchProject.scheduleInfo.saleEnd) {
+    //   // TODO: dynamic update
+    //   let w_list = allocationInfo.processRecords.w
+    // } else if (Date.now <= launchProject.scheduleInfo.saleStart) {
+    //   // TODO: update w0
+    // }
+
+    // TODO: update user allocation info
+    user.projects[projectIndex].allocationAmount = allocationAmount;
     await user.save((err) => {
       if (err) {
         this.logger.error(`Mongo saving user record error: ${err}`);
@@ -143,6 +164,15 @@ export default class LaunchService {
         this.logger.info(`Allocation made, amount: ${allocationAmount}`)
       }
     })
+    // TODO: update total allocation info
+    launchProject.allocationInfo.states.allocatedAmount += allocationAmount;
+    await launchProject.save((err) => {
+      if (err) {
+        this.logger.error(`Mongo saving record error: ${err}`);
+        throw new Error("error when saving launch project")
+      }
+    })
+
     return userProject;
   }
 
@@ -183,6 +213,31 @@ export default class LaunchService {
     });
     console.log("Promise all out", allBalance);
     return allBalance;
+  }
+
+  public async getBonus(userProject) {
+    const swapBonusList: any[] = userProject.allocationBonus.filter(item => item.bonusName == "swap")
+    const liquidityBonusList: any[] = userProject.allocationBonus.filter(item => item.bonusName == "liquidity")
+    const acyBonusList: any[] = userProject.allocationBonus.filter(item => item.bonusName == "acy")
+
+    let swapBonus = 0
+    let liquidityBonus = 0
+    let acyBonus = 0
+    for (var item in swapBonusList) {
+      swapBonus += swapBonusList[item].bonusAmount
+    }
+    for (var item in liquidityBonusList) {
+      liquidityBonus += liquidityBonusList[item].bonusAmount
+    }
+    for (var item in acyBonusList) {
+      acyBonus += acyBonusList[item].bonusAmount
+    }
+    
+    return {
+      swapBonus: swapBonus,
+      liquidityBonus: liquidityBonus,
+      acyBonus: acyBonus
+    }
   }
 
   private calcAllocationLeft(userProject: any) {
@@ -230,6 +285,16 @@ export default class LaunchService {
     }
     projectAllocationCache += amount;
     Container.set("allocationCache", allocationCache);
+
+    // TODO (Gary): add amount to soldAmount in allocation info (check me!)
+    let launchProject = await this.getLaunchProjectByToken(projectToken);
+    launchProject.allocationInfo.states.soldAmount += amount;
+    await launchProject.save((err) => {
+      if (err) {
+        this.logger.error(`Mongo saving record error: ${err}`);
+        throw new Error("error when saving launch project")
+      }
+    })
 
     return userProject;
   }
@@ -303,16 +368,22 @@ export default class LaunchService {
     }
 
     // take care of allocationBonus data structure
-    let bonusIndex = allocationBonus.findIndex(item => item.bonusName === bonusName);
-    if (bonusIndex === -1) {
-      allocationBonus.push({
-        bonusName: bonusName,
-        bonusAmount: bonusAmount
-      })
-    } else {
-      allocationBonus[bonusIndex].bonusAmount = bonusAmount;
-      allocationBonus[bonusIndex].achieveTime = new Date();
-    }
+    // let bonusIndex = allocationBonus.findIndex(item => item.bonusName === bonusName);
+    // if (bonusIndex === -1) {
+    //   allocationBonus.push({
+    //     bonusName: bonusName,
+    //     bonusAmount: bonusAmount
+    //   })
+    // } else {
+    //   allocationBonus[bonusIndex].bonusAmount = bonusAmount;
+    //   allocationBonus[bonusIndex].achieveTime = new Date();
+    // }
+    allocationBonus.push({
+      bonusName: bonusName,
+      bonusAmount: bonusAmount,
+      achieveTime: new Date()
+    })
+    // TODO (Gary): fix
 
     await user.save((err) => {
       if (err) {
@@ -361,14 +432,15 @@ export default class LaunchService {
   }
 
   public async createProjects() {
-    
+    // bsc-test contract, for test only
     await this.launchModel.create({
-      projectID: 2,
+      projectID: 1,
       basicInfo: {
         projectName: 'Paycer',
         poolID: 9,
         projectToken: 'PCR',
-        projectTokenUrl: 'https://www.gitbook.com/cdn-cgi/image/width=40,height=40,fit=contain,dpr=1.5,format=auto/https%3A%2F%2Fpaycer.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252F-MhxXu45T290Q1xsWzti%252Ficon%252FaSZLRb7nNeee5FXyaNmq%252FPaycer%2520Logo%2520Icon.png%3Falt%3Dmedia%26token%3D2ba11bfa-6fd0-4a15-a004-7f474267d3db'
+        projectTokenUrl: 'https://www.gitbook.com/cdn-cgi/image/width=40,height=40,fit=contain,dpr=1.5,format=auto/https%3A%2F%2Fpaycer.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252F-MhxXu45T290Q1xsWzti%252Ficon%252FaSZLRb7nNeee5FXyaNmq%252FPaycer%2520Logo%2520Icon.png%3Falt%3Dmedia%26token%3D2ba11bfa-6fd0-4a15-a004-7f474267d3db',
+        contractAddress: '0x6e0EC29eA8afaD2348C6795Afb9f82e25F196436'
       },
       saleInfo: {
         tokenPrice: 0.055,
@@ -413,28 +485,57 @@ export default class LaunchService {
 
   private async updateAllocationParameters(projectToken: String) {
     let launchProject = await this.getLaunchProjectByToken(projectToken);
+    let allocationInfo = launchProject.allocationInfo
 
-    // Example retrieve: 
-    let rateBalance = launchProject.allocationInfo.parameters.rateBalance;
-    // ... retrieve other parametes needed
+    // retrieve parametes needed
+    const allocatedAmount = allocationInfo.states.allocatedAmount;
+    const soldAmount = allocationInfo.states.soldAmount; // TODO: update using soldAmount, since everyone can buy ONLY ONCE
+    const processRecords = allocationInfo.processRecords // [{time, w}]
+    const T = allocationInfo.parameters.T
+    const alertProportion = allocationInfo.parameters.alertProportion
+    const totalRaise = launchProject.saleInfo.totalRaise
 
+    // TODO: actual update algo
+    if (totalRaise <= soldAmount) return launchProject; // if already sold out, no need to update
+    let lastAllocationAmount = 0
+    let w_last = 0
+    for (var item in processRecords) {
+      lastAllocationAmount += processRecords[item].w
+      if (Number(item) == processRecords.length - 1) {
+        w_last = processRecords[item].w
+      }
+    }
+    let w_new = allocatedAmount - lastAllocationAmount
+    let beta = w_new / w_last
+    let remainingT = T - processRecords.length
+    let tmp = w_last
+    let estimatedSell = 0
+    for (var i = 0; i < remainingT; i++) {
+      tmp *= beta
+      estimatedSell += tmp
+    }
 
-    // TODO for gary:
-    // actual update algo
+    let eta = estimatedSell / (totalRaise - allocatedAmount) // the **ratio**
+    console.assert(eta > 0, "error: eta should be greater than 0!")
 
-    // Example update:
-    launchProject.allocationInfo.parameters.minAlloc = 50;
-
+    // update
+    if (eta <= alertProportion) { // update
+      launchProject.allocationInfo.parameters.maxAlloc /= eta
+      launchProject.allocationInfo.parameters.minAlloc /= eta
+      launchProject.allocationInfo.parameters.rate_balance /= eta
+    }
+    launchProject.allocationInfo.processRecords.push({ w: w_new, endTime: new Date() })
 
 
     let allocationCache = Container.get("allocationCache");
-    let w_latest = allocationCache[projectToken.toString()];
-    if (!w_latest) {
-      w_latest = 0;
-    }
-    launchProject.allocationInfo.processRecords.push({
-      w: w_latest
-    })
+    // NOTE (Gary): please check if the cache is needed HERE
+    // let w_latest = allocationCache[projectToken.toString()];
+    // if (!w_latest) {
+    //   w_latest = 0;
+    // }
+    // launchProject.allocationInfo.processRecords.push({
+    //   w: w_latest
+    // })
 
     // reset allocation cache
     allocationCache[projectToken.toString()] = 0;
