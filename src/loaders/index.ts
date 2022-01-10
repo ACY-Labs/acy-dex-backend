@@ -5,7 +5,7 @@ import Logger from "./logger";
 import config from "../config";
 import { Connection } from "mongoose";
 
-export default async ({ expressApp }) => {
+export default async ({ expressApp }, isExpress=true) => {
 
   // 连接所有DB，并加载所有Schema，因为await的原因所以暂时没法用for
   // TODO: async Foreach
@@ -52,6 +52,8 @@ export default async ({ expressApp }) => {
   await dependencyInjectorLoader({mongoConnections});
   Logger.info("✌️ Dependency Injector loaded");
 
-  expressLoader({ app: expressApp });
-  Logger.info("✌️ Express loaded");
+  if(isExpress) {
+    expressLoader({ app: expressApp });
+    Logger.info("✌️ Express loaded");
+  }
 };

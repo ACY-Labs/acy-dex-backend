@@ -3,7 +3,7 @@ import Web3 from "web3";
 import { Logger, loggers } from "winston";
 import { ERC20_ABI, FARM_ADDRESS, GAS_TOKEN} from "../constants";
 import TokenListSelector from "../constants/tokenAddress"
-import { sleep,getTokensPrice  } from "../util";
+import { sleep, getTokensPrice } from "../util";
 
 export default class LaunchService {
   launchModel: any;
@@ -150,7 +150,6 @@ export default class LaunchService {
     const web3 = new Web3(this.web3);
     const logger = this.logger
     
-
     // var plist = [];
     var tokenlist = TokenListSelector(this.chainId)
     console.log("tokenlist" ,tokenlist, this.chainId)

@@ -63,10 +63,6 @@ export default ({
         web3: Web3Instances["polygon-test"],
         logger: Container.get("logger")
       }
-      // TODO: fill ?
-      // 'polygon-test': {
-      //   ?
-      // }
     }
     Container.set("constantLoader", constantLoader);
 

@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "debug": "nodemon --config nodemon.json",
-    "deploy": "NODE_ENV=production npx ts-node  --transpile-only ./src/app.ts"
+    "deploy": "NODE_ENV=production npx ts-node --transpile-only ./src/app.ts",
+    "cron": "npx ts-node --transpile-only ./src/crontab.ts"
   },
   "keywords": [
     "dex"
@@ -47,6 +48,7 @@
     "ts-node": "^10.0.0",
     "typedi": "^0.10.0",
     "web3": "^1.4.0",
-    "winston": "^3.3.3"
+    "winston": "^3.3.3",
+    "node-cron": "^3.0.0"
   }
 }
