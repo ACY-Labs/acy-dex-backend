@@ -266,15 +266,6 @@ export default {
         // kyber network crystal token address in testnet is not verified
         // address is chosen based on highest transactions
         {
-            name: 'Kyber Network Crystal',
-            symbol: 'KNC',
-            address: '0x164028f557339024d937687B5dFd2Fc65a47c48d',
-            addressOnEth: '0xdd974D5C2e2928deA5F71b9825b8b646686BD200',
-            decimals: 18,
-            logoURI: 'https://storageapi.fleek.co/chwizdo-team-bucket/ACY Token List/KNC.svg',
-            idOnCoingecko: "kyber-network-crystal",
-        },
-        {
             name: 'ChainLink Token',
             symbol: 'LINK',
             address: '0xe7A3a5d135637569FAC74b1CbdF5Ae7f672Baf11',

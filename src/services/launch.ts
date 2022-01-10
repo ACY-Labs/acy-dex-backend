@@ -154,15 +154,15 @@ export default class LaunchService {
     console.log("tokenlist" ,tokenlist, this.chainId)
     const chainId = this.chainId;
     var tokenPrice = await getTokensPrice(tokenlist);
-    const plist = tokenlist.map(function(n){
+    const plist = tokenlist.map(function(n) {
         let contract = new web3.eth.Contract(ERC20_ABI, n.address);
         if(GAS_TOKEN[chainId] == n.symbol)
-          return web3.eth.getBalance(addr).then(res => tokenPrice[n.symbol]/ 10**n.decimals* res);
-        return contract.methods.balanceOf(addr).call().then(res => tokenPrice[n.symbol]/ 10**n.decimals* res);
+          return web3.eth.getBalance(addr).then(res => tokenPrice[n.symbol]/ 10**n.decimals * res);
+        return contract.methods.balanceOf(addr).call().then(res => tokenPrice[n.symbol]/ 10**n.decimals * res);
         // .then(
         //   res => tokenPrice[n.symbol]/ 10**n.decimals* res);
     })
-    console.log("Promise all in", plist);
+    // console.log("Promise all in", plist);
     
     // let allBalance = await Promise.all(plist).then(function(res){
     //   console.log('Promise then',res);
@@ -177,7 +177,7 @@ export default class LaunchService {
 
     let allBalance = await Promise.all(plist).then((res) => {
       console.log("HERE:", res)
-      return res.reduce((total,a) => total+a,0)
+      return res.reduce((total, a) => total + a, 0)
     });
     console.log("Promise all out", allBalance);
     return allBalance;
@@ -348,36 +348,24 @@ export default class LaunchService {
   public async createProjects() {
     
     await this.launchModel.create({
-      projectID: 1,
+      projectID: 2,
       basicInfo: {
-        projectName: 'test project',
-        poolID: 2,
-        projectToken: 'TEST',
-        projectTokenUrl: 'http://www.baidu.com'
+        projectName: 'Paycer',
+        poolID: 9,
+        projectToken: 'PCR',
+        projectTokenUrl: 'https://www.gitbook.com/cdn-cgi/image/width=40,height=40,fit=contain,dpr=1.5,format=auto/https%3A%2F%2Fpaycer.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252F-MhxXu45T290Q1xsWzti%252Ficon%252FaSZLRb7nNeee5FXyaNmq%252FPaycer%2520Logo%2520Icon.png%3Falt%3Dmedia%26token%3D2ba11bfa-6fd0-4a15-a004-7f474267d3db'
       },
       saleInfo: {
-        tokenPrice: 1,
-        totalRaise: 10,
-        totalSale: 10
+        tokenPrice: 0.055,
+        totalRaise: 100000,
+        totalSale: 1818181
       },
-      // scheduleInfo: {
-      //   regStart: {
-      //     type: Date,
-      //     default: Date.now,
-      //   },
-      //   regEnd: {
-      //     type: Date,
-      //     default: Date.now,
-      //   },
-      //   saleStart: {
-      //     type: Date,
-      //     default: Date.now,
-      //   },
-      //   saleEnd: {
-      //     type: Date,
-      //     default: Date.now,
-      //   }
-      // },
+      scheduleInfo: {
+        regStart: '2021-12-15T16:00:00Z',
+        regEnd: "2022-01-09T16:00:00Z",
+        saleStart: "2022-01-09T20:00:00Z",
+        saleEnd: "2022-01-20T20:00:00Z"
+      },
       allocationInfo: {
         parameters: {
           minAlloc: 0,
@@ -391,7 +379,7 @@ export default class LaunchService {
         },
         processRecords: []
       },
-      contextData: "{}"
+      contextData: "{\"tokenLabels\": [\"DeFi\",\"BSC\", \"Polygon\", \"No.1\"], \"projectDescription\": [\"Paycer is building a bridge protocol to connect traditional and decentralized finance. This will support the mass market adoption of decentralized finance (DeFi) to fix the broken low interest banking system.\", \"The Paycer protocol is the core engine and includes a solid smart contract architecture to consume different DeFi services. The smart-contract-based protocol will include Paycer's decentralized business logic, including staking, liquidity mining, yield farming, investment strategies, lending, and more. It will be able to interact with DeFi protocols from different blockchains and will also implement automated risk checks. In this chapter, the Paycer protocol is discussed in more detail, including its technical aspects and architecture.\", \"The Paycer platform is a web application that will be accessible via a website and, later, via an app. The platform will offer numerous functions and financial services and will be primarily a B2C platform targeting mainstream customers. The Paycer protocol will act as a second blockchain-based backend for the Paycer platform and will connect it with the DeFi and blockchain space. The Paycer platform will link the Paycer protocol to the existing banking system, enabling a bridge between traditional and decentralized banking.\" ], \"posterUrl\": \"https://miro.medium.com/max/1050/1*dNe1pHMlsKqVdTYOulVnVw.jpeg\", \"tokenLogoUrl\": \"https://www.gitbook.com/cdn-cgi/image/width=40,height=40,fit=contain,dpr=1.5,format=auto/https%3A%2F%2Fpaycer.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252F-MhxXu45T290Q1xsWzti%252Ficon%252FaSZLRb7nNeee5FXyaNmq%252FPaycer%2520Logo%2520Icon.png%3Falt%3Dmedia%26token%3D2ba11bfa-6fd0-4a15-a004-7f474267d3db\"}"
     }, (err, data) => {
       if (err) {
         this.logger.error(`Mongo create new record error ${err}`);
