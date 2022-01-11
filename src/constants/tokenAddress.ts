@@ -41,14 +41,14 @@ const BscMainNetTokenList: Array<TokenInfo> = [
     logoURI: 'https://cryptologos.cc/logos/binance-usd-busd-logo.svg?v=014',
     idOnCoingecko: "tether",
   },
-  {
-    name: 'Wrapped BNB',
-    symbol: 'WBNB',
-    address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
-    decimals: 18,
-    logoURI: 'https://cryptologos.cc/logos/binance-coin-bnb-logo.svg?v=014',
-    idOnCoingecko: "binancecoin",
-  },
+  // {
+  //   name: 'Wrapped BNB',
+  //   symbol: 'WBNB',
+  //   address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+  //   decimals: 18,
+  //   logoURI: 'https://cryptologos.cc/logos/binance-coin-bnb-logo.svg?v=014',
+  //   idOnCoingecko: "binancecoin",
+  // },
 
   {
     name: 'Ethereum',
