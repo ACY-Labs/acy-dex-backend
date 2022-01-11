@@ -42,6 +42,7 @@ async function startTasks() {
   //Token Price Service
   const tokenPriceServiceBscMain = new TokenPriceService(modelsBscMain,logger,constantsBscMain.chainId);
   const updateTokenPriceListBscMain = createTask("* * * * *",() => tokenPriceServiceBscMain.updateTokensPriceList(constantsBscMain.chainId))
+  // ***** mean every minute 
 
   
 
@@ -52,9 +53,8 @@ async function startTasks() {
   massUpdateFarmBscMain.start()
   massUpdatePolygonBscMain.start()
 
-  // updateTokenPriceListBscMain.start()
+  updateTokenPriceListBscMain.start()
 
-  this.logger.debug("111111111111")
 }
 
 startTasks();
