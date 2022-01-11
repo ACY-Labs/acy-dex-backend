@@ -19,10 +19,10 @@ async function startTasks() {
 
   // Pool service
   const poolServiceBscMain = new poolVolumeService(modelsBscMain, constantsBscMain.chainId);
-  const updateVolumeTaskBscMain = createTask("* * * * *", () => poolServiceBscMain.updateVolumeData());
+  const updateVolumeTaskBscMain = createTask("0,15,30,45 * * * *", () => poolServiceBscMain.updateVolumeData());
 
   const poolServicePolygonMain = new poolVolumeService(modelsPolaygonMain, constantsPolaygonMain.chainId);
-  const updateVolumeTaskPolygonMain = createTask("* * * * *", () => poolServicePolygonMain.updateVolumeData());
+  const updateVolumeTaskPolygonMain = createTask("0,15,30,45 * * * *", () => poolServicePolygonMain.updateVolumeData());
 
   // TX service
   const txServiceBscMain = new TxService(modelsBscMain, constantsBscMain.chainId);
@@ -33,10 +33,10 @@ async function startTasks() {
 
   // Farm Service
   const farmServiceBscMain = new FarmService(modelsBscMain, logger, constantsBscMain.chainId);
-  const massUpdateFarmBscMain = createTask("* * * * *", () => farmServiceBscMain.massUpdateFarm());
+  const massUpdateFarmBscMain = createTask("0,10,20,30,40,50 * * * *", () => farmServiceBscMain.massUpdateFarm());
   
   const farmServicePolygonMain = new FarmService(modelsPolaygonMain, logger, constantsPolaygonMain.chainId);
-  const massUpdatePolygonBscMain = createTask("* * * * *", () => farmServicePolygonMain.massUpdateFarm());
+  const massUpdatePolygonBscMain = createTask("0,10,20,30,40,50 * * * *", () => farmServicePolygonMain.massUpdateFarm());
 
   updateVolumeTaskBscMain.start()
   updateVolumeTaskPolygonMain.start()

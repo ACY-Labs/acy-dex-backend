@@ -57,9 +57,9 @@ export default (app: Router) => {
       );
       try {
         const poolServiceInstance = new PoolService(req.constants, req.models)
-        const { walletId, action, token0, token1} = req.query;
+        const { walletId, action, txHash, token0, token1} = req.query;
         // const { token0, token1 } = req.body;
-        const statusOK = await poolServiceInstance.updateUserPools(walletId, action, token0, token1);
+        const statusOK = await poolServiceInstance.updateUserPools(walletId, action, txHash, token0, token1);
         return res.status(201).send(statusOK);
       } catch (e) {
         logger.error("🔥 error: %o", e);
