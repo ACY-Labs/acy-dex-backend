@@ -21,7 +21,8 @@ export default ({
       'launchModel',
       'userLaunchModel',
       'userInfoModel',
-      'farmModel'
+      'farmModel',
+      'tokenPriceModel',
     ]
 
     // TODO: to be removed
