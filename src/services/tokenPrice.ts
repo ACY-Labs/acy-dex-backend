@@ -13,20 +13,16 @@ export default class TokenPriceService {
 
 
     tokenPriceModel: any;
-    logger: Logger;
-    web3: Web3;
     chainId: any;
 
 
 
-    constructor(constants, models,chainId) {
-        this.tokenPriceModel = models.tokenPriceModel;
-        this.logger = constants.logger;
-        this.web3 = constants.web3;
-        this.chainId = chainId
+    constructor(models,chainId) {
+      this.tokenPriceModel = models.tokenPriceModel;
+      this.chainId =  chainId;
       }
 
-      public async fetchTokensPrice() {
+      public async updateTokensPriceList() {
   
         const tokenlist = TokenListSelector('97');
         const searchIdsArray = tokenlist.map(token => token.idOnCoingecko);

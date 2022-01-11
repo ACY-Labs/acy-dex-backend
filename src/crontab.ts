@@ -5,6 +5,7 @@ import { createTask } from "./util/crontils";
 import poolVolumeService from "./services/poolVolume";
 import TxService from "./services/tx";
 import FarmService from "./services/farm";
+import TokenPriceService from "./services/tokenPrice"
 
 async function startTasks() {
   await require("./loaders").default({}, false);
@@ -37,6 +38,12 @@ async function startTasks() {
   
   const farmServicePolygonMain = new FarmService(modelsPolaygonMain, logger, constantsPolaygonMain.chainId);
   const massUpdatePolygonBscMain = createTask("* * * * *", () => farmServicePolygonMain.massUpdateFarm());
+
+  //Token Price Service
+  const tokenPriceServiceBscMain = new TokenPriceService(modelsBscMain,constantsBscMain.chainId);
+  const updateTokenPriceListBscMain = createTask("* * * * *",() => tokenPriceServiceBscMain.updateTokensPriceList())
+
+  
 
   updateVolumeTaskBscMain.start()
   updateVolumeTaskPolygonMain.start()
