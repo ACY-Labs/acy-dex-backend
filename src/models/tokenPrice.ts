@@ -6,13 +6,13 @@ const TokenPrice = new mongoose.Schema(
         index:true,
         type:Number,
     },
-    tokenList:
-    [
-        {
-            symbol: String,   
-            price: Number
-        }
-        ]
+    //symbol -> price
+    symbol:
+    {
+       type: Map,
+        of: String
+
+    }
     },{ timestamps: true }
 );
 
