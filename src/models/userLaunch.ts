@@ -5,7 +5,7 @@ const UserLaunch = new mongoose.Schema(
         walletId: {
             type: String,
             index: true,
-            require: true
+            required: true
         },
         projects: [
             {

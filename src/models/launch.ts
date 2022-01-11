@@ -85,10 +85,12 @@ const Launch = new mongoose.Schema(
         allocatedAmount: { type: Number },
         soldAmount: { type: Number }
       },
-      processRecords: [{
-        endTime: { type: Date, default: Date.now },
-        w: { type: Number }
-      }]
+      processRecords: [
+        {
+          endTime: { type: Date, default: Date.now },
+          w: { type: Number }
+        }
+      ]
     },
     social: [
       {

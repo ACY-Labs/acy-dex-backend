@@ -436,7 +436,7 @@ export default class LaunchService {
   public async createProjects() {
     // bsc-test contract, for test only
     await this.launchModel.create({
-      projectID: 1,
+      projectID: 20,
       basicInfo: {
         projectName: 'Paycer',
         poolID: 9,
