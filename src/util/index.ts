@@ -10,7 +10,6 @@ import { Contract } from '@ethersproject/contracts';
 import uniqueTokens from "../constants/uniqueTokens";
 import TokenListSelector from "../constants/tokenAddress"
 
-import chainTokens from "../constants/chainTokens";
 
 export function timestampToDate(timestamp) {
   const date = moment.unix(timestamp);
@@ -110,7 +109,8 @@ export const getPairAddress = (token0Addr, token1Addr, chainId) => {
 }
 
 export async function getAllSuportedTokensPrice(chainId) {
-  const searchIdsArray = chainTokens[chainId].map(token => token.idOnCoingecko);
+  const tokenList = TokenListSelector(chainId.toString());
+  const searchIdsArray = tokenList.map(token => token.idOnCoingecko);
   const searchIds = searchIdsArray.join('%2C');
   const tokensPrice = await axios.get(
     `https://api.coingecko.com/api/v3/simple/price?ids=${searchIds}&vs_currencies=usd`
@@ -118,7 +118,7 @@ export async function getAllSuportedTokensPrice(chainId) {
     const data = result.data;
     console.log(data);
     const tokensPrice = {};
-    chainTokens[chainId].forEach(token =>{
+    tokenList.forEach(token =>{
       tokensPrice[token.symbol] = data[token.idOnCoingecko]['usd'];
     })
     return tokensPrice;

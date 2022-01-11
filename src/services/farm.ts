@@ -2,7 +2,7 @@ import { Service } from "typedi";
 import FARM_ABI from "../constants/farm_abi";
 import { Logger } from "winston";
 import { FARM_ADDRESS, PAIR_CONTRACT_ABI, RPC_URL, BLOCKS_PER_YEAR} from "../constants";
-import supportedTokens from "../constants/chainTokens";
+import TokenListSelector from "../constants/tokenAddress";
 
 import Web3 from "web3";
 @Service()
@@ -11,6 +11,7 @@ export default class FarmService {
     farmModel: any;
     chainId: any;
     logger: Logger;
+    supportedTokens: any;
 
   constructor(
     models,
@@ -20,9 +21,11 @@ export default class FarmService {
     this.farmModel = models.farmModel;
     this.chainId = chainId;
     this.logger = logger;
+    this.supportedTokens = TokenListSelector(chainId);
+    console.log(this.supportedTokens);
   }
   public getTokenSymbol(address) {
-      return supportedTokens[this.chainId].find(token => token.address.toLowerCase() == address.toLowerCase()).symbol;
+      return this.supportedTokens.find(token => token.address.toLowerCase() == address.toLowerCase()).symbol;
   }
 
   public async massUpdateFarm() {
@@ -72,7 +75,7 @@ export default class FarmService {
         contract.methods.getPoolPositions(poolId).call()
     ]);
     const rewardTokensSymbols = rewardTokensAddresses.map(address => 
-        supportedTokens[this.chainId].find(token => token.address.toLowerCase() == address.toLowerCase())
+        this.supportedTokens.find(token => token.address.toLowerCase() == address.toLowerCase())
     );
     let token0;
     let token1;
@@ -102,7 +105,7 @@ export default class FarmService {
     const startBlock = poolInfo[4];
     const endBlock = poolInfo[5];
     const tokens = pairTokens.map(address => {
-        let token =  supportedTokens[this.chainId].find(token => token.address.toLowerCase() == address.toLowerCase());
+        let token =  this.supportedTokens.find(token => token.address.toLowerCase() == address.toLowerCase());
         return {
             symbol: token.symbol,
             logoURI: token.logoURI,
