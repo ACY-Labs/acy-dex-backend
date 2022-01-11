@@ -13,6 +13,7 @@ export default class LaunchService {
   web3: any;
   chainId: any;
   logger: Logger;
+  tokenPriceModel: any
 
   constructor(
     models,
@@ -24,6 +25,7 @@ export default class LaunchService {
     this.web3 = constants.web3;
     this.chainId = constants.chainId;
     this.logger = logger;
+    this.tokenPriceModel = models.tokenPriceModel;
   }
 
   public async getProjects() {
@@ -187,15 +189,22 @@ export default class LaunchService {
     var tokenlist = TokenListSelector(this.chainId)
     console.log("tokenlist" ,tokenlist, this.chainId)
     const chainId = this.chainId;
-    var tokenPrice = await getTokensPrice(tokenlist);
+
+    // this is fetching tokenlist data directly from the website now we get the list directly from our db
+    // var tokenPrice = await getTokensPrice(tokenlist);
+    const tokenPriceModelInstance = await this.tokenPriceModel.findOne({chainId : chainId})
+
     const plist = tokenlist.map(function(n) {
-        let contract = new web3.eth.Contract(ERC20_ABI, n.address);
-        if(GAS_TOKEN[chainId] == n.symbol)
-          return web3.eth.getBalance(addr).then(res => tokenPrice[n.symbol]/ 10**n.decimals * res);
-        return contract.methods.balanceOf(addr).call().then(res => tokenPrice[n.symbol]/ 10**n.decimals * res);
-        // .then(
-        //   res => tokenPrice[n.symbol]/ 10**n.decimals* res);
-    })
+      const tokenPrice = tokenPriceModelInstance.symbol.get(n.symbol)
+      console.log(tokenPrice)
+
+      let contract = new web3.eth.Contract(ERC20_ABI, n.address);
+      if(GAS_TOKEN[chainId] == n.symbol)
+        return web3.eth.getBalance(addr).then(res => tokenPrice[n.symbol]/ 10**n.decimals * res);
+      return contract.methods.balanceOf(addr).call().then(res => tokenPrice[n.symbol]/ 10**n.decimals * res);
+      // .then(
+      //   res => tokenPrice[n.symbol]/ 10**n.decimals* res);
+  })
     // console.log("Promise all in", plist);
     
     // let allBalance = await Promise.all(plist).then(function(res){

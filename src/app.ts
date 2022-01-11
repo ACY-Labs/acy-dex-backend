@@ -18,11 +18,11 @@ async function startServer() {
   await require("./loaders").default({ expressApp: app });
 
   //write here just for testing , u should write the service function in crontab.ts
-  const logger = Container.get("logger");
-  const constantsBscMain = Container.get("constantLoader")['bsc-main'];
-  const modelsBscMain    = Container.get('connections')['bsc-main'];
-  const tokenPriceServiceBscMain = new TokenPriceService(modelsBscMain,logger,constantsBscMain.chainId);
-  setInterval(() => tokenPriceServiceBscMain.updateTokensPriceList(constantsBscMain.chainId), 30000);
+  // const logger = Container.get("logger");
+  // const constantsBscMain = Container.get("constantLoader")['bsc-main'];
+  // const modelsBscMain    = Container.get('connections')['bsc-main'];
+  // const tokenPriceServiceBscMain = new TokenPriceService(modelsBscMain,logger,constantsBscMain.chainId);
+  // setInterval(() => tokenPriceServiceBscMain.updateTokensPriceList(constantsBscMain.chainId), 30000);
 
 
   app
