@@ -2,6 +2,9 @@ import "reflect-metadata";
 import config from "./config";
 import express from "express";
 import Logger from "./loaders/logger";
+import TokenPriceService from "./services/tokenPrice";
+import { Container } from "typedi";
+
 
 async function startServer() {
   const app = express();
@@ -13,6 +16,14 @@ async function startServer() {
    * So we are using good old require.
    **/
   await require("./loaders").default({ expressApp: app });
+
+  //write here just for testing , u should write the service function in crontab.ts
+  const logger = Container.get("logger");
+  const constantsBscMain = Container.get("constantLoader")['bsc-main'];
+  const modelsBscMain    = Container.get('connections')['bsc-main'];
+  const tokenPriceServiceBscMain = new TokenPriceService(modelsBscMain,logger,constantsBscMain.chainId);
+  setInterval(() => tokenPriceServiceBscMain.updateTokensPriceList(constantsBscMain.chainId), 30000);
+
 
   app
     .listen(config.port, () => {

@@ -40,8 +40,8 @@ async function startTasks() {
   const massUpdatePolygonBscMain = createTask("* * * * *", () => farmServicePolygonMain.massUpdateFarm());
 
   //Token Price Service
-  const tokenPriceServiceBscMain = new TokenPriceService(modelsBscMain,constantsBscMain.chainId);
-  const updateTokenPriceListBscMain = createTask("* * * * *",() => tokenPriceServiceBscMain.updateTokensPriceList())
+  const tokenPriceServiceBscMain = new TokenPriceService(modelsBscMain,logger,constantsBscMain.chainId);
+  const updateTokenPriceListBscMain = createTask("* * * * *",() => tokenPriceServiceBscMain.updateTokensPriceList(constantsBscMain.chainId))
 
   
 
@@ -51,6 +51,10 @@ async function startTasks() {
   updateTxListPolygonMain.start()
   massUpdateFarmBscMain.start()
   massUpdatePolygonBscMain.start()
+
+  // updateTokenPriceListBscMain.start()
+
+  this.logger.debug("111111111111")
 }
 
 startTasks();

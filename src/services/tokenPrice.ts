@@ -14,17 +14,22 @@ export default class TokenPriceService {
 
     tokenPriceModel: any;
     chainId: any;
+    logger: Logger;
 
 
 
-    constructor(models,chainId) {
+    constructor(models,logger,chainId) {
       this.tokenPriceModel = models.tokenPriceModel;
       this.chainId =  chainId;
+      this.logger = logger;
+
       }
 
-      public async updateTokensPriceList() {
-  
-        const tokenlist = TokenListSelector('97');
+      public async updateTokensPriceList(chainId) {
+        
+
+        console.log("Fetching TokenPriceList data--------------------ChainID is " + this.chainId)
+        const tokenlist = TokenListSelector(this.chainId);
         const searchIdsArray = tokenlist.map(token => token.idOnCoingecko);
       
         const searchIds = searchIdsArray.join('%2C');
@@ -43,7 +48,16 @@ export default class TokenPriceService {
       
           console.log("get price err",e)
         });
-      
+        // if(this.tokenPriceModel.findOne)
+        this.tokenPriceModel.create(
+          {
+           chainId,
+           tokensPrice
+          }
+        )
+        this.logger.debug("Fetching TokenPriceList data--------------------ChainID is " + this.chainId,tokensPrice);
+
+        console.log(tokensPrice)
         return [201, "Fetch TokenPrice List success"];
       }
       

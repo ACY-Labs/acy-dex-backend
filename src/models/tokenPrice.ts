@@ -9,7 +9,6 @@ const TokenPrice = new mongoose.Schema(
     tokenList:
     [
         {
-            name: String,
             symbol: String,   
             price: Number
         }
