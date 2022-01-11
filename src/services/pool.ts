@@ -28,7 +28,7 @@ export default class PoolService {
     this.logger = constants.logger;
     this.userPoolModel = models.userPoolModel;
     this.pairVolumeModel = models.pairVolumeModel;
-    this.web3 = constants.web3;
+    this.web3 = new Web3(constants.web3);
     this.chainId = constants.chainId;
   }
 
@@ -123,8 +123,37 @@ export default class PoolService {
     }
   }
 
+  private delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  public async updateUserPools(walletId, action, txHash, token0, token1) {
+
+    // check if transaction is successful
+    let tryCount = 0;
+    let receipt;
+    while (!receipt) {
+      await this.delay(1000);
+      receipt = await this.web3.eth.getTransactionReceipt(txHash);
+      tryCount++;
+      if (tryCount > 3600) {
+        this.logger.warning(`tx fails to complete within 3600 seconds: ${txHash}`);
+        return -1
+      }
+    }
+
+    if (!receipt.status) {
+      this.logger.info(`updateUserPools failed because tx failed: ${txHash}`);
+      return -1;
+    } else {
+      const res = await this.updateUserPoolsDBRecrod(walletId, action, token0, token1);
+      return res;
+    }
+  }
+
   // FIXME: prevent duplicate adding, use set (token0 and token1 are interchangable)
-  public async updateUserPools(walletId, action, token0, token1) {
+  public async updateUserPoolsDBRecrod(walletId, action, token0, token1) {
+    // process request
     this.logger.debug("updateUserPools called");
     console.log("received param in function ", walletId, action, token0, token1);
     const record = await this.userPoolModel.findOne({ walletId }).exec();
@@ -185,177 +214,177 @@ export default class PoolService {
 
   ///// Fetch pool's general info
 
-//   public async getPoolInfo(token0Symbol, token1Symbol, chainId = 56) {
-//     // FIXME: use pool address as input
-//     // FIXME: ACY token adressOnEth is changed to a very uncommon token addr for avoiding confliction with ETH
-//     // if this collides with other token addr, the generated pairAddr will also collide.
-//     // in a concurrent request, mongo will throw error "No matching document found for id" indicating a race condition happens.
-//     const token0AddrOnMain = supportedTokens.find(item => item.symbol === token0Symbol).addressOnEth;
-//     const token1AddrOnMain = supportedTokens.find(item => item.symbol === token1Symbol).addressOnEth;
+  //   public async getPoolInfo(token0Symbol, token1Symbol, chainId = 56) {
+  //     // FIXME: use pool address as input
+  //     // FIXME: ACY token adressOnEth is changed to a very uncommon token addr for avoiding confliction with ETH
+  //     // if this collides with other token addr, the generated pairAddr will also collide.
+  //     // in a concurrent request, mongo will throw error "No matching document found for id" indicating a race condition happens.
+  //     const token0AddrOnMain = supportedTokens.find(item => item.symbol === token0Symbol).addressOnEth;
+  //     const token1AddrOnMain = supportedTokens.find(item => item.symbol === token1Symbol).addressOnEth;
 
-//     const [_token0, _token1] =
-//     token0AddrOnMain.toLowerCase() < token1AddrOnMain.toLowerCase()
-//         ? [token0AddrOnMain, token1AddrOnMain]
-//         : [token1AddrOnMain, token0AddrOnMain];
-//     const pairAddress = getCreate2Address(
-//       FACTORY_ADDRESS[chainId],
-//       keccak256(["bytes"], [pack(["address", "address"], [_token0, _token1])]),
-//       INIT_CODE_HASH[chainId]
-//     );
-//     console.log("onMainnet token0", token0AddrOnMain);
-//     console.log("onMainnet token1", token1AddrOnMain);
-//     console.log("pairAddress", pairAddress);
+  //     const [_token0, _token1] =
+  //     token0AddrOnMain.toLowerCase() < token1AddrOnMain.toLowerCase()
+  //         ? [token0AddrOnMain, token1AddrOnMain]
+  //         : [token1AddrOnMain, token0AddrOnMain];
+  //     const pairAddress = getCreate2Address(
+  //       FACTORY_ADDRESS[chainId],
+  //       keccak256(["bytes"], [pack(["address", "address"], [_token0, _token1])]),
+  //       INIT_CODE_HASH[chainId]
+  //     );
+  //     console.log("onMainnet token0", token0AddrOnMain);
+  //     console.log("onMainnet token1", token1AddrOnMain);
+  //     console.log("pairAddress", pairAddress);
 
-//     console.log("inside getPoolInfo function now");
-//     // await this.readPoolInfo(pairAddress);
-//     const pairVolume = await this.updatePoolInfo(_token0, _token1, pairAddress);
-//     console.log("end of getPoolInfo");;
-//     return pairVolume;
-//   }
+  //     console.log("inside getPoolInfo function now");
+  //     // await this.readPoolInfo(pairAddress);
+  //     const pairVolume = await this.updatePoolInfo(_token0, _token1, pairAddress);
+  //     console.log("end of getPoolInfo");;
+  //     return pairVolume;
+  //   }
 
-//   private async readPoolInfo(pairAddr) {
-//     let pairRecord = await this.pairVolumeModel.findOne({pairAddr}).exec();
-//     console.log(pairRecord.history[0]);
-//     let latestValidTimestamp = pairRecord.history[pairRecord.history.length-1].time;
-//     latestValidTimestamp.setHours(latestValidTimestamp.getHours() - 3);
+  //   private async readPoolInfo(pairAddr) {
+  //     let pairRecord = await this.pairVolumeModel.findOne({pairAddr}).exec();
+  //     console.log(pairRecord.history[0]);
+  //     let latestValidTimestamp = pairRecord.history[pairRecord.history.length-1].time;
+  //     latestValidTimestamp.setHours(latestValidTimestamp.getHours() - 3);
 
-//     console.log(latestValidTimestamp);
+  //     console.log(latestValidTimestamp);
 
-//     for (let item of pairRecord.history) {
-//       const ts = item.time;
-//       if (ts <= latestValidTimestamp) {
-//         console.log("remove time", ts);
-//       } else {
-//         console.log("found valid time", ts);
-//         break;
-//       }
-//     }
-//   }
+  //     for (let item of pairRecord.history) {
+  //       const ts = item.time;
+  //       if (ts <= latestValidTimestamp) {
+  //         console.log("remove time", ts);
+  //       } else {
+  //         console.log("found valid time", ts);
+  //         break;
+  //       }
+  //     }
+  //   }
 
-//   private async updatePoolInfo(token0, token1, pairAddr) {
-//     const timeDurationToTraceBack = 24*3600*1000; // miliseconds
-//     // get pool address
-//     // get lastBlockNumber, pairHistory from DB
-//     let lastBlockNumber, latestValidTimestamp;
-    
-//     let pairRecord = await this.pairVolumeModel.findOne({pairAddr}).exec();
-//     if (!pairRecord) {
-//       pairRecord = await this.pairVolumeModel.create({pairAddr, lastVolume: {token0: 0, token1: 0}});
-//       this.logger.debug("creating new record in db");
-//       console.log("logging out created pairRecord", pairRecord);
-      
-//       lastBlockNumber = null;
-//       latestValidTimestamp = null;
-//     } else {
-//       lastBlockNumber = pairRecord.lastBlockNumber;
-//       latestValidTimestamp = new Date(Date.now() - timeDurationToTraceBack);
-//     }
+  //   private async updatePoolInfo(token0, token1, pairAddr) {
+  //     const timeDurationToTraceBack = 24*3600*1000; // miliseconds
+  //     // get pool address
+  //     // get lastBlockNumber, pairHistory from DB
+  //     let lastBlockNumber, latestValidTimestamp;
 
-//     // construct contract for this pool
-//     const contract = new this.web3.eth.Contract(PAIR_CONTRACT_ABI, pairAddr);
+  //     let pairRecord = await this.pairVolumeModel.findOne({pairAddr}).exec();
+  //     if (!pairRecord) {
+  //       pairRecord = await this.pairVolumeModel.create({pairAddr, lastVolume: {token0: 0, token1: 0}});
+  //       this.logger.debug("creating new record in db");
+  //       console.log("logging out created pairRecord", pairRecord);
 
-//     // get current block
-//     const currentBlockNumber = await this.web3.eth.getBlockNumber();
-//     // const currentBlock = await this.web3.eth.getBlock(currentBlockNumber);
+  //       lastBlockNumber = null;
+  //       latestValidTimestamp = null;
+  //     } else {
+  //       lastBlockNumber = pairRecord.lastBlockNumber;
+  //       latestValidTimestamp = new Date(Date.now() - timeDurationToTraceBack);
+  //     }
 
-//     // find past swap events with specific contract
-//     const daysToTrace = 1;
+  //     // construct contract for this pool
+  //     const contract = new this.web3.eth.Contract(PAIR_CONTRACT_ABI, pairAddr);
 
-//     const averageBlockTime = 15*1000; // 15 seconds = 15000 ms
-//     const option = {
-//       fromBlock: lastBlockNumber ? lastBlockNumber + 1 : currentBlockNumber - timeDurationToTraceBack / averageBlockTime,
-//       toBlock: currentBlockNumber
-//     };
-//     console.log("lastBlockNumber", lastBlockNumber);
-//     const swaps = await contract.getPastEvents("Swap", option);
-//     console.log("fetched swaps length", swaps.length)
+  //     // get current block
+  //     const currentBlockNumber = await this.web3.eth.getBlockNumber();
+  //     // const currentBlock = await this.web3.eth.getBlock(currentBlockNumber);
 
-//     // remove obsoleted volume, and add new volume
-//     const token0Contract = new this.web3.eth.Contract(PAIR_CONTRACT_ABI, token0);
-//     const token1Contract = new this.web3.eth.Contract(PAIR_CONTRACT_ABI, token1);
-//     const decimal0 = await token0Contract.methods.decimals().call();
-//     const decimal1 = await token1Contract.methods.decimals().call();
-    
-//     //// remove obsolete data from record
-//     let filteredHistory = [...pairRecord.history];
-//     let subtractedVolume = {
-//       amount0In:0, 
-//       amount1In:0, 
-//     };
-//     if (latestValidTimestamp) {
+  //     // find past swap events with specific contract
+  //     const daysToTrace = 1;
 
-//       for (let [idx, item] of filteredHistory.entries()) {
-//         const ts = item.time;
-//         if (ts > latestValidTimestamp) {
-//           filteredHistory.splice(0, idx);
-//           console.log("filteredHistory length", filteredHistory.length)
-//           break;
-//         } else {
-//           console.log("remove data", ts);
-//           subtractedVolume.amount0In += item.amount0In;
-//           subtractedVolume.amount1In += item.amount1In;
-//         }
-//       }
-//     }
-//     //// push new data to record
-//     interface DBSwapEntry {
-//       time: mongooseDate,
-//       amount0In: number,
-//       amount1In: number,
-//     }
-//     const extracted_swaps: (DBSwapEntry[] | DBSwapEntry) = await Promise.all(swaps.map(async (swap) => {
-//       // https://docs.mongodb.com/manual/reference/method/Date/#date--
-//       let blockTimestamp = await this.web3.eth.getBlock(swap.blockNumber);
-//       blockTimestamp = blockTimestamp.timestamp * 1000;  // unix timestamp in ms
-//       console.log("push data", new Date(blockTimestamp));
+  //     const averageBlockTime = 15*1000; // 15 seconds = 15000 ms
+  //     const option = {
+  //       fromBlock: lastBlockNumber ? lastBlockNumber + 1 : currentBlockNumber - timeDurationToTraceBack / averageBlockTime,
+  //       toBlock: currentBlockNumber
+  //     };
+  //     console.log("lastBlockNumber", lastBlockNumber);
+  //     const swaps = await contract.getPastEvents("Swap", option);
+  //     console.log("fetched swaps length", swaps.length)
 
-//       let {amount0In, amount1In, amount0Out, amount1Out} = swap.returnValues;
-//       amount0In = this.getFloat(amount0In, decimal0);
-//       amount1In = this.getFloat(amount1In, decimal1);
-//       amount0Out = this.getFloat(amount0Out, decimal0);
-//       amount1Out = this.getFloat(amount1Out, decimal1);
+  //     // remove obsoleted volume, and add new volume
+  //     const token0Contract = new this.web3.eth.Contract(PAIR_CONTRACT_ABI, token0);
+  //     const token1Contract = new this.web3.eth.Contract(PAIR_CONTRACT_ABI, token1);
+  //     const decimal0 = await token0Contract.methods.decimals().call();
+  //     const decimal1 = await token1Contract.methods.decimals().call();
 
-//       return {
-//         time: blockTimestamp, 
-//         amount0In, 
-//         amount1In, 
-//       };
-//     }));
+  //     //// remove obsolete data from record
+  //     let filteredHistory = [...pairRecord.history];
+  //     let subtractedVolume = {
+  //       amount0In:0, 
+  //       amount1In:0, 
+  //     };
+  //     if (latestValidTimestamp) {
 
-//     console.log("debugg", extracted_swaps)
-//     let addedVolume = {
-//       amount0In:0, 
-//       amount1In:0, 
-//     };
+  //       for (let [idx, item] of filteredHistory.entries()) {
+  //         const ts = item.time;
+  //         if (ts > latestValidTimestamp) {
+  //           filteredHistory.splice(0, idx);
+  //           console.log("filteredHistory length", filteredHistory.length)
+  //           break;
+  //         } else {
+  //           console.log("remove data", ts);
+  //           subtractedVolume.amount0In += item.amount0In;
+  //           subtractedVolume.amount1In += item.amount1In;
+  //         }
+  //       }
+  //     }
+  //     //// push new data to record
+  //     interface DBSwapEntry {
+  //       time: mongooseDate,
+  //       amount0In: number,
+  //       amount1In: number,
+  //     }
+  //     const extracted_swaps: (DBSwapEntry[] | DBSwapEntry) = await Promise.all(swaps.map(async (swap) => {
+  //       // https://docs.mongodb.com/manual/reference/method/Date/#date--
+  //       let blockTimestamp = await this.web3.eth.getBlock(swap.blockNumber);
+  //       blockTimestamp = blockTimestamp.timestamp * 1000;  // unix timestamp in ms
+  //       console.log("push data", new Date(blockTimestamp));
 
-//     // for (let i=0; i<extracted_swaps.length; i++) {
-//     for (let newSwap of extracted_swaps) {
-//       // let newSwap: DBSwapEntry = extracted_swaps[i];
-//       console.log("debug", newSwap)
-//       addedVolume.amount0In += newSwap.amount0In;
-//       addedVolume.amount1In += newSwap.amount1In;
-//     }
-    
+  //       let {amount0In, amount1In, amount0Out, amount1Out} = swap.returnValues;
+  //       amount0In = this.getFloat(amount0In, decimal0);
+  //       amount1In = this.getFloat(amount1In, decimal1);
+  //       amount0Out = this.getFloat(amount0Out, decimal0);
+  //       amount1Out = this.getFloat(amount1Out, decimal1);
 
-//     // calculate new volume
-//     const newToken0Vol = pairRecord.lastVolume.token0 + addedVolume.amount0In - subtractedVolume.amount0In;
-//     const newToken1Vol = pairRecord.lastVolume.token1 + addedVolume.amount1In - subtractedVolume.amount1In;
-//     console.log("newVol, pairRecord.lastVolume.token0 + addedVolume.amount0In - subtractedVolume.amount0In", newToken0Vol, pairRecord.lastVolume.token0, addedVolume.amount0In, subtractedVolume.amount0In);
-//     console.log("newVol, pairRecord.lastVolume.token1 + addedVolume.amount1In - subtractedVolume.amount1In", newToken1Vol, pairRecord.lastVolume.token1, addedVolume.amount1In, subtractedVolume.amount1In);
+  //       return {
+  //         time: blockTimestamp, 
+  //         amount0In, 
+  //         amount1In, 
+  //       };
+  //     }));
 
-//     // // store swap records
-//     pairRecord.history = [...filteredHistory, ...extracted_swaps];
-//     pairRecord.lastVolume = {token0: newToken0Vol, token1: newToken1Vol};
-//     pairRecord.lastBlockNumber = currentBlockNumber;
-//     const savedRecord = await pairRecord.save();
+  //     console.log("debugg", extracted_swaps)
+  //     let addedVolume = {
+  //       amount0In:0, 
+  //       amount1In:0, 
+  //     };
 
-//     console.log("latest length", pairRecord.history.length);
+  //     // for (let i=0; i<extracted_swaps.length; i++) {
+  //     for (let newSwap of extracted_swaps) {
+  //       // let newSwap: DBSwapEntry = extracted_swaps[i];
+  //       console.log("debug", newSwap)
+  //       addedVolume.amount0In += newSwap.amount0In;
+  //       addedVolume.amount1In += newSwap.amount1In;
+  //     }
 
-//     return pairRecord.lastVolume;
-//   }
 
-//   // helper functions
-//   private getFloat(bigNum, decimals) {
-//     return (new BigNumber(bigNum).div(new BigNumber(`1e+${decimals}`))).toNumber();
-//   }
+  //     // calculate new volume
+  //     const newToken0Vol = pairRecord.lastVolume.token0 + addedVolume.amount0In - subtractedVolume.amount0In;
+  //     const newToken1Vol = pairRecord.lastVolume.token1 + addedVolume.amount1In - subtractedVolume.amount1In;
+  //     console.log("newVol, pairRecord.lastVolume.token0 + addedVolume.amount0In - subtractedVolume.amount0In", newToken0Vol, pairRecord.lastVolume.token0, addedVolume.amount0In, subtractedVolume.amount0In);
+  //     console.log("newVol, pairRecord.lastVolume.token1 + addedVolume.amount1In - subtractedVolume.amount1In", newToken1Vol, pairRecord.lastVolume.token1, addedVolume.amount1In, subtractedVolume.amount1In);
+
+  //     // // store swap records
+  //     pairRecord.history = [...filteredHistory, ...extracted_swaps];
+  //     pairRecord.lastVolume = {token0: newToken0Vol, token1: newToken1Vol};
+  //     pairRecord.lastBlockNumber = currentBlockNumber;
+  //     const savedRecord = await pairRecord.save();
+
+  //     console.log("latest length", pairRecord.history.length);
+
+  //     return pairRecord.lastVolume;
+  //   }
+
+  //   // helper functions
+  //   private getFloat(bigNum, decimals) {
+  //     return (new BigNumber(bigNum).div(new BigNumber(`1e+${decimals}`))).toNumber();
+  //   }
 }
