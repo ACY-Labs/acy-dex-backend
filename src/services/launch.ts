@@ -4,6 +4,8 @@ import { Logger, loggers } from "winston";
 import { ERC20_ABI, FARM_ADDRESS, GAS_TOKEN} from "../constants";
 import TokenListSelector from "../constants/tokenAddress"
 import { sleep, getTokensPrice } from "../util";
+import moment from "moment";
+import { Container } from "typedi"; 
 
 export default class LaunchService {
   launchModel: any;
@@ -37,16 +39,16 @@ export default class LaunchService {
       let tempRes = {}
       tempRes = {
         projectID: obj.projectID,
-        projectName: obj.projectName,
-        projectToken: obj.projectToken,
-        // projectStatus: obj.projectStatus,
-        tokenPrice: obj.tokenPrice,
-        totalRaise: obj.totalRaise,
-        totalSale: obj.totalSale,
+        projectName: obj.basicInfo.projectName,
+        projectToken: obj.basicInfo.projectToken,
+        projectTokenUrl: obj.basicInfo.projectTokenUrl,
+        tokenPrice: obj.saleInfo.tokenPrice,
+        totalRaise: obj.saleInfo.totalRaise,
+        totalSale: obj.saleInfo.totalSale,
       }
       // categorized project into Ongoing/Upcoming/Ended
-      let saleStart = obj.saleStart;
-      let saleEnd = obj.saleEnd;
+      let saleStart = obj.scheduleInfo.saleStart;
+      let saleEnd = obj.scheduleInfo.saleEnd;
       let current = new Date();
       if(current < saleStart) {
         tempRes["projectStatus"] = "Upcoming"
@@ -56,12 +58,13 @@ export default class LaunchService {
         tempRes["projectStatus"] = "Ongoing"
       }
 
-      let temp1 = new Date(obj.saleEnd)
-      let temp2 = new Date(obj.saleStart)
+      let temp1 = new Date(obj.scheduleInfo.saleEnd)
+      let temp2 = new Date(obj.scheduleInfo.saleStart)
       let dateTime1 = temp1.toLocaleDateString() + ' ' + temp1.toTimeString().substring(0, temp1.toTimeString().indexOf("GMT"));
       let dateTime2 = temp2.toLocaleDateString() + ' ' + temp2.toTimeString().substring(0, temp2.toTimeString().indexOf("GMT"));
       tempRes["saleStart"] = dateTime1;
       tempRes["saleEnd"] = dateTime2;
+
       result.push(tempRes);
     });
     this.logger.debug("end getProjects");
@@ -122,17 +125,40 @@ export default class LaunchService {
     // already allocated, cannot allocate again, return old allocation amount
     if(userProject.allocationAmount !== 0) return userProject;
 
-    // TODO (Gary 2021.1.6): float with time and total pool size
     console.log("allBalance:");
-    // TODO (Gary 2021.1.5: the getBalance should be called only once a day, update the amount in database)
-    let allBalance = await this.getBalance(walletId);
+    // TODO (Gary 2021.1.5): the getBalance should be called only once a day, update the amount in database
+    // let allBalance = await this.getBalance(walletId);
+    let allBalance = 100;
     console.log("allBalance:", allBalance);
     console.log(allBalance);
+
+    let bonus = await this.getBonus(userProject)
     
-    let allocationAmount = Math.round(
-      50 + Math.random() * 200
-    )
-    userProject.allocationAmount = allocationAmount;
+    // TODO: actual allocation method
+    let launchProject = await this.getLaunchProjectByToken(projectToken);
+    let allocationInfo = launchProject.allocationInfo
+    // balance
+    let balanceAllocation = allBalance * launchProject.allocationInfo.parameters.rateBalance * Math.random() * 2
+    if (balanceAllocation > launchProject.allocationInfo.maxAlloc) {
+      balanceAllocation = launchProject.allocationInfo.maxAlloc
+    }
+    if (balanceAllocation < launchProject.allocationInfo.minAlloc) {
+      balanceAllocation = launchProject.allocationInfo.minAlloc
+    }
+    // bonus
+    let bonusAllocation = bonus.swapBonus * launchProject.allocationInfo.parameters.rateSwap + bonus.liquidityBonus * launchProject.allocationInfo.parameters.rateLiquidity + bonus.acyBonus * launchProject.allocationInfo.parameters.rateAcy
+    // total
+    let allocationAmount = Math.round(balanceAllocation + bonusAllocation)
+
+    // if (Date.now > launchProject.scheduleInfo.saleStart && Date.now < launchProject.scheduleInfo.saleEnd) {
+    //   // TODO: dynamic update
+    //   let w_list = allocationInfo.processRecords.w
+    // } else if (Date.now <= launchProject.scheduleInfo.saleStart) {
+    //   // TODO: update w0
+    // }
+
+    // TODO: update user allocation info
+    user.projects[projectIndex].allocationAmount = allocationAmount;
     await user.save((err) => {
       if (err) {
         this.logger.error(`Mongo saving user record error: ${err}`);
@@ -140,10 +166,17 @@ export default class LaunchService {
         this.logger.info(`Allocation made, amount: ${allocationAmount}`)
       }
     })
+    // TODO: update total allocation info
+    launchProject.allocationInfo.states.allocatedAmount += allocationAmount;
+    await launchProject.save((err) => {
+      if (err) {
+        this.logger.error(`Mongo saving record error: ${err}`);
+        throw new Error("error when saving launch project")
+      }
+    })
+
     return userProject;
   }
-
-
 
   public async getBalance(addr: String) {
     console.log(`getBalance`, addr);
@@ -155,15 +188,15 @@ export default class LaunchService {
     console.log("tokenlist" ,tokenlist, this.chainId)
     const chainId = this.chainId;
     var tokenPrice = await getTokensPrice(tokenlist);
-    const plist = tokenlist.map(function(n){
+    const plist = tokenlist.map(function(n) {
         let contract = new web3.eth.Contract(ERC20_ABI, n.address);
         if(GAS_TOKEN[chainId] == n.symbol)
-          return web3.eth.getBalance(addr).then(res => tokenPrice[n.symbol]/ 10**n.decimals* res);
-        return contract.methods.balanceOf(addr).call().then(res => tokenPrice[n.symbol]/ 10**n.decimals* res);
+          return web3.eth.getBalance(addr).then(res => tokenPrice[n.symbol]/ 10**n.decimals * res);
+        return contract.methods.balanceOf(addr).call().then(res => tokenPrice[n.symbol]/ 10**n.decimals * res);
         // .then(
         //   res => tokenPrice[n.symbol]/ 10**n.decimals* res);
     })
-    console.log("Promise all in", plist);
+    // console.log("Promise all in", plist);
     
     // let allBalance = await Promise.all(plist).then(function(res){
     //   console.log('Promise then',res);
@@ -178,10 +211,35 @@ export default class LaunchService {
 
     let allBalance = await Promise.all(plist).then((res) => {
       console.log("HERE:", res)
-      return res.reduce((total,a) => total+a,0)
+      return res.reduce((total, a) => total + a, 0)
     });
     console.log("Promise all out", allBalance);
     return allBalance;
+  }
+
+  public async getBonus(userProject) {
+    const swapBonusList: any[] = userProject.allocationBonus.filter(item => item.bonusName == "swap")
+    const liquidityBonusList: any[] = userProject.allocationBonus.filter(item => item.bonusName == "liquidity")
+    const acyBonusList: any[] = userProject.allocationBonus.filter(item => item.bonusName == "acy")
+
+    let swapBonus = 0
+    let liquidityBonus = 0
+    let acyBonus = 0
+    for (var item in swapBonusList) {
+      swapBonus += swapBonusList[item].bonusAmount
+    }
+    for (var item in liquidityBonusList) {
+      liquidityBonus += liquidityBonusList[item].bonusAmount
+    }
+    for (var item in acyBonusList) {
+      acyBonus += acyBonusList[item].bonusAmount
+    }
+    console.log("bonus made:", swapBonus, liquidityBonus, acyBonus)
+    return {
+      swapBonus: swapBonus,
+      liquidityBonus: liquidityBonus,
+      acyBonus: acyBonus
+    }
   }
 
   private calcAllocationLeft(userProject: any) {
@@ -193,7 +251,7 @@ export default class LaunchService {
     let totalAllocationAmount = userProject.allocationAmount + bonusAmount;
     let allocationLeft = totalAllocationAmount - userProject.allocationUsed;
     return allocationLeft;
-  } 
+  }
 
   public async useAllocation(walletId: String, projectToken: String, amount: number) {
     this.logger.info(`useAllocation ${walletId} - ${projectToken} - ${amount}`);
@@ -204,14 +262,15 @@ export default class LaunchService {
     }).exec()
     let projectIndex = user.projects.findIndex(item => item.projectToken === projectToken);
     let userProject = user.projects[projectIndex];
-
     this.logger.info(`userProject ${userProject}`);
 
+    // only allow allocation less than limitation
     let allocationLeft = this.calcAllocationLeft(userProject);
     if(amount > allocationLeft) {
       throw new Error("not enough allocation");
     }
 
+    // actual record allocation used
     userProject.allocationUsed = Math.round(Number(userProject.allocationUsed) + Number(amount));
     await user.save((err) => {
       if (err) {
@@ -219,16 +278,122 @@ export default class LaunchService {
         throw new Error("error when saving allocation")
       }
     })
+
+    // store allocation in cache, in order to calc allocation using during period
+    let allocationCache: Object = Container.get("allocationCache");
+    let projectAllocationCache = allocationCache[projectToken.toString()];
+    if (!projectAllocationCache) {
+      projectAllocationCache = 0;
+    }
+    projectAllocationCache += amount;
+    Container.set("allocationCache", allocationCache);
+
+    // TODO (Gary): add amount to soldAmount in allocation info (check me!)
+    let launchProject = await this.getLaunchProjectByToken(projectToken);
+    launchProject.allocationInfo.states.soldAmount += amount;
+    await launchProject.save((err) => {
+      if (err) {
+        this.logger.error(`Mongo saving record error: ${err}`);
+        throw new Error("error when saving launch project")
+      }
+    })
+
     return userProject;
   }
 
-  public async bonusAllocation(walletId: String, projectToken: String, bonusName: String) {
-    this.logger.info(`bonusAllocation ${walletId} - ${projectToken} - ${bonusName}`);
+  public async bonusAllocation(walletId: String, projectToken: String, bonusName: String, T: Number) {
+    this.logger.info(`bonusAllocation ${walletId} - ${projectToken} - ${bonusName} - ${T}`);
     let user = await this.userLaunchModel.findOne({
       walletId: walletId
     }).exec()
+    if (!user) {
+      this.logger.info(`new user, start creation`);
+      let block = true;
+      await this.userLaunchModel.create({
+        walletId
+      }, (err, data) => {
+        if (err) {
+          this.logger.error(`Mongo create new record error ${err}`);
+          throw new Error("Create user Error.");
+        }
+        block = false;
+        this.logger.info(`Mongo created a new user launch record`);
+      })
+
+      // wait for user creation ready
+      while (block) {
+        await sleep(10);
+      }
+      user = await this.userLaunchModel.findOne({
+        walletId: walletId
+      }).exec()
+    }
+
+    // if project not exists, create first
     let projectIndex = user.projects.findIndex(item => item.projectToken === projectToken);
-    let userProject = user.projects[projectIndex];
+    if (projectIndex === -1) {
+      user.projects.push({
+        projectToken: projectToken,
+        allocationAmount: 0,
+        allocationUsed: 0
+      });
+      projectIndex = user.projects.length - 1;
+    }
+    let userProject = user.projects[projectIndex];    
+    let allocationBonus = userProject.allocationBonus;
+
+    let launchProject = await this.getLaunchProjectByToken(projectToken);
+    if (!launchProject) {
+      throw new Error("No such projectToken")
+    }
+
+    // add specific bonus type
+    let bonusAmount = 0;
+    switch (bonusName) {
+      case "swap":
+        let rateSwap = launchProject.allocationInfo.parameters.rateSwap;
+        bonusAmount = Number(T) * Number(rateSwap);
+        break;
+      
+      case "liquidity":
+        let rateLiquidity = launchProject.allocationInfo.parameters.rateLiquidity;
+        bonusAmount = Number(T) * Number(rateLiquidity);
+        break;
+
+      case "acy":
+        let rateAcy = launchProject.allocationInfo.parameters.rateAcy;
+        bonusAmount = Number(T) * Number(rateAcy);
+        break;
+      
+      default:
+        return false;
+    }
+
+    // take care of allocationBonus data structure
+    // let bonusIndex = allocationBonus.findIndex(item => item.bonusName === bonusName);
+    // if (bonusIndex === -1) {
+    //   allocationBonus.push({
+    //     bonusName: bonusName,
+    //     bonusAmount: bonusAmount
+    //   })
+    // } else {
+    //   allocationBonus[bonusIndex].bonusAmount = bonusAmount;
+    //   allocationBonus[bonusIndex].achieveTime = new Date();
+    // }
+    allocationBonus.push({
+      bonusName: bonusName,
+      bonusAmount: bonusAmount,
+      achieveTime: new Date()
+    })
+    // TODO (Gary): fix
+
+    await user.save((err) => {
+      if (err) {
+        this.logger.error(`Mongo saving user record error: ${err}`);
+        throw new Error("error when saving allocation")
+      }
+    })
+    return bonusAmount;
   }
 
   public async purchaseRecord(walletId: String, projectToken: String, amount: Number) {
@@ -237,8 +402,6 @@ export default class LaunchService {
     let user = await this.userLaunchModel.findOne({
       walletId: walletId
     }).exec()
-    let allocationRemainder = user.allocationAmount - user.allocationUsed
-    // token
   }
 
   public async vestingRecord(walletId: String, projectToken: String, amount: Number) {
@@ -247,8 +410,6 @@ export default class LaunchService {
     let user = await this.userLaunchModel.findOne({
       walletId: walletId
     }).exec()
-    let allocationRemainder = user.allocationAmount - user.allocationUsed
-    // token
   }
 
   public async getAllocationInfo(walletId: String, projectToken: String) {
@@ -272,4 +433,128 @@ export default class LaunchService {
     }
   }
 
+  public async createProjects() {
+    // bsc-test contract, for test only
+    await this.launchModel.create({
+      projectID: 1,
+      basicInfo: {
+        projectName: 'Paycer',
+        poolID: 9,
+        projectToken: 'PCR',
+        projectTokenUrl: 'https://www.gitbook.com/cdn-cgi/image/width=40,height=40,fit=contain,dpr=1.5,format=auto/https%3A%2F%2Fpaycer.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252F-MhxXu45T290Q1xsWzti%252Ficon%252FaSZLRb7nNeee5FXyaNmq%252FPaycer%2520Logo%2520Icon.png%3Falt%3Dmedia%26token%3D2ba11bfa-6fd0-4a15-a004-7f474267d3db',
+        contractAddress: '0x6e0EC29eA8afaD2348C6795Afb9f82e25F196436'
+      },
+      saleInfo: {
+        tokenPrice: 0.055,
+        totalRaise: 100000,
+        totalSale: 1818181
+      },
+      scheduleInfo: {
+        regStart: '2021-12-15T16:00:00Z',
+        regEnd: "2022-01-09T16:00:00Z",
+        saleStart: "2022-01-09T20:00:00Z",
+        saleEnd: "2022-01-20T20:00:00Z"
+      },
+      allocationInfo: {
+        parameters: {
+          minAlloc: 0,
+          maxAlloc: 100,
+          rateBalance: 1,
+          rateSwap: 1,
+          rateLiquidity: 1,
+          rateAcy: 1,
+          alertProportion: 0.5,
+          T: 10
+        },
+        states: {
+          allocatedAmount: 0,
+          soldAmount: 0
+        },
+        processRecords: []
+      },
+      contextData: "{\"tokenLabels\": [\"DeFi\",\"BSC\", \"Polygon\", \"No.1\"], \"projectDescription\": [\"Paycer is building a bridge protocol to connect traditional and decentralized finance. This will support the mass market adoption of decentralized finance (DeFi) to fix the broken low interest banking system.\", \"The Paycer protocol is the core engine and includes a solid smart contract architecture to consume different DeFi services. The smart-contract-based protocol will include Paycer's decentralized business logic, including staking, liquidity mining, yield farming, investment strategies, lending, and more. It will be able to interact with DeFi protocols from different blockchains and will also implement automated risk checks. In this chapter, the Paycer protocol is discussed in more detail, including its technical aspects and architecture.\", \"The Paycer platform is a web application that will be accessible via a website and, later, via an app. The platform will offer numerous functions and financial services and will be primarily a B2C platform targeting mainstream customers. The Paycer protocol will act as a second blockchain-based backend for the Paycer platform and will connect it with the DeFi and blockchain space. The Paycer platform will link the Paycer protocol to the existing banking system, enabling a bridge between traditional and decentralized banking.\" ], \"posterUrl\": \"https://miro.medium.com/max/1050/1*dNe1pHMlsKqVdTYOulVnVw.jpeg\", \"tokenLogoUrl\": \"https://www.gitbook.com/cdn-cgi/image/width=40,height=40,fit=contain,dpr=1.5,format=auto/https%3A%2F%2Fpaycer.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252F-MhxXu45T290Q1xsWzti%252Ficon%252FaSZLRb7nNeee5FXyaNmq%252FPaycer%2520Logo%2520Icon.png%3Falt%3Dmedia%26token%3D2ba11bfa-6fd0-4a15-a004-7f474267d3db\"}"
+    }, (err, data) => {
+      if (err) {
+        this.logger.error(`Mongo create new record error ${err}`);
+        throw new Error("Create launch project Error.");
+      }
+      this.logger.info(`Mongo created a new launch project record`);
+    })
+  }
+
+  private async getLaunchProjectByToken(projectToken: String) {
+    let data = await this.launchModel.findOne({
+      'basicInfo.projectToken': projectToken
+    }).exec();
+    return data;
+  }
+
+  private async updateAllocationParameters(projectToken: String) {
+    let launchProject = await this.getLaunchProjectByToken(projectToken);
+    let allocationInfo = launchProject.allocationInfo
+
+    // retrieve parametes needed
+    const allocatedAmount = allocationInfo.states.allocatedAmount;
+    const soldAmount = allocationInfo.states.soldAmount; // TODO: update using soldAmount, since everyone can buy ONLY ONCE
+    const processRecords = allocationInfo.processRecords // [{time, w}]
+    const T = allocationInfo.parameters.T
+    const alertProportion = allocationInfo.parameters.alertProportion
+    const totalRaise = launchProject.saleInfo.totalRaise
+
+    // TODO: actual update algo
+    if (totalRaise <= soldAmount) return launchProject; // if already sold out, no need to update
+    let lastAllocationAmount = 0
+    let w_last = 0
+    for (var item in processRecords) {
+      lastAllocationAmount += processRecords[item].w
+      if (Number(item) == processRecords.length - 1) {
+        w_last = processRecords[item].w
+      }
+    }
+    let w_new = allocatedAmount - lastAllocationAmount
+    let beta = w_new / w_last
+    let remainingT = T - processRecords.length
+    let tmp = w_last
+    let estimatedSell = 0
+    for (var i = 0; i < remainingT; i++) {
+      tmp *= beta
+      estimatedSell += tmp
+    }
+
+    let eta = estimatedSell / (totalRaise - allocatedAmount) // the **ratio**
+    console.assert(eta > 0, "error: eta should be greater than 0!")
+
+    // update
+    if (eta <= alertProportion) { // update
+      launchProject.allocationInfo.parameters.maxAlloc /= eta
+      launchProject.allocationInfo.parameters.minAlloc /= eta
+      launchProject.allocationInfo.parameters.rate_balance /= eta
+    }
+    launchProject.allocationInfo.processRecords.push({ w: w_new, endTime: new Date() })
+
+
+    let allocationCache = Container.get("allocationCache");
+    // NOTE (Gary): please check if the cache is needed HERE
+    // let w_latest = allocationCache[projectToken.toString()];
+    // if (!w_latest) {
+    //   w_latest = 0;
+    // }
+    // launchProject.allocationInfo.processRecords.push({
+    //   w: w_latest
+    // })
+
+    // reset allocation cache
+    allocationCache[projectToken.toString()] = 0;
+    Container.set("allocationCache", allocationCache);
+
+    // update launch project to db
+    await launchProject.save((err) => {
+      if (err) {
+        this.logger.error(`Mongo saving record error: ${err}`);
+        throw new Error("error when saving launch project")
+      }
+    })
+    return launchProject;
+
+  }
 }

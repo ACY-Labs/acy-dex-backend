@@ -1,5 +1,5 @@
 import { Service, Inject } from "typedi";
-import chainTokens from "../constants/chainTokens";
+import TokenListSelector from "../constants/tokenAddress";
 import BigNumber from "bignumber.js";
 
 
@@ -16,7 +16,7 @@ export default class UserService {
   ) { 
     this.userInfoModel = models.userInfoModel;
     this.chainId = chainId;
-    this.tokenList = chainTokens[chainId];
+    this.tokenList = TokenListSelector(chainId.toString());
   }
     // constructor(
     //     @Inject("userModel") private userInfoModel,

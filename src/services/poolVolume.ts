@@ -9,9 +9,9 @@ import {
     HISTORICAL_DATA_UPDATE_COUNT,
     RPC_URL
   } from "../constants";
-import tokenList from "../constants/chainTokens";
 import {getPairAddress} from "../util/index";
 import Web3 from "web3";
+import TokenListSelector from "../constants/tokenAddress";
 @Service()
 export default class PoolVolumeService {
 
@@ -27,7 +27,7 @@ export default class PoolVolumeService {
     this.pairVolumeModel = models.pairVolumeModel;
     this.chainId = chainId;
     this.web3 = new Web3(RPC_URL[this.chainId]);
-    this.supportedTokens = tokenList[chainId];
+    this.supportedTokens = TokenListSelector(chainId.toString());
   }
 
     // constructor(
