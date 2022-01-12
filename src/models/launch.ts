@@ -34,10 +34,6 @@ const Launch = new mongoose.Schema(
         type: String,
         required: true
       },
-      contractAddress: {
-        type: String,
-        required: true
-      }
     },
     saleInfo: {
       tokenPrice: {

@@ -169,7 +169,7 @@ export default class LaunchService {
       }
     })
     // TODO: update total allocation info
-    launchProject.allocationInfo.states.allocatedAmount += allocationAmount;
+    // launchProject.allocationInfo.states.allocatedAmount += allocationAmount;
     await launchProject.save((err) => {
       if (err) {
         this.logger.error(`Mongo saving record error: ${err}`);
@@ -202,8 +202,6 @@ export default class LaunchService {
       if(GAS_TOKEN[chainId] == n.symbol)
         return web3.eth.getBalance(addr).then(res => tokenPrice[n.symbol]/ 10**n.decimals * res);
       return contract.methods.balanceOf(addr).call().then(res => tokenPrice[n.symbol]/ 10**n.decimals * res);
-      // .then(
-      //   res => tokenPrice[n.symbol]/ 10**n.decimals* res);
   })
     // console.log("Promise all in", plist);
     
