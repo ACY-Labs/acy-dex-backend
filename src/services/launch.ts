@@ -129,8 +129,8 @@ export default class LaunchService {
 
     console.log("allBalance:");
     // TODO (Gary 2021.1.5): the getBalance should be called only once a day, update the amount in database
-    // let allBalance = await this.getBalance(walletId);
-    let allBalance = 100;
+    let allBalance = await this.getBalance(walletId);
+    // let allBalance = 100;
     console.log("allBalance:", allBalance);
     console.log(allBalance);
 
@@ -192,21 +192,32 @@ export default class LaunchService {
     var tokenlist = TokenListSelector(this.chainId)
     console.log("tokenlist" ,tokenlist, this.chainId)
     const chainId = this.chainId;
+    var tokenPrice = await getTokensPrice(tokenlist);
 
-    // this is fetching tokenlist data directly from the website now we get the list directly from our db
-    // var tokenPrice = await getTokensPrice(tokenlist);
-    const tokenPriceModelInstance = await this.tokenPriceModel.findOne({chainId : chainId})
+    const plist = tokenlist.map(async function(n) {
+        let contract = new web3.eth.Contract(ERC20_ABI, n.address);
+        if(GAS_TOKEN[chainId] == n.symbol){
+          
+          return await web3.eth.getBalance(addr).then(res => {
+            
+            console.log(res)
 
-    const plist = tokenlist.map(function(n) {
-      const tokenPrice = tokenPriceModelInstance.symbol.get(n.symbol)
-      console.log(tokenPrice)
-
-      let contract = new web3.eth.Contract(ERC20_ABI, n.address);
-      if(GAS_TOKEN[chainId] == n.symbol)
-        return web3.eth.getBalance(addr).then(res => tokenPrice[n.symbol]/ 10**n.decimals * res);
-      return contract.methods.balanceOf(addr).call().then(res => tokenPrice[n.symbol]/ 10**n.decimals * res);
-  })
-    // console.log("Promise all in", plist);
+            return tokenPrice[n.symbol]/ 10**n.decimals * res
+          })
+        }
+        else {
+        return await contract.methods.balanceOf(addr).call().then(res => 
+          {
+          console.log(res)
+ 
+          return tokenPrice[n.symbol]/ 10**n.decimals * res
+          }
+          );
+        }
+        // .then(
+        //   res => tokenPrice[n.symbol]/ 10**n.decimals* res);
+    })
+    console.log("Promise all in", plist);
     
     // let allBalance = await Promise.all(plist).then(function(res){
     //   console.log('Promise then',res);
