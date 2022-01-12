@@ -6,6 +6,7 @@ import TokenListSelector from "../constants/tokenAddress"
 import { sleep, getTokensPrice } from "../util";
 import moment from "moment";
 import { Container } from "typedi"; 
+import UserService from "./user";
 
 export default class LaunchService {
   launchModel: any;
@@ -219,21 +220,8 @@ export default class LaunchService {
           }
           );
         }
-        // .then(
-        //   res => tokenPrice[n.symbol]/ 10**n.decimals* res);
     })
     console.log("Promise all in", plist);
-    
-    // let allBalance = await Promise.all(plist).then(function(res){
-    //   console.log('Promise then',res);
-    //   let format_list = [];
-    //   res.map(function(b:string){
-    //     format_list.push(web3.utils.fromWei(b));
-    //   })
-    //   return format_list;
-    // }).catch((err)=>{
-    //   console.log("Errrrrrrrrrrrrrrrr", err);
-    // });
 
     let allBalance = await Promise.all(plist).then((res) => {
       console.log("HERE:", res)
@@ -327,8 +315,8 @@ export default class LaunchService {
     return userProject;
   }
 
-  public async bonusAllocation(walletId: String, projectToken: String, bonusName: String, T: Number) {
-    this.logger.info(`bonusAllocation ${walletId} - ${projectToken} - ${bonusName} - ${T}`);
+  public async bonusAllocation(walletId: String, bonusName: String, T: Number) {
+    this.logger.info(`bonusAllocation ${walletId} - ${bonusName} - ${T}`);
     let user = await this.userLaunchModel.findOne({
       walletId: walletId
     }).exec()
@@ -354,64 +342,44 @@ export default class LaunchService {
         walletId: walletId
       }).exec()
     }
+    let allBonus = []
 
-    // if project not exists, create first
-    let projectIndex = user.projects.findIndex(item => item.projectToken === projectToken);
-    if (projectIndex === -1) {
-      user.projects.push({
-        projectToken: projectToken,
-        allocationAmount: 0,
-        allocationUsed: 0
-      });
-      projectIndex = user.projects.length - 1;
+    for (var i in user.projects) {
+      let userProject = user.projects[i]
+      let launchProject = await this.getLaunchProjectByToken(userProject.projectToken);
+
+      if (!launchProject) {
+        throw new Error("No such projectToken")
+      }
+
+      // add specific bonus type
+      let bonusAmount = 0;
+      switch (bonusName) {
+        case "swap":
+          let rateSwap = launchProject.allocationInfo.parameters.rateSwap;
+          bonusAmount = Number(T) * Number(rateSwap);
+          break;
+        
+        case "liquidity":
+          let rateLiquidity = launchProject.allocationInfo.parameters.rateLiquidity;
+          bonusAmount = Number(T) * Number(rateLiquidity);
+          break;
+
+        case "acy":
+          let rateAcy = launchProject.allocationInfo.parameters.rateAcy;
+          bonusAmount = Number(T) * Number(rateAcy);
+          break;
+        
+        default:
+          return false;
+      }
+      userProject.allocationBonus.push({
+        bonusName: bonusName,
+        bonusAmount: bonusAmount,
+        achieveTime: new Date()
+      })
+      allBonus.push({projectToken: userProject.projectToken, bonusAmount: bonusAmount})
     }
-    let userProject = user.projects[projectIndex];    
-    let allocationBonus = userProject.allocationBonus;
-
-    let launchProject = await this.getLaunchProjectByToken(projectToken);
-    if (!launchProject) {
-      throw new Error("No such projectToken")
-    }
-
-    // add specific bonus type
-    let bonusAmount = 0;
-    switch (bonusName) {
-      case "swap":
-        let rateSwap = launchProject.allocationInfo.parameters.rateSwap;
-        bonusAmount = Number(T) * Number(rateSwap);
-        break;
-      
-      case "liquidity":
-        let rateLiquidity = launchProject.allocationInfo.parameters.rateLiquidity;
-        bonusAmount = Number(T) * Number(rateLiquidity);
-        break;
-
-      case "acy":
-        let rateAcy = launchProject.allocationInfo.parameters.rateAcy;
-        bonusAmount = Number(T) * Number(rateAcy);
-        break;
-      
-      default:
-        return false;
-    }
-
-    // take care of allocationBonus data structure
-    // let bonusIndex = allocationBonus.findIndex(item => item.bonusName === bonusName);
-    // if (bonusIndex === -1) {
-    //   allocationBonus.push({
-    //     bonusName: bonusName,
-    //     bonusAmount: bonusAmount
-    //   })
-    // } else {
-    //   allocationBonus[bonusIndex].bonusAmount = bonusAmount;
-    //   allocationBonus[bonusIndex].achieveTime = new Date();
-    // }
-    allocationBonus.push({
-      bonusName: bonusName,
-      bonusAmount: bonusAmount,
-      achieveTime: new Date()
-    })
-    // TODO (Gary): fix
 
     await user.save((err) => {
       if (err) {
@@ -419,7 +387,7 @@ export default class LaunchService {
         throw new Error("error when saving allocation")
       }
     })
-    return bonusAmount;
+    return allBonus;
   }
 
   public async purchaseRecord(walletId: String, projectToken: String, amount: Number) {
