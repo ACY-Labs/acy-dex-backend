@@ -73,6 +73,7 @@ const Launch = new mongoose.Schema(
     },
     allocationInfo: {
       parameters: {
+        maxTotalAlloc: { type: Number },
         minAlloc: { type: Number },
         maxAlloc: { type: Number },
         rateBalance: { type: Number },

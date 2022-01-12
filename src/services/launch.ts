@@ -151,6 +151,9 @@ export default class LaunchService {
     let bonusAllocation = bonus.swapBonus * launchProject.allocationInfo.parameters.rateSwap + bonus.liquidityBonus * launchProject.allocationInfo.parameters.rateLiquidity + bonus.acyBonus * launchProject.allocationInfo.parameters.rateAcy
     // total
     let allocationAmount = Math.round(balanceAllocation + bonusAllocation)
+    if (allocationAmount > launchProject.allocationInfo.maxTotalAlloc) {
+      allocationAmount = launchProject.allocationInfo.maxTotalAlloc
+    }
 
     // if (Date.now > launchProject.scheduleInfo.saleStart && Date.now < launchProject.scheduleInfo.saleEnd) {
     //   // TODO: dynamic update
