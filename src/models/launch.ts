@@ -25,11 +25,6 @@ const Launch = new mongoose.Schema(
         required: true,
         index: true,
       },
-      mainCoin:{
-        type: String,
-        required: true,
-        index: true,
-      },
       projectTokenUrl: {
         type: String,
         required: true

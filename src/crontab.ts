@@ -14,6 +14,8 @@ async function startTasks() {
 
   const constantsBscMain = Container.get("constantLoader")['bsc-main'];
   const modelsBscMain    = Container.get('connections')['bsc-main'];
+  const constantsBscTest = Container.get("constantLoader")['bsc-test'];
+  const modelsBscTest    = Container.get('connections')['bsc-test'];
 
   const constantsPolaygonMain = Container.get("constantLoader")['polygon-main'];
   const modelsPolaygonMain    = Container.get('connections')['polygon-main'];
@@ -42,6 +44,8 @@ async function startTasks() {
   //Token Price Service
   const tokenPriceServiceBscMain = new TokenPriceService(modelsBscMain,logger,constantsBscMain.chainId);
   const updateTokenPriceListBscMain = createTask("* * * * *",() => tokenPriceServiceBscMain.updateTokensPriceList(constantsBscMain.chainId))
+  const tokenPriceServiceBscTest = new TokenPriceService(modelsBscMain,logger,constantsBscTest.chainId);
+  const updateTokenPriceListBscTest = createTask("* * * * *",() => tokenPriceServiceBscTest.updateTokensPriceList(constantsBscTest.chainId))
   // ***** mean every minute 
 
   
@@ -54,6 +58,7 @@ async function startTasks() {
   massUpdatePolygonBscMain.start()
 
   updateTokenPriceListBscMain.start()
+  updateTokenPriceListBscTest.start()
 
 }
 
