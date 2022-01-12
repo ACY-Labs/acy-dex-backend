@@ -192,25 +192,30 @@ export default class LaunchService {
     var tokenlist = TokenListSelector(this.chainId)
     console.log("tokenlist" ,tokenlist, this.chainId)
     const chainId = this.chainId;
-    var tokenPrice = await getTokensPrice(tokenlist);
+    
+    // var tokenPrice = await getTokensPrice(tokenlist);
+    // (2022-01-12 Austin)this is fetching tokenlist data directly from the website now we get the list directly from our db
+
+    const tokenPriceModelInstance = await this.tokenPriceModel.findOne({chainId : chainId})
+
 
     const plist = tokenlist.map(async function(n) {
+
+      const tokenPrice = Number(tokenPriceModelInstance.symbol.get(n.symbol))
+      console.log(tokenPrice)
+
         let contract = new web3.eth.Contract(ERC20_ABI, n.address);
         if(GAS_TOKEN[chainId] == n.symbol){
           
           return await web3.eth.getBalance(addr).then(res => {
             
-            console.log(res)
-
-            return tokenPrice[n.symbol]/ 10**n.decimals * res
+            return tokenPrice/ 10**n.decimals * res
           })
         }
         else {
         return await contract.methods.balanceOf(addr).call().then(res => 
-          {
-          console.log(res)
- 
-          return tokenPrice[n.symbol]/ 10**n.decimals * res
+          { 
+          return tokenPrice/ 10**n.decimals * res
           }
           );
         }
