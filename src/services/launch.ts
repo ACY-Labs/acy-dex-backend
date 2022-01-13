@@ -147,23 +147,16 @@ export default class LaunchService {
       balanceAllocation = launchProject.allocationInfo.parameters.minAlloc
     }
     // bonus
-    let bonusAllocation = bonus.swapBonus * launchProject.allocationInfo.parameters.rateSwap + bonus.liquidityBonus * launchProject.allocationInfo.parameters.rateLiquidity + bonus.acyBonus * launchProject.allocationInfo.parameters.rateAcy
+    let bonusAllocation = bonus.swapBonus + bonus.liquidityBonus + bonus.acyBonus
     // total
     let allocationAmount = Math.round(balanceAllocation + bonusAllocation)
     if (allocationAmount > launchProject.allocationInfo.parameters.maxTotalAlloc) {
       allocationAmount = launchProject.allocationInfo.parameters.maxTotalAlloc
     }
 
-    // if (Date.now > launchProject.scheduleInfo.saleStart && Date.now < launchProject.scheduleInfo.saleEnd) {
-    //   // TODO: dynamic update
-    //   let w_list = allocationInfo.processRecords.w
-    // } else if (Date.now <= launchProject.scheduleInfo.saleStart) {
-    //   // TODO: update w0
-    // }
-
     // TODO: update user allocation info
     userProject.allocationAmount = allocationAmount;
-    userProject.allocationLeft = this.calcAllocationLeft(userProject);
+    userProject.allocationLeft = await this.calcAllocationLeft(userProject);
     await user.save((err) => {
       if (err) {
         this.logger.error(`Mongo saving user record error: ${err}`);
@@ -258,13 +251,12 @@ export default class LaunchService {
     }
   }
 
-  private calcAllocationLeft(userProject: any) {
-    let bonusAmount = 0;
-    if(userProject.allocationBonus.length !== 0) {
-      const reduceAddBonus = (prevValue, currentValue) => prevValue + currentValue.bonusAmount;
-      bonusAmount = userProject.allocationBonus.reduce(reduceAddBonus);
-    }
-    let totalAllocationAmount = userProject.allocationAmount + bonusAmount;
+  private async calcAllocationLeft(userProject: any) {
+    let bonus = await this.getBonus(userProject)
+    const bonusAmount = bonus.swapBonus + bonus.liquidityBonus + bonus.acyBonus
+    // Note (GARY): total allocation amount includes bonus!
+    let totalAllocationAmount = userProject.allocationAmount;
+    console.log("allocation left:", totalAllocationAmount, userProject.allocationUsed)
     let allocationLeft = totalAllocationAmount - userProject.allocationUsed;
     return allocationLeft;
   }
@@ -281,14 +273,14 @@ export default class LaunchService {
     this.logger.info(`userProject ${userProject}`);
 
     // only allow allocation less than limitation
-    let allocationLeft = this.calcAllocationLeft(userProject);
+    let allocationLeft = await this.calcAllocationLeft(userProject);
     if(amount > allocationLeft) {
       throw new Error("not enough allocation");
     }
 
     // actual record allocation used
     userProject.allocationUsed = Math.round(Number(userProject.allocationUsed) + Number(amount));
-    userProject.allocationLeft = this.calcAllocationLeft(userProject);
+    userProject.allocationLeft = await this.calcAllocationLeft(userProject);
     await user.save((err) => {
       if (err) {
         this.logger.error(`Mongo saving user record error: ${err}`);
@@ -382,7 +374,7 @@ export default class LaunchService {
         achieveTime: new Date()
       })
       allBonus.push({projectToken: userProject.projectToken, bonusAmount: bonusAmount});
-      userProject.allocationLeft = this.calcAllocationLeft(userProject);
+      userProject.allocationLeft = await this.calcAllocationLeft(userProject);
     }
     await user.save((err) => {
       if (err) {
@@ -426,7 +418,7 @@ export default class LaunchService {
       } else {
         let userProject = user.projects[projectIndex];
         if (!userProject.allocationLeft) {
-          userProject.allocationLeft = this.calcAllocationLeft(userProject);
+          userProject.allocationLeft = await this.calcAllocationLeft(userProject);
           await user.save((err) => {
             if (err) {
               this.logger.error(`Mongo saving user record error: ${err}`);

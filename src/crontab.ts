@@ -54,21 +54,25 @@ async function startTasks() {
   const launchServicePolygonMain = new LaunchService(modelsPolaygonMain, {web3: "", chainId: 137}, logger)
   const allocationParameterPolygonMain = createTask("0,10,20,30,40,50 * * * *", () => launchServicePolygonMain.updateAllAllocationParameters())
 
+
+  const launchServiceBscTest = new LaunchService(modelsBscMain, {web3: "", chainId: 97}, logger)
+  const allocationParameterBscTest = createTask("0,10,20,30,40,50 * * * *", () => launchServiceBscTest.updateAllAllocationParameters())
   // ***** mean every minute 
 
   console.log("start services")
 
-  updateVolumeTaskBscMain.start()
-  updateVolumeTaskPolygonMain.start()
-  updateTxListBscMain.start()
-  updateTxListPolygonMain.start()
-  massUpdateFarmBscMain.start()
-  massUpdatePolygonBscMain.start()
+  // updateVolumeTaskBscMain.start()
+  // updateVolumeTaskPolygonMain.start()
+  // updateTxListBscMain.start()
+  // updateTxListPolygonMain.start()
+  // massUpdateFarmBscMain.start()
+  // massUpdatePolygonBscMain.start()
 
   updateTokenPriceListBscMain.start()
   updateTokenPriceListBscTest.start()
 
   allocationParameterBscMain.start()
+  allocationParameterBscTest.start()
   allocationParameterPolygonMain.start()
 }
 
