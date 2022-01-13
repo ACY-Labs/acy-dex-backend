@@ -128,12 +128,9 @@ export default class LaunchService {
     // already allocated, cannot allocate again, return old allocation amount
     if(userProject.allocationAmount !== 0) return userProject;
 
-    console.log("allBalance:");
     // TODO (Gary 2021.1.5): the getBalance should be called only once a day, update the amount in database
     let allBalance = await this.getBalance(walletId);
     // let allBalance = 100;
-    console.log("allBalance:", allBalance);
-    console.log(allBalance);
 
     let bonus = await this.getBonus(userProject)
     
@@ -165,7 +162,8 @@ export default class LaunchService {
     // }
 
     // TODO: update user allocation info
-    user.projects[projectIndex].allocationAmount = allocationAmount;
+    userProject.allocationAmount = allocationAmount;
+    userProject.allocationLeft = this.calcAllocationLeft(userProject);
     await user.save((err) => {
       if (err) {
         this.logger.error(`Mongo saving user record error: ${err}`);
@@ -181,18 +179,15 @@ export default class LaunchService {
         throw new Error("error when saving launch project")
       }
     })
-
     return userProject;
   }
 
   public async getBalance(addr: String) {
-    console.log(`getBalance`, addr);
     const web3 = new Web3(this.web3);
     const logger = this.logger
     
     // var plist = [];
     var tokenlist = TokenListSelector(this.chainId)
-    console.log("tokenlist" ,tokenlist, this.chainId)
     const chainId = this.chainId;
     
     // var tokenPrice = await getTokensPrice(tokenlist);
@@ -236,7 +231,6 @@ export default class LaunchService {
       console.log("total", total)
       return total
     });
-    console.log("Promise all out", allBalance);
     return allBalance;
   }
 
@@ -257,7 +251,6 @@ export default class LaunchService {
     for (var item in acyBonusList) {
       acyBonus += acyBonusList[item].bonusAmount
     }
-    console.log("bonus made:", swapBonus, liquidityBonus, acyBonus)
     return {
       swapBonus: swapBonus,
       liquidityBonus: liquidityBonus,
@@ -295,6 +288,7 @@ export default class LaunchService {
 
     // actual record allocation used
     userProject.allocationUsed = Math.round(Number(userProject.allocationUsed) + Number(amount));
+    userProject.allocationLeft = this.calcAllocationLeft(userProject);
     await user.save((err) => {
       if (err) {
         this.logger.error(`Mongo saving user record error: ${err}`);
@@ -387,9 +381,9 @@ export default class LaunchService {
         bonusAmount: bonusAmount,
         achieveTime: new Date()
       })
-      allBonus.push({projectToken: userProject.projectToken, bonusAmount: bonusAmount})
+      allBonus.push({projectToken: userProject.projectToken, bonusAmount: bonusAmount});
+      userProject.allocationLeft = this.calcAllocationLeft(userProject);
     }
-
     await user.save((err) => {
       if (err) {
         this.logger.error(`Mongo saving user record error: ${err}`);
@@ -431,6 +425,14 @@ export default class LaunchService {
         return {};
       } else {
         let userProject = user.projects[projectIndex];
+        if (!userProject.allocationLeft) {
+          userProject.allocationLeft = this.calcAllocationLeft(userProject);
+          await user.save((err) => {
+            if (err) {
+              this.logger.error(`Mongo saving user record error: ${err}`);
+            }
+          })
+        }
         return userProject;
       }
     }
