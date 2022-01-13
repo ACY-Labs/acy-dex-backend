@@ -165,7 +165,7 @@ export default class LaunchService {
       }
     })
     // TODO: update total allocation info
-    // launchProject.allocationInfo.states.allocatedAmount += allocationAmount;
+    launchProject.allocationInfo.states.allocatedAmount += allocationAmount;
     await launchProject.save((err) => {
       if (err) {
         this.logger.error(`Mongo saving record error: ${err}`);
@@ -490,6 +490,7 @@ export default class LaunchService {
     let data = await this.launchModel.find().exec();
     console.log("Fetching projects, total: ", data.length)
     const date_ = new Date()
+    console.log(date_, data[0].scheduleInfo.saleStart)
     for (var item in data) {
       console.log("date info: ", data[item].scheduleInfo.saleStart <= date_, data[item].scheduleInfo.saleEnd >= date_)
       if (data[item].scheduleInfo.saleStart <= date_ && data[item].scheduleInfo.saleEnd >= date_ ) {
@@ -522,7 +523,10 @@ export default class LaunchService {
       }
     }
     let w_new = allocatedAmount - lastAllocationAmount
-    let beta = w_new / w_last
+    let beta
+    if (w_last == 0 && w_new == 0) beta = 0
+    else if (w_last == 0) beta = 1
+    else beta = w_new / w_last
     let remainingT = T - processRecords.length
     let tmp = w_last
     let estimatedSell = 0
@@ -530,16 +534,21 @@ export default class LaunchService {
       tmp *= beta
       estimatedSell += tmp
     }
+    
 
     let eta = estimatedSell / (totalRaise - allocatedAmount) // the **ratio**
-    console.assert(eta > 0, "error: eta should be greater than 0!")
+    // console.assert(eta > 0, "error: eta should be greater than 0!")
+    console.log("eta", eta)
+    if (eta < 0.33) eta = 0.33
+    
 
     // update
     if (eta <= alertProportion) { // update
-      launchProject.allocationInfo.parameters.maxAlloc /= eta
-      launchProject.allocationInfo.parameters.minAlloc /= eta
-      launchProject.allocationInfo.parameters.rate_balance /= eta
+      launchProject.allocationInfo.parameters.maxAlloc = launchProject.allocationInfo.parameters.maxAlloc / eta
+      launchProject.allocationInfo.parameters.minAlloc = launchProject.allocationInfo.parameters.minAlloc / eta
+      launchProject.allocationInfo.parameters.rateBalance = launchProject.allocationInfo.parameters.rateBalance / eta
     }
+    console.log("after update:", launchProject.allocationInfo.parameters.maxAlloc)
     launchProject.allocationInfo.processRecords.push({ w: w_new, endTime: new Date() })
 
 
