@@ -140,20 +140,21 @@ export default class LaunchService {
     // TODO: actual allocation method
     let launchProject = await this.getLaunchProjectByToken(projectToken);
     let allocationInfo = launchProject.allocationInfo
+    console.log("allocation parameters: ", launchProject.allocationInfo.maxAlloc, projectToken, launchProject)
     // balance
     let balanceAllocation = allBalance * launchProject.allocationInfo.parameters.rateBalance * Math.random() * 2
-    if (balanceAllocation > launchProject.allocationInfo.maxAlloc) {
-      balanceAllocation = launchProject.allocationInfo.maxAlloc
+    if (balanceAllocation > launchProject.allocationInfo.parameters.maxAlloc) {
+      balanceAllocation = launchProject.allocationInfo.parameters.maxAlloc
     }
-    if (balanceAllocation < launchProject.allocationInfo.minAlloc) {
-      balanceAllocation = launchProject.allocationInfo.minAlloc
+    if (balanceAllocation < launchProject.allocationInfo.parameters.minAlloc) {
+      balanceAllocation = launchProject.allocationInfo.parameters.minAlloc
     }
     // bonus
     let bonusAllocation = bonus.swapBonus * launchProject.allocationInfo.parameters.rateSwap + bonus.liquidityBonus * launchProject.allocationInfo.parameters.rateLiquidity + bonus.acyBonus * launchProject.allocationInfo.parameters.rateAcy
     // total
     let allocationAmount = Math.round(balanceAllocation + bonusAllocation)
-    if (allocationAmount > launchProject.allocationInfo.maxTotalAlloc) {
-      allocationAmount = launchProject.allocationInfo.maxTotalAlloc
+    if (allocationAmount > launchProject.allocationInfo.parameters.maxTotalAlloc) {
+      allocationAmount = launchProject.allocationInfo.parameters.maxTotalAlloc
     }
 
     // if (Date.now > launchProject.scheduleInfo.saleStart && Date.now < launchProject.scheduleInfo.saleEnd) {
