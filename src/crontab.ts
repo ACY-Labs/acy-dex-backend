@@ -6,6 +6,7 @@ import poolVolumeService from "./services/poolVolume";
 import TxService from "./services/tx";
 import FarmService from "./services/farm";
 import TokenPriceService from "./services/tokenPrice"
+import LaunchService from "./services/launch"
 
 async function startTasks() {
   await require("./loaders").default({}, false);
@@ -46,20 +47,26 @@ async function startTasks() {
   const updateTokenPriceListBscMain = createTask("* * * * *",() => tokenPriceServiceBscMain.updateTokensPriceList(constantsBscMain.chainId))
   const tokenPriceServiceBscTest = new TokenPriceService(modelsBscMain,logger,constantsBscTest.chainId);
   const updateTokenPriceListBscTest = createTask("* * * * *",() => tokenPriceServiceBscTest.updateTokensPriceList(constantsBscTest.chainId))
+
+  // allocation parameter service
+  const launchServiceBscMain = new LaunchService(modelsBscMain, {web3: "", chainId: 56}, logger)
+  const allocationParameterBscMain = createTask("* * * * *", () => launchServiceBscMain.updateAllAllocationParameters())
+  const launchServicePolygonMain = new LaunchService(modelsPolaygonMain, {web3: "", chainId: 137}, logger)
+  const allocationParameterPolygonMain = createTask("* * * * *", () => launchServicePolygonMain.updateAllAllocationParameters())
+
   // ***** mean every minute 
+  // updateVolumeTaskBscMain.start()
+  // updateVolumeTaskPolygonMain.start()
+  // updateTxListBscMain.start()
+  // updateTxListPolygonMain.start()
+  // massUpdateFarmBscMain.start()
+  // massUpdatePolygonBscMain.start()
 
-  
-
-  updateVolumeTaskBscMain.start()
-  updateVolumeTaskPolygonMain.start()
-  updateTxListBscMain.start()
-  updateTxListPolygonMain.start()
-  massUpdateFarmBscMain.start()
-  massUpdatePolygonBscMain.start()
-
-  updateTokenPriceListBscMain.start()
-  updateTokenPriceListBscTest.start()
-
+  // updateTokenPriceListBscMain.start()
+  // updateTokenPriceListBscTest.start()
+  console.log("start services")
+  allocationParameterBscMain.start()
+  allocationParameterPolygonMain.start()
 }
 
 startTasks();

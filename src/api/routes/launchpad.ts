@@ -142,10 +142,8 @@ export default (app: Router) => {
         if (!walletId || !projectToken) {
           throw new Error("lack of request parameters");
         }
-        console.log("constants", req)
         const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
         const data = await launchServiceInstance.getAllocationInfo(walletId, projectToken);
-        console.log("allocation data", data)
         return res.status(201).json(data);
       } catch (e) {
         logger.error("🔥 error: %o", e);

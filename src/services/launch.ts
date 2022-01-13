@@ -203,8 +203,9 @@ export default class LaunchService {
 
     const plist = tokenlist.map(async function(n) {
 
-      const tokenPrice = Number(tokenPriceModelInstance.symbol.get(n.symbol))
+      let tokenPrice = Number(tokenPriceModelInstance.symbol.get(n.symbol))
       console.log(tokenPrice)
+      if (isNaN(tokenPrice)) tokenPrice = 0
 
         let contract = new web3.eth.Contract(ERC20_ABI, n.address);
         if(GAS_TOKEN[chainId] == n.symbol){
@@ -222,11 +223,18 @@ export default class LaunchService {
           );
         }
     })
-    console.log("Promise all in", plist);
+    console.log("Promise all in");
 
     let allBalance = await Promise.all(plist).then((res) => {
       console.log("HERE:", res)
-      return res.reduce((total, a) => total + a, 0)
+      let total = 0
+      for (var i in res) {
+        if (!isNaN(res[i])) {
+          total += res[i]
+        }
+      }
+      console.log("total", total)
+      return total
     });
     console.log("Promise all out", allBalance);
     return allBalance;
@@ -484,7 +492,20 @@ export default class LaunchService {
     return data;
   }
 
+  public async updateAllAllocationParameters() {
+    let data = await this.launchModel.find().exec();
+    console.log("Fetching projects, total: ", data.length)
+    const date_ = new Date()
+    for (var item in data) {
+      console.log("date info: ", data[item].scheduleInfo.saleStart <= date_, data[item].scheduleInfo.saleEnd >= date_)
+      if (data[item].scheduleInfo.saleStart <= date_ && data[item].scheduleInfo.saleEnd >= date_ ) {
+        this.updateAllocationParameters(data[item].basicInfo.projectToken)
+      }
+    }
+  }
+
   private async updateAllocationParameters(projectToken: String) {
+    console.log("updating allocation parameters for project with token: ", projectToken)
     let launchProject = await this.getLaunchProjectByToken(projectToken);
     let allocationInfo = launchProject.allocationInfo
 
@@ -492,7 +513,7 @@ export default class LaunchService {
     const allocatedAmount = allocationInfo.states.allocatedAmount;
     const soldAmount = allocationInfo.states.soldAmount; // TODO: update using soldAmount, since everyone can buy ONLY ONCE
     const processRecords = allocationInfo.processRecords // [{time, w}]
-    const T = allocationInfo.parameters.T
+    const T = Number((launchProject.scheduleInfo.saleEnd - launchProject.scheduleInfo.saleStart) / (Number(allocationInfo.parameters.T) * 1000 * 60))
     const alertProportion = allocationInfo.parameters.alertProportion
     const totalRaise = launchProject.saleInfo.totalRaise
 
