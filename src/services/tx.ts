@@ -91,7 +91,7 @@ export default class TxService {
         this.logger.debug("currently data list having %d and adding %d txs", _currList.length,_toAdd.length);
         // this.logger.debug(_currList.slice(-2),_toAdd);
         for(let i=0;i<_toAdd.length;i++){
-            _toAdd[i] = await parseTxData(_toAdd[i].hash, _toAdd[i].timeStamp, _toAdd[i].input.substring(0,10),this.libraryOut, this.chainId);
+            _toAdd[i] = await parseTxData(_toAdd[i].txreceipt_status,_toAdd[i].hash, _toAdd[i].timeStamp, _toAdd[i].input.substring(0,10),this.libraryOut, this.chainId);
         }
 
         _toAdd.push(..._currList);
