@@ -111,13 +111,13 @@ export default (app: Router) => {
     "/allocation/bonus",
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const { walletId, projectToken, bonusName, T } = req.query;
-        if (!walletId || !projectToken || !bonusName || !T) {
+        const { walletId, bonusName, T } = req.query;
+        if (!walletId || !bonusName || !T) {
           throw new Error("lack of request parameters");
         }
 
         const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
-        const data = await launchServiceInstance.bonusAllocation(walletId, projectToken, bonusName, T);
+        const data = await launchServiceInstance.bonusAllocation(walletId, bonusName, T);
         return res.status(201).json({
           code: 0,
           msg: data
@@ -142,10 +142,8 @@ export default (app: Router) => {
         if (!walletId || !projectToken) {
           throw new Error("lack of request parameters");
         }
-        console.log("constants", req)
         const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
         const data = await launchServiceInstance.getAllocationInfo(walletId, projectToken);
-        console.log("allocation data", data)
         return res.status(201).json(data);
       } catch (e) {
         logger.error("🔥 error: %o", e);

@@ -6,6 +6,7 @@ import TokenListSelector from "../constants/tokenAddress"
 import { sleep, getTokensPrice } from "../util";
 import moment from "moment";
 import { Container } from "typedi"; 
+import UserService from "./user";
 
 export default class LaunchService {
   launchModel: any;
@@ -13,6 +14,7 @@ export default class LaunchService {
   web3: any;
   chainId: any;
   logger: Logger;
+  tokenPriceModel: any
 
   constructor(
     models,
@@ -24,6 +26,7 @@ export default class LaunchService {
     this.web3 = constants.web3;
     this.chainId = constants.chainId;
     this.logger = logger;
+    this.tokenPriceModel = models.tokenPriceModel;
   }
 
   public async getProjects() {
@@ -125,40 +128,35 @@ export default class LaunchService {
     // already allocated, cannot allocate again, return old allocation amount
     if(userProject.allocationAmount !== 0) return userProject;
 
-    console.log("allBalance:");
     // TODO (Gary 2021.1.5): the getBalance should be called only once a day, update the amount in database
-    // let allBalance = await this.getBalance(walletId);
-    let allBalance = 100;
-    console.log("allBalance:", allBalance);
-    console.log(allBalance);
+    let allBalance = await this.getBalance(walletId);
+    // let allBalance = 100;
 
     let bonus = await this.getBonus(userProject)
     
     // TODO: actual allocation method
     let launchProject = await this.getLaunchProjectByToken(projectToken);
     let allocationInfo = launchProject.allocationInfo
+    console.log("allocation parameters: ", launchProject.allocationInfo.maxAlloc, projectToken, launchProject)
     // balance
     let balanceAllocation = allBalance * launchProject.allocationInfo.parameters.rateBalance * Math.random() * 2
-    if (balanceAllocation > launchProject.allocationInfo.maxAlloc) {
-      balanceAllocation = launchProject.allocationInfo.maxAlloc
+    if (balanceAllocation > launchProject.allocationInfo.parameters.maxAlloc) {
+      balanceAllocation = launchProject.allocationInfo.parameters.maxAlloc
     }
-    if (balanceAllocation < launchProject.allocationInfo.minAlloc) {
-      balanceAllocation = launchProject.allocationInfo.minAlloc
+    if (balanceAllocation < launchProject.allocationInfo.parameters.minAlloc) {
+      balanceAllocation = launchProject.allocationInfo.parameters.minAlloc
     }
     // bonus
-    let bonusAllocation = bonus.swapBonus * launchProject.allocationInfo.parameters.rateSwap + bonus.liquidityBonus * launchProject.allocationInfo.parameters.rateLiquidity + bonus.acyBonus * launchProject.allocationInfo.parameters.rateAcy
+    let bonusAllocation = bonus.swapBonus + bonus.liquidityBonus + bonus.acyBonus
     // total
     let allocationAmount = Math.round(balanceAllocation + bonusAllocation)
-
-    // if (Date.now > launchProject.scheduleInfo.saleStart && Date.now < launchProject.scheduleInfo.saleEnd) {
-    //   // TODO: dynamic update
-    //   let w_list = allocationInfo.processRecords.w
-    // } else if (Date.now <= launchProject.scheduleInfo.saleStart) {
-    //   // TODO: update w0
-    // }
+    if (allocationAmount > launchProject.allocationInfo.parameters.maxTotalAlloc) {
+      allocationAmount = launchProject.allocationInfo.parameters.maxTotalAlloc
+    }
 
     // TODO: update user allocation info
-    user.projects[projectIndex].allocationAmount = allocationAmount;
+    userProject.allocationAmount = allocationAmount;
+    userProject.allocationLeft = await this.calcAllocationLeft(userProject);
     await user.save((err) => {
       if (err) {
         this.logger.error(`Mongo saving user record error: ${err}`);
@@ -174,46 +172,58 @@ export default class LaunchService {
         throw new Error("error when saving launch project")
       }
     })
-
     return userProject;
   }
 
   public async getBalance(addr: String) {
-    console.log(`getBalance`, addr);
     const web3 = new Web3(this.web3);
     const logger = this.logger
     
     // var plist = [];
     var tokenlist = TokenListSelector(this.chainId)
-    console.log("tokenlist" ,tokenlist, this.chainId)
     const chainId = this.chainId;
-    var tokenPrice = await getTokensPrice(tokenlist);
-    const plist = tokenlist.map(function(n) {
-        let contract = new web3.eth.Contract(ERC20_ABI, n.address);
-        if(GAS_TOKEN[chainId] == n.symbol)
-          return web3.eth.getBalance(addr).then(res => tokenPrice[n.symbol]/ 10**n.decimals * res);
-        return contract.methods.balanceOf(addr).call().then(res => tokenPrice[n.symbol]/ 10**n.decimals * res);
-        // .then(
-        //   res => tokenPrice[n.symbol]/ 10**n.decimals* res);
-    })
-    // console.log("Promise all in", plist);
     
-    // let allBalance = await Promise.all(plist).then(function(res){
-    //   console.log('Promise then',res);
-    //   let format_list = [];
-    //   res.map(function(b:string){
-    //     format_list.push(web3.utils.fromWei(b));
-    //   })
-    //   return format_list;
-    // }).catch((err)=>{
-    //   console.log("Errrrrrrrrrrrrrrrr", err);
-    // });
+    // var tokenPrice = await getTokensPrice(tokenlist);
+    // (2022-01-12 Austin)this is fetching tokenlist data directly from the website now we get the list directly from our db
+
+    const tokenPriceModelInstance = await this.tokenPriceModel.findOne({chainId : chainId})
+
+
+    const plist = tokenlist.map(async function(n) {
+
+      let tokenPrice = Number(tokenPriceModelInstance.symbol.get(n.symbol))
+      console.log(tokenPrice)
+      if (isNaN(tokenPrice)) tokenPrice = 0
+
+        let contract = new web3.eth.Contract(ERC20_ABI, n.address);
+        if(GAS_TOKEN[chainId] == n.symbol){
+          
+          return await web3.eth.getBalance(addr).then(res => {
+            
+            return tokenPrice/ 10**n.decimals * res
+          })
+        }
+        else {
+        return await contract.methods.balanceOf(addr).call().then(res => 
+          { 
+          return tokenPrice/ 10**n.decimals * res
+          }
+          );
+        }
+    })
+    console.log("Promise all in");
 
     let allBalance = await Promise.all(plist).then((res) => {
       console.log("HERE:", res)
-      return res.reduce((total, a) => total + a, 0)
+      let total = 0
+      for (var i in res) {
+        if (!isNaN(res[i])) {
+          total += res[i]
+        }
+      }
+      console.log("total", total)
+      return total
     });
-    console.log("Promise all out", allBalance);
     return allBalance;
   }
 
@@ -234,7 +244,6 @@ export default class LaunchService {
     for (var item in acyBonusList) {
       acyBonus += acyBonusList[item].bonusAmount
     }
-    console.log("bonus made:", swapBonus, liquidityBonus, acyBonus)
     return {
       swapBonus: swapBonus,
       liquidityBonus: liquidityBonus,
@@ -242,13 +251,12 @@ export default class LaunchService {
     }
   }
 
-  private calcAllocationLeft(userProject: any) {
-    let bonusAmount = 0;
-    if(userProject.allocationBonus.length !== 0) {
-      const reduceAddBonus = (prevValue, currentValue) => prevValue + currentValue.bonusAmount;
-      bonusAmount = userProject.allocationBonus.reduce(reduceAddBonus);
-    }
-    let totalAllocationAmount = userProject.allocationAmount + bonusAmount;
+  private async calcAllocationLeft(userProject: any) {
+    let bonus = await this.getBonus(userProject)
+    const bonusAmount = bonus.swapBonus + bonus.liquidityBonus + bonus.acyBonus
+    // Note (GARY): total allocation amount includes bonus!
+    let totalAllocationAmount = userProject.allocationAmount;
+    console.log("allocation left:", totalAllocationAmount, userProject.allocationUsed)
     let allocationLeft = totalAllocationAmount - userProject.allocationUsed;
     return allocationLeft;
   }
@@ -265,13 +273,14 @@ export default class LaunchService {
     this.logger.info(`userProject ${userProject}`);
 
     // only allow allocation less than limitation
-    let allocationLeft = this.calcAllocationLeft(userProject);
+    let allocationLeft = await this.calcAllocationLeft(userProject);
     if(amount > allocationLeft) {
       throw new Error("not enough allocation");
     }
 
     // actual record allocation used
     userProject.allocationUsed = Math.round(Number(userProject.allocationUsed) + Number(amount));
+    userProject.allocationLeft = await this.calcAllocationLeft(userProject);
     await user.save((err) => {
       if (err) {
         this.logger.error(`Mongo saving user record error: ${err}`);
@@ -301,8 +310,8 @@ export default class LaunchService {
     return userProject;
   }
 
-  public async bonusAllocation(walletId: String, projectToken: String, bonusName: String, T: Number) {
-    this.logger.info(`bonusAllocation ${walletId} - ${projectToken} - ${bonusName} - ${T}`);
+  public async bonusAllocation(walletId: String, bonusName: String, T: Number) {
+    this.logger.info(`bonusAllocation ${walletId} - ${bonusName} - ${T}`);
     let user = await this.userLaunchModel.findOne({
       walletId: walletId
     }).exec()
@@ -328,72 +337,52 @@ export default class LaunchService {
         walletId: walletId
       }).exec()
     }
+    let allBonus = []
 
-    // if project not exists, create first
-    let projectIndex = user.projects.findIndex(item => item.projectToken === projectToken);
-    if (projectIndex === -1) {
-      user.projects.push({
-        projectToken: projectToken,
-        allocationAmount: 0,
-        allocationUsed: 0
-      });
-      projectIndex = user.projects.length - 1;
+    for (var i in user.projects) {
+      let userProject = user.projects[i]
+      let launchProject = await this.getLaunchProjectByToken(userProject.projectToken);
+
+      if (!launchProject) {
+        throw new Error("No such projectToken")
+      }
+
+      // add specific bonus type
+      let bonusAmount = 0;
+      switch (bonusName) {
+        case "swap":
+          let rateSwap = launchProject.allocationInfo.parameters.rateSwap;
+          bonusAmount = Number(T) * Number(rateSwap);
+          break;
+        
+        case "liquidity":
+          let rateLiquidity = launchProject.allocationInfo.parameters.rateLiquidity;
+          bonusAmount = Number(T) * Number(rateLiquidity);
+          break;
+
+        case "acy":
+          let rateAcy = launchProject.allocationInfo.parameters.rateAcy;
+          bonusAmount = Number(T) * Number(rateAcy);
+          break;
+        
+        default:
+          return false;
+      }
+      userProject.allocationBonus.push({
+        bonusName: bonusName,
+        bonusAmount: bonusAmount,
+        achieveTime: new Date()
+      })
+      allBonus.push({projectToken: userProject.projectToken, bonusAmount: bonusAmount});
+      userProject.allocationLeft = await this.calcAllocationLeft(userProject);
     }
-    let userProject = user.projects[projectIndex];    
-    let allocationBonus = userProject.allocationBonus;
-
-    let launchProject = await this.getLaunchProjectByToken(projectToken);
-    if (!launchProject) {
-      throw new Error("No such projectToken")
-    }
-
-    // add specific bonus type
-    let bonusAmount = 0;
-    switch (bonusName) {
-      case "swap":
-        let rateSwap = launchProject.allocationInfo.parameters.rateSwap;
-        bonusAmount = Number(T) * Number(rateSwap);
-        break;
-      
-      case "liquidity":
-        let rateLiquidity = launchProject.allocationInfo.parameters.rateLiquidity;
-        bonusAmount = Number(T) * Number(rateLiquidity);
-        break;
-
-      case "acy":
-        let rateAcy = launchProject.allocationInfo.parameters.rateAcy;
-        bonusAmount = Number(T) * Number(rateAcy);
-        break;
-      
-      default:
-        return false;
-    }
-
-    // take care of allocationBonus data structure
-    // let bonusIndex = allocationBonus.findIndex(item => item.bonusName === bonusName);
-    // if (bonusIndex === -1) {
-    //   allocationBonus.push({
-    //     bonusName: bonusName,
-    //     bonusAmount: bonusAmount
-    //   })
-    // } else {
-    //   allocationBonus[bonusIndex].bonusAmount = bonusAmount;
-    //   allocationBonus[bonusIndex].achieveTime = new Date();
-    // }
-    allocationBonus.push({
-      bonusName: bonusName,
-      bonusAmount: bonusAmount,
-      achieveTime: new Date()
-    })
-    // TODO (Gary): fix
-
     await user.save((err) => {
       if (err) {
         this.logger.error(`Mongo saving user record error: ${err}`);
         throw new Error("error when saving allocation")
       }
     })
-    return bonusAmount;
+    return allBonus;
   }
 
   public async purchaseRecord(walletId: String, projectToken: String, amount: Number) {
@@ -428,6 +417,14 @@ export default class LaunchService {
         return {};
       } else {
         let userProject = user.projects[projectIndex];
+        if (!userProject.allocationLeft) {
+          userProject.allocationLeft = await this.calcAllocationLeft(userProject);
+          await user.save((err) => {
+            if (err) {
+              this.logger.error(`Mongo saving user record error: ${err}`);
+            }
+          })
+        }
         return userProject;
       }
     }
@@ -436,7 +433,7 @@ export default class LaunchService {
   public async createProjects() {
     // bsc-test contract, for test only
     await this.launchModel.create({
-      projectID: 1,
+      projectID: 20,
       basicInfo: {
         projectName: 'Paycer',
         poolID: 9,
@@ -489,7 +486,21 @@ export default class LaunchService {
     return data;
   }
 
+  public async updateAllAllocationParameters() {
+    let data = await this.launchModel.find().exec();
+    console.log("Fetching projects, total: ", data.length)
+    const date_ = new Date()
+    console.log(date_, data[0].scheduleInfo.saleStart)
+    for (var item in data) {
+      console.log("date info: ", data[item].scheduleInfo.saleStart <= date_, data[item].scheduleInfo.saleEnd >= date_)
+      if (data[item].scheduleInfo.saleStart <= date_ && data[item].scheduleInfo.saleEnd >= date_ ) {
+        this.updateAllocationParameters(data[item].basicInfo.projectToken)
+      }
+    }
+  }
+
   private async updateAllocationParameters(projectToken: String) {
+    console.log("updating allocation parameters for project with token: ", projectToken)
     let launchProject = await this.getLaunchProjectByToken(projectToken);
     let allocationInfo = launchProject.allocationInfo
 
@@ -497,7 +508,7 @@ export default class LaunchService {
     const allocatedAmount = allocationInfo.states.allocatedAmount;
     const soldAmount = allocationInfo.states.soldAmount; // TODO: update using soldAmount, since everyone can buy ONLY ONCE
     const processRecords = allocationInfo.processRecords // [{time, w}]
-    const T = allocationInfo.parameters.T
+    const T = Number((launchProject.scheduleInfo.saleEnd - launchProject.scheduleInfo.saleStart) / (Number(allocationInfo.parameters.T) * 1000 * 60))
     const alertProportion = allocationInfo.parameters.alertProportion
     const totalRaise = launchProject.saleInfo.totalRaise
 
@@ -512,7 +523,10 @@ export default class LaunchService {
       }
     }
     let w_new = allocatedAmount - lastAllocationAmount
-    let beta = w_new / w_last
+    let beta
+    if (w_last == 0 && w_new == 0) beta = 0
+    else if (w_last == 0) beta = 1
+    else beta = w_new / w_last
     let remainingT = T - processRecords.length
     let tmp = w_last
     let estimatedSell = 0
@@ -520,16 +534,21 @@ export default class LaunchService {
       tmp *= beta
       estimatedSell += tmp
     }
+    
 
     let eta = estimatedSell / (totalRaise - allocatedAmount) // the **ratio**
-    console.assert(eta > 0, "error: eta should be greater than 0!")
+    // console.assert(eta > 0, "error: eta should be greater than 0!")
+    console.log("eta", eta)
+    if (eta < 0.33) eta = 0.33
+    
 
     // update
     if (eta <= alertProportion) { // update
-      launchProject.allocationInfo.parameters.maxAlloc /= eta
-      launchProject.allocationInfo.parameters.minAlloc /= eta
-      launchProject.allocationInfo.parameters.rate_balance /= eta
+      launchProject.allocationInfo.parameters.maxAlloc = launchProject.allocationInfo.parameters.maxAlloc / eta
+      launchProject.allocationInfo.parameters.minAlloc = launchProject.allocationInfo.parameters.minAlloc / eta
+      launchProject.allocationInfo.parameters.rateBalance = launchProject.allocationInfo.parameters.rateBalance / eta
     }
+    console.log("after update:", launchProject.allocationInfo.parameters.maxAlloc)
     launchProject.allocationInfo.processRecords.push({ w: w_new, endTime: new Date() })
 
 

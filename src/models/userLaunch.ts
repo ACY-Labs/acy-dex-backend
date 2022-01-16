@@ -5,12 +5,12 @@ const UserLaunch = new mongoose.Schema(
         walletId: {
             type: String,
             index: true,
-            require: true
+            required: true
         },
         projects: [
             {
                 projectToken: { type: String },
-                allocationAmount: { type: Number},
+                allocationAmount: { type: Number },
                 allocationBonus: [
                     {
                         bonusName: { type: String },
@@ -19,6 +19,7 @@ const UserLaunch = new mongoose.Schema(
                     }
                 ],
                 allocationUsed: { type: Number },
+                allocationLeft: { type: Number },
                 purchaseHistory: [
                     {
                         purchaseTime: { type: Date },

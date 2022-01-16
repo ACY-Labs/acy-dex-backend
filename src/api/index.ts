@@ -8,6 +8,7 @@ import poolVolume from "./routes/poolVolume";
 import farm from "./routes/farm";
 import userInfo from "./routes/user";
 import txList from "./routes/txList";
+import tokenPrice from "./routes/tokenPrice";
 
 // guaranteed to get dependencies
 export default () => {
@@ -21,5 +22,7 @@ export default () => {
   farm(app);
   userInfo(app);
   txList(app);
+  tokenPrice(app);
+
   return app;
 };

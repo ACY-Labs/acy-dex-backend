@@ -29,10 +29,6 @@ const Launch = new mongoose.Schema(
         type: String,
         required: true
       },
-      contractAddress: {
-        type: String,
-        required: true
-      }
     },
     saleInfo: {
       tokenPrice: {
@@ -72,6 +68,7 @@ const Launch = new mongoose.Schema(
     },
     allocationInfo: {
       parameters: {
+        maxTotalAlloc: { type: Number },
         minAlloc: { type: Number },
         maxAlloc: { type: Number },
         rateBalance: { type: Number },
@@ -85,26 +82,28 @@ const Launch = new mongoose.Schema(
         allocatedAmount: { type: Number },
         soldAmount: { type: Number }
       },
-      processRecords: [{
-        endTime: { type: Date, default: Date.now },
-        w: { type: Number }
-      }]
+      processRecords: [
+        {
+          endTime: { type: Date, default: Date.now },
+          w: { type: Number }
+        }
+      ]
     },
     social: [
       {
-        website: String,
-        whitepaper: String,
-        deck: String,
-        twitter: String,
-        telegram: String,
-        linkedin: String,
-        medium: String,
-        github: String,
-        forum: String,
-        youtube: String,
-        etheraddress: String,
-        polyaddress: String,
-        confluxaddress: String,
+        Website: String,
+        Whitepaper: String,
+        Deck: String,
+        Twitter: String,
+        Telegram: String,
+        Linkedin: String,
+        Medium: String,
+        Github: String,
+        Forum: String,
+        Youtube: String,
+        Etheraddress: String,
+        Polyaddress: String,
+        Confluxaddress: String,
       },
     ],
     contextData: { type: String },
