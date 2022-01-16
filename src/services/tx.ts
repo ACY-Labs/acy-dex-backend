@@ -49,6 +49,10 @@ export default class TxService {
         // this.logger.debug("got a current list of %d items and new list with %d transactions",currList.length,newList.length);
         // this.logger.debug(currList[currList.length-1],newList[newList.length-1].hash);
 
+        //DELETE EMPTY ITEMS FROM LIST
+
+        currList = currList.filter(item => item.address);
+
         let currLength = currList.length;
 
         let index_bottom = currLength-1;
