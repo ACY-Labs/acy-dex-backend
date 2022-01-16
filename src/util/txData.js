@@ -4,12 +4,12 @@ import { findTokenInList,findTokenWithSymbol } from "./TokenUtils";
 import {methodList, actionList} from '../constants/MethodList';
 import {GAS_TOKEN} from '../constants/index';
 
-async function failedTransaction(hash){
+function failedTransaction(hash){
     return {
     "address" : null,
     "hash": hash,
     "status":0,
-    "action":'Remove',
+    "action":'Failed',
     // "totalToken": totalAmount,
     "token1Number": null,
     "token1Symbol": null,
@@ -145,7 +145,6 @@ async function fetchUniqueTokenToToken(hash, timestamp, libraryOut,chainID){
     console.log("fetchUniqueTokenToToken",hash);
 
     try{
-    
         let response = await libraryOut.getTransactionReceipt(hash);
         // console.log(response);
         let FROM_HASH = response.from.toLowerCase().slice(2);
@@ -194,6 +193,7 @@ async function fetchUniqueTokenToToken(hash, timestamp, libraryOut,chainID){
         }
 
     }catch(e){
+        console.log(e)
         return failedTransaction(hash);
     }
     
@@ -261,6 +261,7 @@ async function fetchUniqueAddLiquidity(hash, timestamp, libraryOut,chainID){
         })
 
     }catch (e){
+        console.log("entered here 2");
         console.log(e);
         return failedTransaction(hash);
     }
@@ -451,11 +452,12 @@ export async function fetchUniqueRemoveLiquidityEth(hash, timestamp, libraryOut,
 
 }
 
-export async function parseTxData(receiptHash,timestamp,input, libraryOut, chainID){
+export async function parseTxData(status, receiptHash,timestamp,input, libraryOut, chainID){
 
     // console.log(libraryOut);
-
     let newData = {};
+
+    if(status!=1) return failedTransaction(receiptHash);
 
     // console.log("fetching data for this tx",receiptHash);
     // console.log(input);
@@ -486,12 +488,11 @@ export async function parseTxData(receiptHash,timestamp,input, libraryOut, chain
 
         newData = await fetchUniqueRemoveLiquidityEth(receiptHash,timestamp, libraryOut, chainID);
 
-    }else {
-
+    }else if(input==methodList.addLiquidityEth.id) {
         newData = await fetchUniqueAddLiquidityEth(receiptHash,timestamp, libraryOut, chainID);
+    }else {
+        newData = failedTransaction(receiptHash);
     }
-
-    // console.log(newData);
     
     return newData;
 
