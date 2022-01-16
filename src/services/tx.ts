@@ -51,7 +51,7 @@ export default class TxService {
 
         //DELETE EMPTY ITEMS FROM LIST
 
-        currList = currList.filter(item => item.address);
+        currList = currList.filter(item => item.hash);
 
         let currLength = currList.length;
 
