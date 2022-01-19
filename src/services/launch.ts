@@ -35,11 +35,15 @@ export default class LaunchService {
     if (!data)
       this.logger.info(`Retrieve data failed`);
     // store into array
-    let result = []
+    let result1 = [];
+    let result2 = [];
+
+    let ongoing_cnt = 0;
+    
 
     data.forEach(obj => { 
       // get specific properties
-      let tempRes = {}
+      let tempRes = {};
       tempRes = {
         projectID: obj.projectID,
         projectName: obj.basicInfo.projectName,
@@ -49,29 +53,56 @@ export default class LaunchService {
         totalRaise: obj.saleInfo.totalRaise,
         totalSale: obj.saleInfo.totalSale,
       }
-      // categorized project into Ongoing/Upcoming/Ended
-      let saleStart = obj.scheduleInfo.saleStart;
-      let saleEnd = obj.scheduleInfo.saleEnd;
-      let current = new Date();
-      if(current < saleStart) {
-        tempRes["projectStatus"] = "Upcoming"
-      } else if (current > saleEnd){
-        tempRes["projectStatus"] = "Ended"
-      } else{
-        tempRes["projectStatus"] = "Ongoing"
-      }
-
-      let temp1 = new Date(obj.scheduleInfo.saleEnd)
-      let temp2 = new Date(obj.scheduleInfo.saleStart)
+      let temp1 = new Date(obj.scheduleInfo.saleStart);
+      let temp2 = new Date(obj.scheduleInfo.saleEnd);
       let dateTime1 = temp1.toLocaleDateString() + ' ' + temp1.toTimeString().substring(0, temp1.toTimeString().indexOf("GMT"));
       let dateTime2 = temp2.toLocaleDateString() + ' ' + temp2.toTimeString().substring(0, temp2.toTimeString().indexOf("GMT"));
       tempRes["saleStart"] = dateTime1;
       tempRes["saleEnd"] = dateTime2;
 
-      result.push(tempRes);
+      // categorized project into Ongoing/Upcoming/Ended
+      const current = moment();
+
+      const saleStart = moment(obj.scheduleInfo.saleStart);
+      const saleEnd = moment(obj.scheduleInfo.saleEnd);
+      const two_day_ago = saleStart.subtract(2, 'days');
+      const one_day_ago = saleStart.subtract(1, 'days');
+
+      let tempRes2 = Object.assign({}, tempRes);
+      if (current > saleEnd) {
+        tempRes["projectStatus"] = "Ended";
+        tempRes2["projectStatus"] = "Ended";
+      }
+
+      if (current < saleEnd) {
+        if (one_day_ago < current) {
+          tempRes["projectStatus"] = "Ongoing";
+          tempRes2["projectStatus"] = "Ongoing";
+        } else if (two_day_ago < current) {
+          tempRes["projectStatus"] = "Upcoming";
+          tempRes2["projectStatus"] = "Ongoing";
+          ongoing_cnt += 1;
+        } else if (two_day_ago > current) {
+          tempRes["projectStatus"] = "Upcoming";
+          tempRes2["projectStatus"] = "Upcoming";
+        }
+      }
+
+      result1.push(tempRes);
+      result2.push(tempRes2);
     });
     this.logger.debug("end getProjects");
-    return result;
+    if (ongoing_cnt > 3) {
+      result1 = result1.sort(function(a, b) {
+        return a.saleStart < b.saleStart ? -1 : 1
+      })
+      return result1;
+    } else {
+      result2 = result2.sort(function(a, b) {
+        return a.saleStart < b.saleStart ? -1 : 1
+      })
+      return result2;
+    }
   }
 
   public async getProjectsByID(projectsId: Number) {
