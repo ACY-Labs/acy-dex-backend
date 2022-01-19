@@ -137,9 +137,16 @@ export default class LaunchService {
     // TODO: actual allocation method
     let launchProject = await this.getLaunchProjectByToken(projectToken);
     let allocationInfo = launchProject.allocationInfo
-    console.log("allocation parameters: ", launchProject.allocationInfo.maxAlloc, projectToken, launchProject)
     // balance
-    let balanceAllocation = allBalance * launchProject.allocationInfo.parameters.rateBalance * Math.random() * 2
+    let balanceAllocation
+    if (allBalance * launchProject.allocationInfo.parameters.rateBalance <= 2 * launchProject.allocationInfo.parameters.minAlloc) {
+      balanceAllocation = launchProject.allocationInfo.parameters.minAlloc * (1 + Math.random())
+      console.log("balanceAllocation", balanceAllocation, launchProject.allocationInfo.parameters.minAlloc)
+    }
+    else {
+      balanceAllocation = allBalance * launchProject.allocationInfo.parameters.rateBalance * Math.random() * 2
+      console.log("balanceAllocation", balanceAllocation)
+    }
     if (balanceAllocation > launchProject.allocationInfo.parameters.maxAlloc) {
       balanceAllocation = launchProject.allocationInfo.parameters.maxAlloc
     }
@@ -537,13 +544,14 @@ export default class LaunchService {
     
 
     let eta = estimatedSell / (totalRaise - allocatedAmount) // the **ratio**
+    eta = eta / alertProportion
     // console.assert(eta > 0, "error: eta should be greater than 0!")
     console.log("eta", eta)
-    if (eta < 0.33) eta = 0.33
+    if (eta < 0.25) eta = 0.25
     
 
     // update
-    if (eta <= alertProportion) { // update
+    if (eta <= 1) { // update
       launchProject.allocationInfo.parameters.maxAlloc = launchProject.allocationInfo.parameters.maxAlloc / eta
       launchProject.allocationInfo.parameters.minAlloc = launchProject.allocationInfo.parameters.minAlloc / eta
       launchProject.allocationInfo.parameters.rateBalance = launchProject.allocationInfo.parameters.rateBalance / eta
