@@ -444,14 +444,13 @@ export default class LaunchService {
 
     let user = await this.userLaunchModel.findOne({
       walletId: walletId,
-      'basicInfo.projectToken': projectToken
     }).exec();
 
     if (!user) {
       this.logger.warn(`Retrieve data failed`)
       return {};
     } else {
-      let projectIndex = user.projects.findIndex(item => item.projectToken === item.projectToken);
+      let projectIndex = user.projects.findIndex(item => item.projectToken === projectToken);
       if (projectIndex === -1) {
         return {};
       } else {
