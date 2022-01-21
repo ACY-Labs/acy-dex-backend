@@ -444,7 +444,7 @@ export default class LaunchService {
 
     let user = await this.userLaunchModel.findOne({
       walletId: walletId,
-      projectToken: projectToken
+      'basicInfo.projectToken': projectToken
     }).exec();
 
     if (!user) {
