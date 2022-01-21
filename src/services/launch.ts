@@ -443,7 +443,8 @@ export default class LaunchService {
     this.logger.info(`getAllocationInfo ${walletId} - ${projectToken}`);
 
     let user = await this.userLaunchModel.findOne({
-      walletId: walletId
+      walletId: walletId,
+      projectToken: projectToken
     }).exec();
 
     if (!user) {
