@@ -172,12 +172,13 @@ export default class LaunchService {
     let balanceAllocation
     if (allBalance * launchProject.allocationInfo.parameters.rateBalance <= 2 * launchProject.allocationInfo.parameters.minAlloc) {
       balanceAllocation = launchProject.allocationInfo.parameters.minAlloc * (1 + Math.random())
-      console.log("balanceAllocation", balanceAllocation, launchProject.allocationInfo.parameters.minAlloc)
-    }
-    else {
+    } else if (allBalance * launchProject.allocationInfo.parameters.rateBalance >= 2 * launchProject.allocationInfo.parameters.maxTotalAlloc) {
+      balanceAllocation = launchProject.allocationInfo.parameters.maxTotalAlloc * Math.random() * 2
+    } else {
       balanceAllocation = allBalance * launchProject.allocationInfo.parameters.rateBalance * Math.random() * 2
-      console.log("balanceAllocation", balanceAllocation)
     }
+    console.log("balanceAllocation", balanceAllocation)
+    // normalize balance
     if (balanceAllocation > launchProject.allocationInfo.parameters.maxAlloc) {
       balanceAllocation = launchProject.allocationInfo.parameters.maxAlloc
     }
@@ -293,7 +294,7 @@ export default class LaunchService {
     let bonus = await this.getBonus(userProject)
     const bonusAmount = bonus.swapBonus + bonus.liquidityBonus + bonus.acyBonus
     // Note (GARY): total allocation amount includes bonus!
-    let totalAllocationAmount = userProject.allocationAmount;
+    let totalAllocationAmount = userProject.allocationAmount + bonusAmount;
     console.log("allocation left:", totalAllocationAmount, userProject.allocationUsed)
     let allocationLeft = totalAllocationAmount - userProject.allocationUsed;
     return allocationLeft;
@@ -578,7 +579,7 @@ export default class LaunchService {
     eta = eta / alertProportion
     // console.assert(eta > 0, "error: eta should be greater than 0!")
     console.log("eta", eta)
-    if (eta < 0.25) eta = 0.25
+    if (eta < 0.85) eta = 0.85
     
 
     // update
