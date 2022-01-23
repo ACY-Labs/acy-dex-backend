@@ -1,11 +1,11 @@
 import { parseJsonSourceFileConfigFileContent } from "typescript";
 import Web3 from "web3";
 import { Logger, loggers } from "winston";
-import { ERC20_ABI, FARM_ADDRESS, GAS_TOKEN} from "../constants";
+import { ERC20_ABI, FARM_ADDRESS, GAS_TOKEN } from "../constants";
 import TokenListSelector from "../constants/tokenAddress"
 import { sleep, getTokensPrice } from "../util";
 import moment from "moment";
-import { Container } from "typedi"; 
+import { Container } from "typedi";
 import UserService from "./user";
 
 export default class LaunchService {
@@ -20,7 +20,7 @@ export default class LaunchService {
     models,
     constants,
     logger
-  ) { 
+  ) {
     this.launchModel = models.launchModel;
     this.userLaunchModel = models.userLaunchModel;
     this.web3 = constants.web3;
@@ -39,9 +39,9 @@ export default class LaunchService {
     let result2 = [];
 
     let ongoing_cnt = 0;
-    
 
-    data.forEach(obj => { 
+
+    data.forEach(obj => {
       // get specific properties
       let tempRes = {};
       tempRes = {
@@ -93,12 +93,12 @@ export default class LaunchService {
     });
     this.logger.debug("end getProjects");
     if (ongoing_cnt > 3) {
-      result1 = result1.sort(function(a, b) {
+      result1 = result1.sort(function (a, b) {
         return a.saleStart < b.saleStart ? -1 : 1
       })
       return result1;
     } else {
-      result2 = result2.sort(function(a, b) {
+      result2 = result2.sort(function (a, b) {
         return a.saleStart < b.saleStart ? -1 : 1
       })
       return result2;
@@ -107,8 +107,8 @@ export default class LaunchService {
 
   public async getProjectsByID(projectsId: Number) {
     this.logger.info(`Retrieve project from db`);
-    let data = await this.launchModel.findOne({projectID: projectsId}).exec();
-    if(!data)
+    let data = await this.launchModel.findOne({ projectID: projectsId }).exec();
+    if (!data)
       this.logger.info(`Retrieve data failed`);
     this.logger.debug("end getProjectsByID");
     return data;
@@ -119,15 +119,26 @@ export default class LaunchService {
     let data = await this.userLaunchModel.find().exec();
 
     let allocationInfo = []
+    let total_allocation = 0;
 
     for (var index in data) {
       let user = data[index]
       let projectIndex = user.projects.findIndex(item => item.projectToken === projectToken);
       if (projectIndex === -1) continue;
       let userProject = user.projects[projectIndex]
-      allocationInfo.push({walletId: user.walletId, projectToken: projectToken, allocationAmount: userProject.allocationAmount})
+      allocationInfo.push({ 
+        walletId: user.walletId, 
+        projectToken: projectToken, 
+        allocationAmount: userProject.allocationAmount 
+      })
+      total_allocation += userProject.allocationAmount;
     }
-    return allocationInfo
+
+    return {
+      total_participants: allocationInfo.length,
+      total_allocation: total_allocation,
+      data: allocationInfo
+    }
   }
 
   public async updateOneAllocationInfo(walletId: String, projectToken: String, amount: Number) {
@@ -227,14 +238,14 @@ export default class LaunchService {
 
     let userProject = user.projects[projectIndex];
     // already allocated, cannot allocate again, return old allocation amount
-    if(userProject.allocationAmount !== 0) return userProject;
+    if (userProject.allocationAmount !== 0) return userProject;
 
     // TODO (Gary 2021.1.5): the getBalance should be called only once a day, update the amount in database
     let allBalance = await this.getBalance(walletId);
     // let allBalance = 100;
 
     let bonus = await this.getBonus(userProject)
-    
+
     // TODO: actual allocation method
     let launchProject = await this.getLaunchProjectByToken(projectToken);
     let allocationInfo = launchProject.allocationInfo
@@ -288,38 +299,37 @@ export default class LaunchService {
   public async getBalance(addr: String) {
     const web3 = new Web3(this.web3);
     const logger = this.logger
-    
+
     // var plist = [];
     var tokenlist = TokenListSelector(this.chainId)
     const chainId = this.chainId;
-    
+
     // var tokenPrice = await getTokensPrice(tokenlist);
     // (2022-01-12 Austin)this is fetching tokenlist data directly from the website now we get the list directly from our db
 
-    const tokenPriceModelInstance = await this.tokenPriceModel.findOne({chainId : chainId})
+    const tokenPriceModelInstance = await this.tokenPriceModel.findOne({ chainId: chainId })
 
 
-    const plist = tokenlist.map(async function(n) {
+    const plist = tokenlist.map(async function (n) {
 
       let tokenPrice = Number(tokenPriceModelInstance.symbol.get(n.symbol))
       console.log(tokenPrice)
       if (isNaN(tokenPrice)) tokenPrice = 0
 
-        let contract = new web3.eth.Contract(ERC20_ABI, n.address);
-        if(GAS_TOKEN[chainId] == n.symbol){
-          
-          return await web3.eth.getBalance(addr).then(res => {
-            
-            return tokenPrice/ 10**n.decimals * res
-          })
+      let contract = new web3.eth.Contract(ERC20_ABI, n.address);
+      if (GAS_TOKEN[chainId] == n.symbol) {
+
+        return await web3.eth.getBalance(addr).then(res => {
+
+          return tokenPrice / 10 ** n.decimals * res
+        })
+      }
+      else {
+        return await contract.methods.balanceOf(addr).call().then(res => {
+          return tokenPrice / 10 ** n.decimals * res
         }
-        else {
-        return await contract.methods.balanceOf(addr).call().then(res => 
-          { 
-          return tokenPrice/ 10**n.decimals * res
-          }
-          );
-        }
+        );
+      }
     })
     console.log("Promise all in");
 
@@ -475,7 +485,7 @@ export default class LaunchService {
           let rateSwap = launchProject.allocationInfo.parameters.rateSwap;
           bonusAmount = Number(T) * Number(rateSwap);
           break;
-        
+
         case "liquidity":
           let rateLiquidity = launchProject.allocationInfo.parameters.rateLiquidity;
           bonusAmount = Number(T) * Number(rateLiquidity);
@@ -485,7 +495,7 @@ export default class LaunchService {
           let rateAcy = launchProject.allocationInfo.parameters.rateAcy;
           bonusAmount = Number(T) * Number(rateAcy);
           break;
-        
+
         default:
           return false;
       }
@@ -494,7 +504,7 @@ export default class LaunchService {
         bonusAmount: bonusAmount,
         achieveTime: new Date()
       })
-      allBonus.push({projectToken: userProject.projectToken, bonusAmount: bonusAmount});
+      allBonus.push({ projectToken: userProject.projectToken, bonusAmount: bonusAmount });
       userProject.allocationLeft = await this.calcAllocationLeft(userProject);
     }
     await user.save((err) => {
@@ -612,7 +622,7 @@ export default class LaunchService {
     console.log(date_, data[0].scheduleInfo.saleStart)
     for (var item in data) {
       console.log("date info: ", data[item].scheduleInfo.saleStart <= date_, data[item].scheduleInfo.saleEnd >= date_)
-      if (data[item].scheduleInfo.saleStart <= date_ && data[item].scheduleInfo.saleEnd >= date_ ) {
+      if (data[item].scheduleInfo.saleStart <= date_ && data[item].scheduleInfo.saleEnd >= date_) {
         this.updateAllocationParameters(data[item].basicInfo.projectToken)
       }
     }
@@ -636,7 +646,7 @@ export default class LaunchService {
 
     let lastAllocationAmount = 0
     let lastSoldAmount = 0
-    
+
     let w_last = 0
     let w_second_last = -1
     let s_last = 0
@@ -686,13 +696,13 @@ export default class LaunchService {
       estimatedSell += (tmp_1 + tmp_2)
     }
     estimatedSell /= 2.0
-    
+
     let eta = estimatedSell / (totalRaise - allocatedAmount) // the **ratio**
     eta = eta / alertProportion
     // console.assert(eta > 0, "error: eta should be greater than 0!")
     console.log("eta", eta)
     if (eta < 0.85) eta = 0.85
-    
+
     // update
     if (eta <= 1) { // update
       launchProject.allocationInfo.parameters.maxAlloc = launchProject.allocationInfo.parameters.maxAlloc / eta
