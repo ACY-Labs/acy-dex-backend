@@ -114,6 +114,76 @@ export default class LaunchService {
     return data;
   }
 
+  public async getAllAllocationInfo(projectToken: String) {
+    this.logger.info(`getAllAllocationInfo ${projectToken}`);
+    let data = await this.userLaunchModel.find().exec();
+
+    let allocationInfo = []
+
+    for (var index in data) {
+      let user = data[index]
+      let projectIndex = user.projects.findIndex(item => item.projectToken === projectToken);
+      if (projectIndex === -1) continue;
+      let userProject = user.projects[projectIndex]
+      allocationInfo.push({walletId: user.walletId, projectToken: projectToken, allocationAmount: userProject.allocationAmount})
+    }
+    return allocationInfo
+  }
+
+  public async updateOneAllocationInfo(walletId: String, projectToken: String, amount: Number) {
+    this.logger.info(`updateOneAllocationInfo ${walletId} - ${projectToken} - ${amount}`);
+
+    let user = await this.userLaunchModel.findOne({
+      walletId: walletId
+    }).exec()
+
+    if (!user) {
+      this.logger.info(`new user, start creation`);
+      let block = true;
+      await this.userLaunchModel.create({
+        walletId
+      }, (err, data) => {
+        if (err) {
+          this.logger.error(`Mongo create new record error ${err}`);
+          throw new Error("Create user Error.");
+        }
+        block = false;
+        this.logger.info(`Mongo created a new user launch record`);
+      })
+
+      // wait for user creation ready
+      while (block) {
+        await sleep(10);
+      }
+      user = await this.userLaunchModel.findOne({
+        walletId: walletId
+      }).exec()
+    }
+
+    let projectIndex = user.projects.findIndex(item => item.projectToken === projectToken);
+    if (projectIndex === -1) {
+      user.projects.push({
+        projectToken: projectToken,
+        allocationAmount: 0,
+        allocationUsed: 0
+      });
+      projectIndex = user.projects.length - 1;
+    }
+
+    let userProject = user.projects[projectIndex];
+
+    userProject.allocationAmount = amount
+    userProject.allocationLeft = await this.calcAllocationLeft(userProject);
+    await user.save((err) => {
+      if (err) {
+        this.logger.error(`Mongo saving user record error: ${err}`);
+      } else {
+        this.logger.info(`Allocation updated, amount: ${amount}`)
+      }
+    })
+    return userProject
+  }
+
   public async requireAllocation(walletId: String, projectToken: String) {
     this.logger.info(`requireAllocation ${walletId} - ${projectToken}`);
 
@@ -296,7 +366,7 @@ export default class LaunchService {
     // Note (GARY): total allocation amount includes bonus!
     let totalAllocationAmount = userProject.allocationAmount + bonusAmount;
     console.log("allocation left:", totalAllocationAmount, userProject.allocationUsed)
-    let allocationLeft = totalAllocationAmount - userProject.allocationUsed;
+    let allocationLeft = Math.round(totalAllocationAmount - userProject.allocationUsed);
     return allocationLeft;
   }
 
@@ -313,7 +383,14 @@ export default class LaunchService {
 
     // only allow allocation less than limitation
     let allocationLeft = await this.calcAllocationLeft(userProject);
-    if(amount > allocationLeft) {
+    if (amount > allocationLeft) {
+      userProject.allocationLeft = await this.calcAllocationLeft(userProject);
+      await user.save((err) => {
+        if (err) {
+          this.logger.error(`Mongo saving user record error: ${err}`);
+          throw new Error("error when saving allocation")
+        }
+      })
       throw new Error("not enough allocation");
     }
 
@@ -555,17 +632,21 @@ export default class LaunchService {
     if (totalRaise <= soldAmount) return launchProject; // if already sold out, no need to update
     let lastAllocationAmount = 0
     let w_last = 0
+    let w_second_last = -1
     for (var item in processRecords) {
       lastAllocationAmount += processRecords[item].w
       if (Number(item) == processRecords.length - 1) {
         w_last = processRecords[item].w
+      } else if (Number(item) == processRecords.length - 2) {
+        w_second_last = processRecords[item].w
       }
     }
     let w_new = allocatedAmount - lastAllocationAmount
-    let beta
+    let beta, beta_last
     if (w_last == 0 && w_new == 0) beta = 0
     else if (w_last == 0) beta = 1
     else beta = w_new / w_last
+
     let remainingT = T - processRecords.length
     let tmp = w_last
     let estimatedSell = 0
@@ -586,8 +667,14 @@ export default class LaunchService {
     if (eta <= 1) { // update
       launchProject.allocationInfo.parameters.maxAlloc = launchProject.allocationInfo.parameters.maxAlloc / eta
       launchProject.allocationInfo.parameters.minAlloc = launchProject.allocationInfo.parameters.minAlloc / eta
-      launchProject.allocationInfo.parameters.rateBalance = launchProject.allocationInfo.parameters.rateBalance / eta
     }
+    // to avoid overflow of parameters
+    if (launchProject.allocationInfo.parameters.minAlloc > launchProject.allocationInfo.parameters.maxTotalAlloc / 4) {
+      let tmp = launchProject.allocationInfo.parameters.minAlloc / (launchProject.allocationInfo.parameters.maxTotalAlloc / 4)
+      launchProject.allocationInfo.parameters.maxAlloc = launchProject.allocationInfo.parameters.maxAlloc / tmp
+      launchProject.allocationInfo.parameters.minAlloc = launchProject.allocationInfo.parameters.minAlloc / tmp
+    }
+
     console.log("after update:", launchProject.allocationInfo.parameters.maxAlloc)
     launchProject.allocationInfo.processRecords.push({ w: w_new, endTime: new Date() })
 

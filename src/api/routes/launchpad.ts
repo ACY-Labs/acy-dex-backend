@@ -153,6 +153,54 @@ export default (app: Router) => {
   );
 
   route.get(
+    "/allocation/getAll",
+    async (req: Request, res: Response, next: NextFunction) => {
+      logger.debug(
+        "Calling chart GET endpoint /allocation/getAll with query: %o",
+        req.query
+      );
+
+      try {
+        const { projectToken } = req.query;
+        if (!projectToken) {
+          throw new Error("lack of request parameters");
+        }
+        const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
+        const data = await launchServiceInstance.getAllAllocationInfo(projectToken);
+        return res.status(201).json(data);
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
+
+  route.get(
+    "/allocation/updateOne",
+    async (req: Request, res: Response, next: NextFunction) => {
+      logger.debug(
+        "Calling chart GET endpoint /allocation/updateOne with query: %o",
+        req.query
+      );
+
+      try {
+        const { walletId, projectToken, amount } = req.query;
+        if (!projectToken || !projectToken) {
+          throw new Error("lack of request parameters");
+        }
+        let amount_ = amount
+        if (!amount) amount_ = 0
+        const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
+        const data = await launchServiceInstance.updateOneAllocationInfo(walletId, projectToken, amount_);
+        return res.status(201).json(data);
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
+
+  route.get(
     "/purchase/record",
     async (req: Request, res: Response, next: NextFunction) => {
       try {
