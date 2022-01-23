@@ -86,7 +86,8 @@ const Launch = new mongoose.Schema(
       processRecords: [
         {
           endTime: { type: Date, default: Date.now },
-          w: { type: Number }
+          w: { type: Number }, // total allocated
+          s: { type: Number }
         }
       ]
     },

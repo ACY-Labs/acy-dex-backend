@@ -258,7 +258,8 @@ export default class LaunchService {
     // bonus
     let bonusAllocation = bonus.swapBonus + bonus.liquidityBonus + bonus.acyBonus
     // total
-    let allocationAmount = Math.round(balanceAllocation + bonusAllocation)
+    // let allocationAmount = Math.round(balanceAllocation + bonusAllocation)
+    let allocationAmount = Math.round(balanceAllocation)
     if (allocationAmount > launchProject.allocationInfo.parameters.maxTotalAlloc) {
       allocationAmount = launchProject.allocationInfo.parameters.maxTotalAlloc
     }
@@ -362,11 +363,15 @@ export default class LaunchService {
 
   private async calcAllocationLeft(userProject: any) {
     let bonus = await this.getBonus(userProject)
+    let launchProject = await this.getLaunchProjectByToken(userProject.projectToken);
     const bonusAmount = bonus.swapBonus + bonus.liquidityBonus + bonus.acyBonus
     // Note (GARY): total allocation amount includes bonus!
     let totalAllocationAmount = userProject.allocationAmount + bonusAmount;
     console.log("allocation left:", totalAllocationAmount, userProject.allocationUsed)
     let allocationLeft = Math.round(totalAllocationAmount - userProject.allocationUsed);
+    if (allocationLeft > launchProject.allocationInfo.parameters.maxTotalAlloc) {
+      allocationLeft = launchProject.allocationInfo.parameters.maxTotalAlloc
+    }
     return allocationLeft;
   }
 
@@ -533,14 +538,12 @@ export default class LaunchService {
         return {};
       } else {
         let userProject = user.projects[projectIndex];
-        if (!userProject.allocationLeft) {
-          userProject.allocationLeft = await this.calcAllocationLeft(userProject);
-          await user.save((err) => {
-            if (err) {
-              this.logger.error(`Mongo saving user record error: ${err}`);
-            }
-          })
-        }
+        userProject.allocationLeft = await this.calcAllocationLeft(userProject);
+        await user.save((err) => {
+          if (err) {
+            this.logger.error(`Mongo saving user record error: ${err}`);
+          }
+        })
         return userProject;
       }
     }
@@ -623,61 +626,87 @@ export default class LaunchService {
     // retrieve parametes needed
     const allocatedAmount = allocationInfo.states.allocatedAmount;
     const soldAmount = allocationInfo.states.soldAmount; // TODO: update using soldAmount, since everyone can buy ONLY ONCE
-    const processRecords = allocationInfo.processRecords // [{time, w}]
+    const processRecords = allocationInfo.processRecords // [{time, w, s}]
     const T = Number((launchProject.scheduleInfo.saleEnd - launchProject.scheduleInfo.saleStart) / (Number(allocationInfo.parameters.T) * 1000 * 60))
     const alertProportion = allocationInfo.parameters.alertProportion
     const totalRaise = launchProject.saleInfo.totalRaise
 
     // TODO: actual update algo
     if (totalRaise <= soldAmount) return launchProject; // if already sold out, no need to update
+
     let lastAllocationAmount = 0
+    let lastSoldAmount = 0
+    
     let w_last = 0
     let w_second_last = -1
+    let s_last = 0
+    let s_second_last = -1
     for (var item in processRecords) {
       lastAllocationAmount += processRecords[item].w
+      lastSoldAmount += processRecords[item].s
       if (Number(item) == processRecords.length - 1) {
         w_last = processRecords[item].w
+        s_last = processRecords[item].s
       } else if (Number(item) == processRecords.length - 2) {
         w_second_last = processRecords[item].w
+        s_second_last = processRecords[item].s
       }
     }
     let w_new = allocatedAmount - lastAllocationAmount
+    let s_new = soldAmount - lastSoldAmount
+
     let beta, beta_last
     if (w_last == 0 && w_new == 0) beta = 0
     else if (w_last == 0) beta = 1
     else beta = w_new / w_last
+    if (w_second_last != -1) {
+      if (w_second_last == 0 && w_last == 0) beta_last = 0
+      else if (w_second_last == 0) beta_last = 1
+      else beta_last = w_last / w_second_last
+      beta = 0.5 * (beta + beta_last)
+    }
+
+    let gamma, gamma_last
+    if (s_last == 0 && s_new == 0) gamma = 0
+    else if (s_last == 0) gamma = 1
+    else gamma = s_new / s_last
+    if (s_second_last != -1) {
+      if (s_second_last == 0 && s_last == 0) gamma_last = 0
+      else if (s_second_last == 0) gamma_last = 1
+      else gamma_last = s_last / s_second_last
+      gamma = 0.5 * (gamma + gamma_last)
+    }
 
     let remainingT = T - processRecords.length
-    let tmp = w_last
+    let tmp_1 = w_last, tmp_2 = s_last
     let estimatedSell = 0
     for (var i = 0; i < remainingT; i++) {
-      tmp *= beta
-      estimatedSell += tmp
+      tmp_1 *= beta
+      tmp_2 *= gamma
+      estimatedSell += (tmp_1 + tmp_2)
     }
+    estimatedSell /= 2.0
     
-
     let eta = estimatedSell / (totalRaise - allocatedAmount) // the **ratio**
     eta = eta / alertProportion
     // console.assert(eta > 0, "error: eta should be greater than 0!")
     console.log("eta", eta)
     if (eta < 0.85) eta = 0.85
     
-
     // update
     if (eta <= 1) { // update
       launchProject.allocationInfo.parameters.maxAlloc = launchProject.allocationInfo.parameters.maxAlloc / eta
       launchProject.allocationInfo.parameters.minAlloc = launchProject.allocationInfo.parameters.minAlloc / eta
     }
     // to avoid overflow of parameters
-    if (launchProject.allocationInfo.parameters.minAlloc > launchProject.allocationInfo.parameters.maxTotalAlloc / 4) {
-      let tmp = launchProject.allocationInfo.parameters.minAlloc / (launchProject.allocationInfo.parameters.maxTotalAlloc / 4)
-      launchProject.allocationInfo.parameters.maxAlloc = launchProject.allocationInfo.parameters.maxAlloc / tmp
-      launchProject.allocationInfo.parameters.minAlloc = launchProject.allocationInfo.parameters.minAlloc / tmp
+    if (launchProject.allocationInfo.parameters.minAlloc > launchProject.allocationInfo.parameters.maxTotalAlloc / 5) {
+      let ratio = launchProject.allocationInfo.parameters.minAlloc / (launchProject.allocationInfo.parameters.maxTotalAlloc / 5)
+      launchProject.allocationInfo.parameters.maxAlloc = launchProject.allocationInfo.parameters.maxAlloc / ratio
+      launchProject.allocationInfo.parameters.minAlloc = launchProject.allocationInfo.parameters.minAlloc / ratio
     }
 
     console.log("after update:", launchProject.allocationInfo.parameters.maxAlloc)
-    launchProject.allocationInfo.processRecords.push({ w: w_new, endTime: new Date() })
-
+    launchProject.allocationInfo.processRecords.push({ w: w_new, s: s_new, endTime: new Date() })
 
     let allocationCache = Container.get("allocationCache");
     // NOTE (Gary): please check if the cache is needed HERE
