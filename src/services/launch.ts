@@ -4,9 +4,10 @@ import { Logger, loggers } from "winston";
 import { ERC20_ABI, FARM_ADDRESS, GAS_TOKEN } from "../constants";
 import TokenListSelector from "../constants/tokenAddress"
 import { sleep, getTokensPrice } from "../util";
-import moment from "moment";
+import moment, { min } from "moment";
 import { Container } from "typedi";
 import UserService from "./user";
+import launchpad from "../api/routes/launchpad";
 
 export default class LaunchService {
   launchModel: any;
@@ -203,6 +204,35 @@ export default class LaunchService {
     return userProject
   }
 
+  private async calculateMinInvest(userProject, launchProject, allBalance) {
+    // to calculate the min investment for each user
+    const allocationLeft = await this.calcAllocationLeft(userProject)
+    const stage1 = launchProject.allocationInfo.parameters.maxTotalAlloc * 0.2, stage2 = launchProject.allocationInfo.parameters.maxTotalAlloc * 0.5
+    const rate1 = 0.2, rate2 = 0.15, rate3 = 0.08
+    let minInvest = 0
+    
+    if (allBalance > stage1) {
+      minInvest += stage1 * rate1
+      if (allBalance > stage2) {
+        minInvest += (stage2 - stage1) * rate2
+        minInvest += (allBalance - stage2) * rate3
+      } else {
+        minInvest += (allBalance - stage1) * rate2
+      }
+    } else {
+      minInvest += allBalance * rate1
+    }
+    // normalize too small minInvest amount
+    if (minInvest < 0.01 * launchProject.allocationInfo.parameters.maxTotalAlloc) minInvest = 0.01 * launchProject.allocationInfo.parameters.maxTotalAlloc
+    minInvest = minInvest + 100 * Math.random()
+    minInvest *= launchProject.allocationInfo.parameters.rateMinInvest ? launchProject.allocationInfo.parameters.rateMinInvest : 1.0
+    minInvest = Math.round(minInvest)
+
+    if (minInvest > allocationLeft) minInvest = allocationLeft
+
+    return minInvest
+  }
+
   public async requireAllocation(walletId: String, projectToken: String) {
     this.logger.info(`requireAllocation ${walletId} - ${projectToken}`);
     const date_now = new Date()
@@ -262,7 +292,7 @@ export default class LaunchService {
     if (allBalance * launchProject.allocationInfo.parameters.rateBalance <= 2 * launchProject.allocationInfo.parameters.minAlloc) {
       balanceAllocation = launchProject.allocationInfo.parameters.minAlloc * (1 + Math.random())
     } else if (allBalance * launchProject.allocationInfo.parameters.rateBalance >= 2 * launchProject.allocationInfo.parameters.maxTotalAlloc) {
-      balanceAllocation = launchProject.allocationInfo.parameters.maxTotalAlloc * Math.random() * 2
+      balanceAllocation = launchProject.allocationInfo.parameters.maxTotalAlloc * (0.5 + 1.5 * Math.random())
     } else {
       balanceAllocation = allBalance * launchProject.allocationInfo.parameters.rateBalance * Math.random() * 2
     }
@@ -274,8 +304,6 @@ export default class LaunchService {
     if (balanceAllocation < launchProject.allocationInfo.parameters.minAlloc) {
       balanceAllocation = launchProject.allocationInfo.parameters.minAlloc
     }
-    // bonus
-    let bonusAllocation = bonus.swapBonus + bonus.liquidityBonus + bonus.acyBonus
     // total
     // let allocationAmount = Math.round(balanceAllocation + bonusAllocation)
     let allocationAmount = Math.round(balanceAllocation)
@@ -286,6 +314,8 @@ export default class LaunchService {
     // TODO: update user allocation info
     userProject.allocationAmount = allocationAmount;
     userProject.allocationLeft = await this.calcAllocationLeft(userProject);
+    userProject.minInvest = await this.calculateMinInvest(userProject, launchProject, allBalance);
+
     userProject.allocationTime = date_now
     await user.save((err) => {
       if (err) {
@@ -556,8 +586,14 @@ export default class LaunchService {
       if (projectIndex === -1) {
         return {};
       } else {
+        
         let userProject = user.projects[projectIndex];
         userProject.allocationLeft = await this.calcAllocationLeft(userProject);
+        if (!userProject.minInvest) {
+          const launchProject = await this.getLaunchProjectByToken(projectToken)
+          const allBalance = await this.getBalance(walletId)
+          userProject.minInvest = await this.calculateMinInvest(userProject, launchProject, allBalance)
+        }
         await user.save((err) => {
           if (err) {
             this.logger.error(`Mongo saving user record error: ${err}`);
@@ -713,13 +749,18 @@ export default class LaunchService {
     if (eta < 0.85) eta = 0.85
 
     // update
-    if (eta <= 1) { // update
+    if (eta < 1) { // update
       launchProject.allocationInfo.parameters.maxAlloc = launchProject.allocationInfo.parameters.maxAlloc / eta
       launchProject.allocationInfo.parameters.minAlloc = launchProject.allocationInfo.parameters.minAlloc / eta
+      launchProject.allocationInfo.parameters.rateBalance = 1.0
+      launchProject.allocationInfo.parameters.rateMinInvest = 2.0
+    } else {
+      launchProject.allocationInfo.parameters.rateBalance = 0.5
+      launchProject.allocationInfo.parameters.rateMinInvest = 1.0
     }
     // to avoid overflow of parameters
-    if (launchProject.allocationInfo.parameters.minAlloc > launchProject.allocationInfo.parameters.maxTotalAlloc / 5) {
-      let ratio = launchProject.allocationInfo.parameters.minAlloc / (launchProject.allocationInfo.parameters.maxTotalAlloc / 5)
+    if (launchProject.allocationInfo.parameters.minAlloc > launchProject.allocationInfo.parameters.maxTotalAlloc * 0.2) {
+      let ratio = launchProject.allocationInfo.parameters.minAlloc / (launchProject.allocationInfo.parameters.maxTotalAlloc * 0.2)
       launchProject.allocationInfo.parameters.maxAlloc = launchProject.allocationInfo.parameters.maxAlloc / ratio
       launchProject.allocationInfo.parameters.minAlloc = launchProject.allocationInfo.parameters.minAlloc / ratio
     }

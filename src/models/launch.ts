@@ -77,7 +77,7 @@ const Launch = new mongoose.Schema(
         rateAcy: { type: Number },
         alertProportion: { type: Number },
         T: { type: Number },
-        minInvest: {type: Number}
+        rateMinInvest: { type: Number }
       },
       states: {
         allocatedAmount: { type: Number },
