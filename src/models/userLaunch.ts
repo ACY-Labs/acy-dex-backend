@@ -11,6 +11,7 @@ const UserLaunch = new mongoose.Schema(
             {
                 projectToken: { type: String },
                 allocationAmount: { type: Number },
+                allocationTime: { type: Date },
                 allocationBonus: [
                     {
                         bonusName: { type: String },

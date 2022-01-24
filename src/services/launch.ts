@@ -197,7 +197,7 @@ export default class LaunchService {
 
   public async requireAllocation(walletId: String, projectToken: String) {
     this.logger.info(`requireAllocation ${walletId} - ${projectToken}`);
-
+    const date_now = new Date()
     let user = await this.userLaunchModel.findOne({
       walletId: walletId
     }).exec()
@@ -278,6 +278,7 @@ export default class LaunchService {
     // TODO: update user allocation info
     userProject.allocationAmount = allocationAmount;
     userProject.allocationLeft = await this.calcAllocationLeft(userProject);
+    userProject.allocationTime = date_now
     await user.save((err) => {
       if (err) {
         this.logger.error(`Mongo saving user record error: ${err}`);
