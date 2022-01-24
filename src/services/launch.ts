@@ -141,7 +141,7 @@ export default class LaunchService {
     }
   }
 
-  public async updateOneAllocationInfo(walletId: String, projectToken: String, amount: Number) {
+  public async updateOneAllocationInfo(walletId: String, projectToken: String, amount: number) {
     this.logger.info(`updateOneAllocationInfo ${walletId} - ${projectToken} - ${amount}`);
 
     let user = await this.userLaunchModel.findOne({
@@ -182,9 +182,17 @@ export default class LaunchService {
     }
 
     let userProject = user.projects[projectIndex];
+    let launchProject = await this.getLaunchProjectByToken(projectToken);
+    launchProject.allocationInfo.states.allocatedAmount += (- userProject.allocationAmount + amount)
 
     userProject.allocationAmount = amount
     userProject.allocationLeft = await this.calcAllocationLeft(userProject);
+    await launchProject.save((err) => {
+      if (err) {
+        this.logger.error(`Mongo saving record error: ${err}`);
+        throw new Error("error when saving launch project")
+      }
+    })
     await user.save((err) => {
       if (err) {
         this.logger.error(`Mongo saving user record error: ${err}`);
