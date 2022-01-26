@@ -30,7 +30,7 @@ export default class LaunchChartService {
 
   }
 
-  public async addSaleData(poolId, sale, time) {
+  public async addSaleData(poolId,token, sale, time) {
     let chartData = await this.launchChartModel.findOne({ poolId }).exec();
     let tempTime = ((time / (1000 * 60 * 5) | 0) * 5);
     this.logger.debug(chartData)
@@ -38,10 +38,14 @@ export default class LaunchChartService {
     if (!chartData) {
       let dataArray = [{ saleAmount: sale, nodeTime: tempTime, count: 1 }];
       this.logger.debug("New Pool Id adding -----0-----", poolId)
-      await this.launchChartModel.create({
-        poolId,
+      const res = await this.launchChartModel.create({
+        poolId:poolId,
+        token:token,
         saleHistory: dataArray,
       });
+      this.logger.debug("Success");
+
+      return res;
     }
     else {
       let historyData = chartData.saleHistory;
@@ -58,6 +62,7 @@ export default class LaunchChartService {
             saleHistory: historyData
           }
         );
+        this.logger.debug("Success");
         return res;
       }
       else {
@@ -74,6 +79,8 @@ export default class LaunchChartService {
           {
             saleHistory: historyData
           });
+        this.logger.debug("Success");
+
         return res;
 
       }

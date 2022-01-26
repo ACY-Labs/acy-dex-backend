@@ -12,8 +12,8 @@ const LaunchChart = new mongoose.Schema(
     },
     saleHistory: [
       {
-        SaleAmount: Number,
-        time: Number,
+        saleAmount: Number,
+        nodeTime: Number,
         count: Number,
       }
     ],

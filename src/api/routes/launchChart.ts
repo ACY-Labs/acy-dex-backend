@@ -13,7 +13,7 @@ export default (app: Router) =>  {
     app.use("/launchChart", route);
     const logger: Logger = Container.get("logger");
 
-    route.get("/getAllocationSum",async (req: Request, res: Response, next: NextFunction)=>{
+    route.get("/getChartData",async (req: Request, res: Response, next: NextFunction)=>{
 
         logger.debug(
             "fetching allocation Chart Data ",
@@ -28,6 +28,18 @@ export default (app: Router) =>  {
         catch(e) {
             logger.error("🔥 error: %o", e);
             return next(e);        }
+    })
+
+    route.post("/addChartData",async (req:Request, res: Response, next:NextFunction)=> {
+
+        try{
+            const LaunchChartServiceInstance = new LaunchChartService(req.models,req.constants);
+            const data = await LaunchChartServiceInstance.addSaleData(req.query.poolId,req.query.token,req.query.sale,req.query.time);
+            return res.status(201).json(data)
+        }
+        catch(e){
+
+        }
     })
 
 }
