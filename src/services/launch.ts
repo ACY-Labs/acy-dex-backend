@@ -230,6 +230,10 @@ export default class LaunchService {
 
     if (minInvest > allocationLeft) minInvest = allocationLeft
 
+    let sellRemain = launchProject.saleInfo.totalRaise - launchProject.allocationInfo.soldAmount
+    // TODO (Gary): to read data from contract
+    if (minInvest > sellRemain) minInvest = sellRemain
+
     return minInvest
   }
 
