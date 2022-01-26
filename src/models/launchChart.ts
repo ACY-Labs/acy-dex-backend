@@ -11,6 +11,7 @@ const LaunchChart = new mongoose.Schema(
             {
               AllocationSum : Number,
               time : Number, 
+              count:Number,
             }
           ],
         },{ timestamps: true }
