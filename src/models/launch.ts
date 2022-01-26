@@ -76,7 +76,8 @@ const Launch = new mongoose.Schema(
         rateLiquidity: { type: Number },
         rateAcy: { type: Number },
         alertProportion: { type: Number },
-        T: { type: Number }
+        T: { type: Number },
+        minInvest: {type: Number}
       },
       states: {
         allocatedAmount: { type: Number },
@@ -85,7 +86,8 @@ const Launch = new mongoose.Schema(
       processRecords: [
         {
           endTime: { type: Date, default: Date.now },
-          w: { type: Number }
+          w: { type: Number }, // total allocated
+          s: { type: Number }
         }
       ]
     },
