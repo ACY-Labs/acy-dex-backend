@@ -9,6 +9,7 @@ import farm from "./routes/farm";
 import userInfo from "./routes/user";
 import txList from "./routes/txList";
 import tokenPrice from "./routes/tokenPrice";
+import launchChart from "./routes/launchChart";
 
 // guaranteed to get dependencies
 export default () => {
@@ -23,6 +24,7 @@ export default () => {
   userInfo(app);
   txList(app);
   tokenPrice(app);
+  launchChart(app);
 
   return app;
 };
