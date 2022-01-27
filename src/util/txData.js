@@ -4,6 +4,7 @@ import { findTokenInList,findTokenWithSymbol } from "./TokenUtils";
 import {methodList, actionList} from '../constants/MethodList';
 import {GAS_TOKEN} from '../constants/index';
 
+var supportedTokens;
 function failedTransaction(hash){
     return {
     "address" : null,
@@ -31,8 +32,8 @@ async function fetchUniqueETHToToken (hash, timestamp, libraryOut,chainID){
         let inLogs = response.logs.filter(log => log.topics.length > 2 && log.topics[0]===actionList.transfer.hash && log.topics[1].includes(TO_HASH));
         let outLogs = response.logs.filter(log => log.topics.length > 2 && log.topics[0]===actionList.transfer.hash && log.topics[2].includes(FROM_HASH));
         // console.log("pringting data of tx::::::",response,inLogs,outLogs);
-        let inToken = findTokenInList(inLogs[0],chainID);
-        let outToken =  findTokenInList(outLogs[0],chainID);
+        let inToken = findTokenInList(inLogs[0],supportedTokens);
+        let outToken =  findTokenInList(outLogs[0],supportedTokens);
 
         inLogs = inLogs.filter(log => log.address.toLowerCase() == inToken.address.toLowerCase());
         outLogs = outLogs.filter(log => log.address.toLowerCase() == outToken.address.toLowerCase());
@@ -96,8 +97,8 @@ async function fetchUniqueTokenToETH(hash, timestamp, libraryOut,chainID){
         let TO_HASH = response.to.toLowerCase().slice(2);
         let inLogs = response.logs.filter(log => log.topics.length > 2 && log.topics[0]===actionList.transfer.hash && log.topics[1].includes(FROM_HASH));
         let outLogs = response.logs.filter(log => log.topics.length > 2 && log.topics[0]===actionList.transfer.hash && log.topics[2].includes(TO_HASH));
-        let inToken = findTokenInList(inLogs[0],chainID);
-        let outToken =  findTokenInList(outLogs[0],chainID);
+        let inToken = findTokenInList(inLogs[0],supportedTokens);
+        let outToken =  findTokenInList(outLogs[0],supportedTokens);
         let inTokenNumber = 0;
         let outTokenNumber = 0;
 
@@ -152,8 +153,8 @@ async function fetchUniqueTokenToToken(hash, timestamp, libraryOut,chainID){
         let inLogs = response.logs.filter(log => log.topics.length > 2 && log.topics[0]==actionList.transfer.hash && log.topics[1].includes(FROM_HASH));
         let outLogs = response.logs.filter(log => log.topics.length > 2 && log.topics[0]==actionList.transfer.hash && log.topics[2].includes(FROM_HASH));
     
-        let inToken = findTokenInList(inLogs[0],chainID);
-        let outToken =  findTokenInList(outLogs[0],chainID);
+        let inToken = findTokenInList(inLogs[0],supportedTokens);
+        let outToken =  findTokenInList(outLogs[0],supportedTokens);
     
         let inTokenNumber = 0;
         let outTokenNumber = 0;
@@ -218,8 +219,8 @@ async function fetchUniqueAddLiquidity(hash, timestamp, libraryOut,chainID){
         let logsToken1 = outLogs.filter(log => log.address==tokensOut[0]);
         let logsToken2 = outLogs.filter(log => log.address==tokensOut[1]);
 
-        let token1 = findTokenInList(logsToken1[0],chainID);
-        let token2 =  findTokenInList(logsToken2[0],chainID);
+        let token1 = findTokenInList(logsToken1[0],supportedTokens);
+        let token2 =  findTokenInList(logsToken2[0],supportedTokens);
 
         let token1Number = 0;
         for(let log of logsToken1){
@@ -292,8 +293,8 @@ export async function fetchUniqueRemoveLiquidity(hash, timestamp, libraryOut,cha
         let logsToken1 = inLogs.filter(log => log.address==tokensIn[0]);
         let logsToken2 = inLogs.filter(log => log.address==tokensIn[1]);
 
-        let token1 = findTokenInList(logsToken1[0],chainID);
-        let token2 =  findTokenInList(logsToken2[0],chainID);
+        let token1 = findTokenInList(logsToken1[0],supportedTokens);
+        let token2 =  findTokenInList(logsToken2[0],supportedTokens);
 
         let token1Number = 0;
         for(let log of logsToken1){token1Number = token1Number + (log.data / Math.pow(10, token1.decimals))};
@@ -347,8 +348,8 @@ export async function fetchUniqueAddLiquidityEth(hash, timestamp, libraryOut,cha
         let logsToken1 = response.logs.filter(log => log.topics.length > 2 && log.topics[0]===actionList.transfer.hash && log.topics[1].includes(FROM_HASH));
         let logsToken2 = response.logs.filter(log => log.topics.length > 2 && log.topics[0]===actionList.transfer.hash && log.topics[1].includes(TO_HASH));
     
-        let token1 = findTokenInList(logsToken1[0],chainID);
-        let token2 =  findTokenInList(logsToken2[0],chainID);
+        let token1 = findTokenInList(logsToken1[0],supportedTokens);
+        let token2 =  findTokenInList(logsToken2[0],supportedTokens);
     
         let token1Number = 0;
         for(let log of logsToken1){token1Number = token1Number + (log.data / Math.pow(10, token1.decimals))};
@@ -404,8 +405,8 @@ export async function fetchUniqueRemoveLiquidityEth(hash, timestamp, libraryOut,
         let logsToken1 = response.logs.filter(log => log.topics.length > 2 && log.topics[0]===actionList.transfer.hash && log.topics[2].includes(FROM_HASH));
         let logsToken2 = response.logs.filter(log => log.topics.length > 2 && log.topics[0]===actionList.transfer.hash && log.topics[2].includes(TO_HASH));
 
-        let token1 = findTokenInList(logsToken1[0],chainID);
-        let token2 =  findTokenWithSymbol(GAS_TOKEN[chainID],chainID);
+        let token1 = findTokenInList(logsToken1[0],supportedTokens);
+        let token2 =  findTokenWithSymbol(GAS_TOKEN[chainID],supportedTokens);
 
 
         let token1Number = 0;
@@ -452,7 +453,9 @@ export async function fetchUniqueRemoveLiquidityEth(hash, timestamp, libraryOut,
 
 }
 
-export async function parseTxData(status, receiptHash,timestamp,input, libraryOut, chainID){
+export async function parseTxData(status, receiptHash,timestamp,input, libraryOut, chainID, tokenList){
+
+    supportedTokens = tokenList;
 
     // console.log(libraryOut);
     let newData = {};
