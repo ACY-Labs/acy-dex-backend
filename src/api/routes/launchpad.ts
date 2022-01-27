@@ -120,11 +120,8 @@ export default (app: Router) => {
       );
       try {
         const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
-        let status: Number = 200;
-        let message: String = "Default message";
-        const res = await launchServiceInstance.updatePoolID(req.poolId);
-        console.log(status, message);
-        return true
+        await launchServiceInstance.updatePoolID(req.poolId);
+        return res.status(201).json({'msg': 'updated'});
       }catch (e) {
         logger.error("🔥 error: %o", e);
         return next(e);
