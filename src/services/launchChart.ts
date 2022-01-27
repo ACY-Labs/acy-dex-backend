@@ -30,17 +30,17 @@ export default class LaunchChartService {
 
   }
 
-  public async addSaleData(poolId,token, sale, time) {
+  public async addSaleData(poolId, token, sale, time) {
     let chartData = await this.launchChartModel.findOne({ poolId }).exec();
     let tempTime = ((time / (1000 * 60 * 5) | 0) * 5);
     this.logger.debug(chartData)
 
     if (!chartData) {
       let dataArray = [{ saleAmount: sale, nodeTime: tempTime, count: 1 }];
-      this.logger.debug("New Pool Id adding -----0-----", poolId)
+      this.logger.debug("New Pool Id adding -----0chart-----", poolId)
       const res = await this.launchChartModel.create({
-        poolId:poolId,
-        token:token,
+        poolId: poolId,
+        token: token,
         saleHistory: dataArray,
       });
       this.logger.debug("Success");
@@ -49,7 +49,7 @@ export default class LaunchChartService {
     }
     else {
       let historyData = chartData.saleHistory;
-      if (tempTime != (historyData[historyData.length - 1].time)) {
+      if (tempTime != (historyData[historyData.length - 1].nodeTime)) {
         historyData.push({
           saleAmount: sale, nodeTime: tempTime, count: 1
         });
@@ -92,4 +92,39 @@ export default class LaunchChartService {
 
 
   }
-}
+
+  public async addUserPerchasedData(poolId, token, walletId, userPerchased, purchasedTime) {
+    let tableData = await this.launchChartModel.findOne({ poolId }).exec();
+    this.logger.debug(tableData);
+
+    if (!tableData) {
+      let dataArray = [{ walletId: walletId, token: token, userPerchasedAmount: userPerchased, purchasedTime: purchasedTime }];
+      this.logger.debug("New Pool Id adding -----0table-----", poolId)
+      const res = await this.launchChartModel.create({
+        poolId: poolId,
+        token: token,
+        userHistory: dataArray,
+      });
+      this.logger.debug("Success");
+
+      return res;
+    }
+    else {
+      let historyData = tableData.userHistory;
+      historyData.push({
+        walletId: walletId,
+        userPerchasedAmount: userPerchased,
+        purchasedTime: purchasedTime
+      });
+      this.logger.debug("new AllocationData record inserting PooL id is ---1111-----", poolId);
+      const res = await this.launchChartModel.updateOne(
+        {
+          userHistory: historyData
+        }
+      );
+      this.logger.debug("Success");
+      return res;
+
+
+    }
+  }

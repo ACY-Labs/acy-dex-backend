@@ -21,7 +21,7 @@ const LaunchChart = new mongoose.Schema(
       {
         walletId: Number,
         userPurchasedAmount:Number,
-        purchasedTime:Number
+        purchasedTime:Date
       }
     ]
   }, { timestamps: true }
