@@ -43,4 +43,16 @@ export default (app: Router) => {
         }
     })
 
+    route.post("/addTableData", async (req: Request, res: Response, next: NextFunction) => {
+
+        try {
+            const LaunchChartServiceInstance = new LaunchChartService(req.models, req.constants);
+            const data = await LaunchChartServiceInstance.addUserPerchasedData(req.query.poolId, req.query.token, req.query.walletId,req.query.sale, req.query.purchasedTime);
+            return res.status(201).json(data)
+        }
+        catch (e) {
+
+        }
+    })
+
 }
