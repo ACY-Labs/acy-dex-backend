@@ -1,6 +1,7 @@
 import { Service, Container } from "typedi";
 import {
     SCAN_API,
+    SCAN_API_KEY,
     OFFSET,
     ROUTER_ADDRESS,
     RPC_URL,
@@ -19,17 +20,23 @@ export default class TxService {
     web3: any;
     ACY_ROUTER: any;
     BSCSCAN_API: any;
+    BSCSCAN_API_KEY : any;
     libraryOut: any;
+    supportedTokens : any;
+    config : any;
+
 
     constructor(
         models,
         chainId
     ) { 
+        this.config = models.configModel;
         this.txListModel = models.txListModel;
         this.chainId = chainId;
         this.web3 = new Web3(RPC_URL[this.chainId]);
         this.ACY_ROUTER = ROUTER_ADDRESS[chainId];
         this.BSCSCAN_API = SCAN_API[chainId];
+        this.BSCSCAN_API_KEY = SCAN_API_KEY[chainId];
         this.libraryOut = new JsonRpcProvider(RPC_URL[chainId]);
     }
 
@@ -78,7 +85,7 @@ export default class TxService {
             
         let currTxList = user_tx ? user_tx.txList : [];
 
-        let request = this.BSCSCAN_API+'?module=account&action=txlist&address='+address+'&startblock='+CONTRACT_CREATION_BLOCK[this.chainId]+'&endblock='+blockNum+'&page=1&offset='+OFFSET+'&sort=desc';
+        let request = this.BSCSCAN_API+'?module=account&action=txlist&address='+address+'&startblock='+CONTRACT_CREATION_BLOCK[this.chainId]+'&endblock='+blockNum+'&page=1&offset='+OFFSET+'&sort=desc&apikey='+this.BSCSCAN_API_KEY;
         // console.log(request);
         let response = await axios.get(request);
         let data = await response.data.result;
@@ -87,7 +94,7 @@ export default class TxService {
         this.logger.debug("currently data list having %d and adding %d txs", _currList.length,_toAdd.length);
         // this.logger.debug(_currList.slice(-2),_toAdd);
         for(let i=0;i<_toAdd.length;i++){
-            _toAdd[i] = await parseTxData(_toAdd[i].txreceipt_status,_toAdd[i].hash, _toAdd[i].timeStamp, _toAdd[i].input.substring(0,10),this.libraryOut, this.chainId);
+            _toAdd[i] = await parseTxData(_toAdd[i].txreceipt_status,_toAdd[i].hash, _toAdd[i].timeStamp, _toAdd[i].input.substring(0,10),this.libraryOut, this.chainId, this.supportedTokens);
         }
 
         _toAdd.push(..._currList);
@@ -118,6 +125,9 @@ export default class TxService {
     }
 
     public async updateTxList() {
+
+        let modelRequest = await this.config.findOne({attr : "tokenList"}).exec();
+        this.supportedTokens = modelRequest.value;
         
         let runningFlag = Container.get(`net${this.chainId}runningFlag`);
         if(runningFlag['isUpdatingTxList']) {

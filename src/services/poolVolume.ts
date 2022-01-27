@@ -18,7 +18,8 @@ export default class PoolVolumeService {
     pairVolumeModel: any;
     chainId: any;
     web3: any;
-    supportedTokens: any;
+    config : any;
+    supportedTokens : any;
 
   constructor(
     models,
@@ -27,7 +28,7 @@ export default class PoolVolumeService {
     this.pairVolumeModel = models.pairVolumeModel;
     this.chainId = chainId;
     this.web3 = new Web3(RPC_URL[this.chainId]);
-    this.supportedTokens = TokenListSelector(chainId.toString());
+    this.config = models.configModel;
   }
 
     // constructor(
@@ -300,6 +301,8 @@ export default class PoolVolumeService {
         try{
 
             let blockNum = await this.web3.eth.getBlockNumber();
+            let modelRequest = await this.config.findOne({attr : "tokenList"}).exec();
+            this.supportedTokens = modelRequest.value;
 
             let all_tasks = [];
 
@@ -307,8 +310,8 @@ export default class PoolVolumeService {
                 for(let j=i+1;j<this.supportedTokens.length;j++){
 
                     all_tasks.push(this.updateSinglePair(this.supportedTokens[i].address,
-                    this.supportedTokens[j].address,this.supportedTokens[i].decimals,
-                    this.supportedTokens[j].decimals,blockNum));
+                        this.supportedTokens[j].address,this.supportedTokens[i].decimals,
+                        this.supportedTokens[j].decimals,blockNum));
                     
                 }
             }

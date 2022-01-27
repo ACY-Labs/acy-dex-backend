@@ -11,14 +11,17 @@ export default class TokenPriceService {
     tokenPriceModel: any;
     chainId: any;
     logger: Logger;
+    config : any;
     constructor(models,logger,chainId) {
+      this.config = models.configModel;
       this.tokenPriceModel = models.tokenPriceModel;
       this.chainId =  chainId;
       this.logger = logger;
       }
       public async updateTokensPriceList(chainId) {
         console.log("Fetching TokenPriceList data--------------------ChainID is " + this.chainId)
-        const tokenlist = TokenListSelector(this.chainId);
+        let modelRequest = await this.config.findOne({attr : "tokenList"}).exec();
+        const tokenlist = modelRequest.value;
         const searchIdsArray = tokenlist.map(token => token.idOnCoingecko);
         if( await this.tokenPriceModel.findOne({chainId : chainId}) == null){
           let res = 

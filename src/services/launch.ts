@@ -15,12 +15,14 @@ export default class LaunchService {
   chainId: any;
   logger: Logger;
   tokenPriceModel: any
+  config : any;
 
   constructor(
     models,
     constants,
     logger
   ) {
+    this.config = models.configModel;
     this.launchModel = models.launchModel;
     this.userLaunchModel = models.userLaunchModel;
     this.web3 = constants.web3;
@@ -301,7 +303,8 @@ export default class LaunchService {
     const logger = this.logger
 
     // var plist = [];
-    var tokenlist = TokenListSelector(this.chainId)
+    let modelRequest = await this.config.findOne({attr : "tokenList"}).exec();
+    var tokenlist = modelRequest.value;
     const chainId = this.chainId;
 
     // var tokenPrice = await getTokensPrice(tokenlist);

@@ -12,16 +12,17 @@ export default class FarmService {
     chainId: any;
     logger: Logger;
     supportedTokens: any;
+    config : any;
 
   constructor(
     models,
     logger,
     chainId
   ) { 
+    this.config = models.configModel;
     this.farmModel = models.farmModel;
     this.chainId = chainId;
     this.logger = logger;
-    this.supportedTokens = TokenListSelector(chainId);
     console.log(this.supportedTokens);
   }
   public getTokenSymbol(address) {
@@ -31,6 +32,10 @@ export default class FarmService {
   public async massUpdateFarm() {
 
     try {
+
+        //read current token list
+        let modelRequest = await this.config.findOne({attr : "tokenList"}).exec();
+        this.supportedTokens = modelRequest.value;
 
         this.logger.debug("updating in massUdpdateFarm...");
         const web3 = new Web3(RPC_URL[this.chainId]);
