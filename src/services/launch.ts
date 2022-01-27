@@ -439,7 +439,6 @@ export default class LaunchService {
     })
 
     // AustinTODO
-    let data = await this.addSaleData(launchProject.poolID,projectToken,amount,Date.now())
     return userProject;
   }
 

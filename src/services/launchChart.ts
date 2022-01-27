@@ -53,6 +53,7 @@ export default class LaunchChartService {
         historyData.push({
           saleAmount: sale, nodeTime: tempTime, count: 1
         });
+        console.log("Time is",tempTime)
         this.logger.debug("new AllocationData record inserting PooL id is ---1111-----", poolId);
         const res = await this.launchChartModel.updateOne(
           {
@@ -68,7 +69,7 @@ export default class LaunchChartService {
       else {
         let newCount = historyData[historyData.length - 1].count + 1;
         let newAllocation = (historyData[historyData.length - 1].saleAmount + parseInt(sale))
-        historyData[historyData.length - 1].AllocationSum = newAllocation;
+        historyData[historyData.length - 1].saleAmount = newAllocation;
         historyData[historyData.length - 1].count = newCount;
 
         this.logger.debug("AllocationDataSum add PooL id is -----2-----", poolId);

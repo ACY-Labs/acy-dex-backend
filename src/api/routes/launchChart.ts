@@ -13,7 +13,7 @@ export default (app: Router) => {
     app.use("/launchChart", route);
     const logger: Logger = Container.get("logger");
 
-    route.get("/getChartData", async (req: Request, res: Response, next: NextFunction) => {
+    route.get("/getSaleData", async (req: Request, res: Response, next: NextFunction) => {
 
         logger.debug(
             "fetching allocation Chart Data ",
