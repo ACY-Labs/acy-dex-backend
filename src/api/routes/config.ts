@@ -16,7 +16,7 @@ export default (app: Router) => {
     "/tokenlist",
     async (req: Request, res: Response, next: NextFunction) => {
       logger.debug(
-        "Calling user POST endpoint /tokenlist with query: %o",
+        "Calling configs GET endpoint /tokenlist with query: %o",
         req.query
       );
       try {
