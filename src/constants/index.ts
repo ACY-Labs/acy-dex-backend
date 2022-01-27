@@ -48,6 +48,12 @@ export const SCAN_API = {
   137: 'https://api.polygonscan.com/api',
   80001: "https://api-testnet.polygonscan.com/api"
 }
+
+export const SCAN_API_KEY = {
+  56: 'H2W1JHHRFB5H7V735N79N75UVG86E9HFH2',
+  97: 'H2W1JHHRFB5H7V735N79N75UVG86E9HFH2',
+  137: 'Z5VBTTG7RFZWPZ6TUUTQ6IJ485FGFCS5QA',
+}
 export const CONTRACT_CREATION_BLOCK = {
   56: 13500000,
   97: 15040000,
