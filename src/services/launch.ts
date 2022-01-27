@@ -608,6 +608,10 @@ export default class LaunchService {
     }
   }
 
+  public async create(form) {
+
+  }
+
   public async createProjects() {
     // bsc-test contract, for test only
     await this.launchModel.create({
