@@ -6,6 +6,9 @@ const ApplyData = new mongoose.Schema(
             index:true,
             type:Number,
         },
+        walletId:{
+            type:Number
+        },
         //symbol -> price
         form:
         {
