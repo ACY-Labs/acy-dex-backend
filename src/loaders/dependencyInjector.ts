@@ -12,6 +12,7 @@ export default ({
     Container.set('connections', mongoConnections);
 
     const modelList = [
+      'configModel',
       'pairModel',
       'rateModel',
       'subscriberModel',

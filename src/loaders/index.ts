@@ -35,6 +35,7 @@ export default async ({ expressApp }, isExpress=true) => {
     let conn: Connection = mongoConnections[network]['conn'];
     const networkName = network;
     Logger.info(`Loading network:: ${networkName}`);
+    mongoConnections[network]['configModel'] = conn.model('config', require("../models/config").default);
     mongoConnections[network]['pairModel'] = conn.model('pair', require("../models/pair").default);
     mongoConnections[network]['rateModel'] = conn.model('rate', require("../models/rate").default);
     mongoConnections[network]['subscriberModel'] = conn.model('subscriber', require("../models/subscriber").default);

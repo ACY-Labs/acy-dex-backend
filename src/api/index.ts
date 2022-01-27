@@ -9,7 +9,7 @@ import farm from "./routes/farm";
 import userInfo from "./routes/user";
 import txList from "./routes/txList";
 import tokenPrice from "./routes/tokenPrice";
-
+import config from "./routes/config";
 // guaranteed to get dependencies
 export default () => {
   const app = Router();
@@ -23,6 +23,7 @@ export default () => {
   userInfo(app);
   txList(app);
   tokenPrice(app);
+  config(app)
 
   return app;
 };
