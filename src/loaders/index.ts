@@ -46,6 +46,8 @@ export default async ({ expressApp }, isExpress=true) => {
     mongoConnections[network]['userInfoModel'] = conn.model('user', require("../models/userInfo").default);
     mongoConnections[network]['farmModel'] = conn.model('farm', require("../models/farm").default);
     mongoConnections[network]['tokenPriceModel'] = conn.model('tokenPrice',require("../models/tokenPrice").default);
+    mongoConnections[network]['applyDataModel'] = conn.model('applyData',require("../models/applyData").default);
+
 
   })
   Logger.info("✌️ DB Models establised");

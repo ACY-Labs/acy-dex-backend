@@ -2,10 +2,12 @@ import mongoose from "mongoose";
 
 const ApplyData = new mongoose.Schema(
     {
-        id:{
-            index:true,
-            type:Number,
-        },
+        id:
+            {type: mongoose.Schema.Types.ObjectId,
+                index: true,
+                required: true,
+                auto: true}
+        ,
         walletId:{
             type:Number
         },
