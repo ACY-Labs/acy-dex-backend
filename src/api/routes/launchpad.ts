@@ -116,6 +116,23 @@ export default (app: Router) => {
     }
   );
 
+  route.post(
+    "/updatePool",
+    async (req: Request, res: Response, next: NextFunction) => {
+      logger.debug(
+        "Calling POST endpoint /launch/updatePool with query: %o",
+        req.query
+      );
+      try {
+        const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
+        await launchServiceInstance.updatePoolID(req.poolId);
+        return res.status(201).json({'msg': 'updated'});
+      }catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
 
   route.get(
     "/allocation/require",

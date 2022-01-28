@@ -115,6 +115,27 @@ export default class LaunchService {
     return data;
   }
 
+  public async updatePoolID(poolID: Number) {
+    this.logger.info(`Retrieve project from db`);
+    let data = await this.launchModel.findOne({ poolID: poolID }).exec();
+    if (!data)
+      this.logger.info(`Data not found`);
+    const updated = await this.launchModel.updateOne(
+      {
+          poolID
+      },
+      {
+          poolID,
+      }, (err, data) => {
+        if (err) {
+          this.logger.debug(`Mongo update new poolID error ${err}`);
+        return false;
+      }
+      this.logger.debug(`Mongo update a new poolID record`);
+      return data;
+    });
+  }
+
   public async getAllAllocationInfo(projectToken: String) {
     this.logger.info(`getAllAllocationInfo ${projectToken}`);
     let data = await this.userLaunchModel.find().exec();
