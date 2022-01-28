@@ -4,7 +4,7 @@ import express from "express";
 import Logger from "./loaders/logger";
 import TokenPriceService from "./services/tokenPrice";
 import { Container } from "typedi";
-
+import formidable from "express-formidable"
 
 async function startServer() {
   const app = express();
@@ -23,7 +23,7 @@ async function startServer() {
   // const modelsBscMain    = Container.get('connections')['bsc-main'];
   // const tokenPriceServiceBscMain = new TokenPriceService(modelsBscMain,logger,constantsBscMain.chainId);
   // setInterval(() => tokenPriceServiceBscMain.updateTokensPriceList(constantsBscMain.chainId), 30000);
-
+  app.use(formidable());
 
   app
     .listen(config.port, () => {

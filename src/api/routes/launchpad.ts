@@ -73,6 +73,11 @@ export default (app: Router) => {
       }
     }
   );
+  route.post("/projects/create",async(req:Request,res:Response,next:NextFunction)=>{
+    logger.debug("Interface is posting form data to create launchproject",req.query)
+    console.log(JSON.stringify(req.fields));
+    return res.status(201);
+  })
 
   route.get(
     "/projects/:projectsId",
