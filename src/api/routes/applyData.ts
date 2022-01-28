@@ -51,7 +51,7 @@ export default (app: Router) =>  {
         );
         try {
           const applyServiceInstance = new ApplyDataService(req.models, req.constants, logger);
-          let data = await applyServiceInstance.createForm(req.query.walletId,testForm);
+          let data = await applyServiceInstance.createForm(req.query.walletId,req.body);
 
 
           return res.status(201).json(data);

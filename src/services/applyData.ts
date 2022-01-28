@@ -17,14 +17,19 @@ export default class ApplyDataService {
       }
       public async createForm(walletId,form) {
         console.log(walletId,form)
+        try{
         let createRes = await this.applyDataModel.create({
           walletId: walletId,
           form: form
-        },(err,data)=>{
-          console.log("MongoData Create Error",err);
-          return err;
-        })
+        });
 
-        return ("TEST SUCCESS");
+        const modelInstance = await this.applyDataModel.findOne({walletId}).exec();
+        return (modelInstance._id);
+      }
+      catch(err){
+        console.log("MongoData Create Error",err);
+        return err;
+      };
+        
       }
 }

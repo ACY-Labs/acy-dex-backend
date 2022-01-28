@@ -2,14 +2,10 @@ import mongoose from "mongoose";
 
 const ApplyData = new mongoose.Schema(
     {
-        id:
-            {type: mongoose.Schema.Types.ObjectId,
-                index: true,
-                required: true,
-                auto: true}
-        ,
         walletId:{
-            type:Number
+            type:Number,
+            index:true,
+            required:true,
         },
         //symbol -> price
         form:
