@@ -32,4 +32,18 @@ export default class ApplyDataService {
       };
         
       }
+      public async checkForm(walletId){
+        console.log(walletId);
+        try{
+          let findRes = await this.applyDataModel.findOne({walletId}).exec();
+          if(findRes) return true;
+          else return false;
+        }
+        catch(err){
+          console.log("MongoData Find Error",err);
+          return err;
+        }
+
+
+      }
 }
