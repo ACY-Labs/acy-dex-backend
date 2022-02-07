@@ -43,7 +43,17 @@ export default class ApplyDataService {
           console.log("MongoData Find Error",err);
           return err;
         }
+      }
 
-
+      public async getForm(){
+        try{
+          let data = await this.applyDataModel.find().exec();
+          if(!data) this.logger.info("No Form Data store in DB!");
+          return data;
+        }
+        catch(err){
+          console.log("MongoData Find Error",err);
+          return err;
+        }
       }
 }

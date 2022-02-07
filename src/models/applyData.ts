@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const ApplyData = new mongoose.Schema(
     {
         walletId:{
-            type:Number,
+            type:String,
             index:true,
             required:true,
         },
