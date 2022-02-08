@@ -82,12 +82,30 @@ export default (app: Router) =>  {
 
     route.get("/getForm", async  (req: Request, res: Response, next: NextFunction)=>{
       logger.debug(
-        "Calling GET endpoint /applyForm/checkUser with query: %o",
+        "Calling GET endpoint /applyForm/getForm with query: %o",
         req.query
       );
       try{
         const applyServiceInstance = new ApplyDataService(req.models, req.constants, logger);
         let data = await applyServiceInstance.getForm();
+
+        
+
+        return res.status(201).json(data);
+      } catch(e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    })
+
+    route.post("/updateForm",async  (req: Request, res: Response, next: NextFunction)=>{
+      logger.debug(
+        "Calling GET endpoint /applyForm/updateForm with query: %o",
+        req.query
+      );
+      try{
+        const applyServiceInstance = new ApplyDataService(req.models, req.constants, logger);
+        let data = await applyServiceInstance.updateForm(req.query.projectId,req.body);
 
         
 
