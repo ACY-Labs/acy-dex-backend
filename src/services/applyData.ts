@@ -57,7 +57,7 @@ export default class ApplyDataService {
     }
   }
 
-  public async updateForm(projectID,form) {
+  public async updateForm(projectID, form) {
     console.log(projectID);
 
     try {
@@ -67,19 +67,35 @@ export default class ApplyDataService {
       const updateRes = await this.applyDataModel.updateOne(
         { _id: projectID },
         {
-          form:form
-        },(err,data)=>{
+          form: form
+        }, (err, data) => {
           if (err) {
             this.logger.debug(`Mongo update Form error ${err}`);
-          return false;
-        }
+            return false;
+          }
         });
-        this.logger.debug(`Mongo update Form record success`);
-        return true;
+      this.logger.debug(`Mongo update Form record success`);
+      return true;
     }
     catch (err) {
       console.log("MongoData update Error", err);
       return err;
     }
+  }
+
+  public async getFormById(projectId) {
+    try {
+      let data = await this.applyDataModel.find({_id:projectId}).exec();
+      if (!data) this.logger.info("No Form Data store in DB!");
+      return data;
+    }
+    catch (err) {
+      console.log("MongoData Find Error", err);
+      return err;
+    }
+  }
+
+  public async activateProject(projectId) {
+
   }
 }
