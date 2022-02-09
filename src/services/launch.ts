@@ -16,6 +16,7 @@ export default class LaunchService {
   chainId: any;
   logger: Logger;
   tokenPriceModel: any
+  launchChartModel: any
 
   constructor(
     models,
@@ -28,6 +29,7 @@ export default class LaunchService {
     this.chainId = constants.chainId;
     this.logger = logger;
     this.tokenPriceModel = models.tokenPriceModel;
+    this.launchChartModel = models.launchChartModel;
   }
 
   public async getProjects() {
@@ -105,7 +107,6 @@ export default class LaunchService {
       return result2;
     }
   }
-
   public async getProjectsByID(projectsId: Number) {
     this.logger.info(`Retrieve project from db`);
     let data = await this.launchModel.findOne({ projectID: projectsId }).exec();
@@ -148,10 +149,10 @@ export default class LaunchService {
       let projectIndex = user.projects.findIndex(item => item.projectToken === projectToken);
       if (projectIndex === -1) continue;
       let userProject = user.projects[projectIndex]
-      allocationInfo.push({ 
-        walletId: user.walletId, 
-        projectToken: projectToken, 
-        allocationAmount: userProject.allocationAmount 
+      allocationInfo.push({
+        walletId: user.walletId,
+        projectToken: projectToken,
+        allocationAmount: userProject.allocationAmount
       })
       total_allocation += userProject.allocationAmount;
     }
@@ -502,6 +503,7 @@ export default class LaunchService {
       }
     })
 
+    // AustinTODO
     return userProject;
   }
 
@@ -819,6 +821,69 @@ export default class LaunchService {
       }
     })
     return launchProject;
+
+  }
+
+  public async addSaleData(poolId, token, sale, time) {
+    let chartData = await this.launchChartModel.findOne({ poolId }).exec();
+    let tempTime = ((time / (1000 * 60 * 5) | 0) * 5);
+    this.logger.debug(chartData)
+
+    if (!chartData) {
+      let dataArray = [{ saleAmount: sale, nodeTime: tempTime, count: 1 }];
+      this.logger.debug("New Pool Id adding -----0-----", poolId)
+      const res = await this.launchChartModel.create({
+        poolId: poolId,
+        token: token,
+        saleHistory: dataArray,
+      });
+      this.logger.debug("Success");
+
+      return res;
+    }
+    else {
+      let historyData = chartData.saleHistory;
+      if (tempTime != (historyData[historyData.length - 1].nodeTime)) {
+        historyData.push({
+          saleAmount: sale, nodeTime: tempTime, count: 1
+        });
+        this.logger.debug("new AllocationData record inserting PooL id is ---1111-----", poolId);
+        const res = await this.launchChartModel.updateOne(
+          {
+            poolId: poolId
+          },
+          {
+            saleHistory: historyData
+          }
+        );
+        this.logger.debug("Success");
+        return res;
+      }
+      else {
+        let newCount = historyData[historyData.length - 1].count + 1;
+        let newAllocation = (historyData[historyData.length - 1].saleAmount + parseInt(sale))
+        historyData[historyData.length - 1].AllocationSum = newAllocation;
+        historyData[historyData.length - 1].count = newCount;
+
+        this.logger.debug("AllocationDataSum add PooL id is -----2-----", poolId);
+
+        const res = await this.launchChartModel.updateOne({
+          poolId: poolId,
+        },
+          {
+            saleHistory: historyData
+          });
+        this.logger.debug("Success");
+
+        return res;
+
+      }
+    }
+
+
+
+
+
 
   }
 }

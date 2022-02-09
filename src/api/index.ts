@@ -10,6 +10,7 @@ import userInfo from "./routes/user";
 import txList from "./routes/txList";
 import tokenPrice from "./routes/tokenPrice";
 import applyData from "./routes/applyData";
+import launchChart from "./routes/launchChart";
 
 // guaranteed to get dependencies
 export default () => {
@@ -25,6 +26,7 @@ export default () => {
   txList(app);
   tokenPrice(app);
   applyData(app);
+  launchChart(app);
 
   return app;
 };
