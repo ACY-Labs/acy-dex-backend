@@ -23,6 +23,7 @@ export default ({
       'userInfoModel',
       'farmModel',
       'tokenPriceModel',
+      'userBalanceModel'
     ]
 
     // TODO: to be removed
@@ -61,7 +62,7 @@ export default ({
       },
       'polygon-test': {
         chainId: 80001,
-        web3: Web3Instances["polygon-test"],
+        web3: config.rpcURL["polygon-test"],
         logger: Container.get("logger")
       }
     }

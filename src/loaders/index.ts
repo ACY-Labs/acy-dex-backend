@@ -5,7 +5,7 @@ import Logger from "./logger";
 import config from "../config";
 import { Connection } from "mongoose";
 
-export default async ({ expressApp }, isExpress=true) => {
+export default async ({ expressApp }, isExpress = true) => {
 
   // 连接所有DB，并加载所有Schema，因为await的原因所以暂时没法用for
   // TODO: async Foreach
@@ -28,7 +28,7 @@ export default async ({ expressApp }, isExpress=true) => {
   mongoConnections['polygon-test'] = {
     'conn': await mongooseConnector(config.databases['polygon-test'])
   }
-  
+
   Logger.info("✌️ DB loaded and connected!");
   Logger.info(Object.keys(mongoConnections));
   Object.keys(mongoConnections).forEach(network => {
@@ -45,15 +45,15 @@ export default async ({ expressApp }, isExpress=true) => {
     mongoConnections[network]['userLaunchModel'] = conn.model('userLaunch', require("../models/userLaunch").default);
     mongoConnections[network]['userInfoModel'] = conn.model('user', require("../models/userInfo").default);
     mongoConnections[network]['farmModel'] = conn.model('farm', require("../models/farm").default);
-    mongoConnections[network]['tokenPriceModel'] = conn.model('tokenPrice',require("../models/tokenPrice").default);
-
+    mongoConnections[network]['tokenPriceModel'] = conn.model('tokenPrice', require("../models/tokenPrice").default);
+    mongoConnections[network]['userBalanceModel'] = conn.model('userBalance', require("../models/userBalance").default);
   })
   Logger.info("✌️ DB Models establised");
 
-  await dependencyInjectorLoader({mongoConnections});
+  await dependencyInjectorLoader({ mongoConnections });
   Logger.info("✌️ Dependency Injector loaded");
 
-  if(isExpress) {
+  if (isExpress) {
     expressLoader({ app: expressApp });
     Logger.info("✌️ Express loaded");
   }
