@@ -6,6 +6,11 @@ const UserBalance = new mongoose.Schema(
       type: String,
       index: true,
     },
+    chainId: {
+      type: Number,
+      index: true,
+      default: 56
+    },
     balance: [
       {
         tokenName: { type: String },
