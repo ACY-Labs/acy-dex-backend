@@ -59,6 +59,24 @@ export default (app: Router) => {
     }
   );
 
+  route.get(
+    "/userLaunchInfo",
+    async (req: Request, res: Response, next: NextFunction) => {
+      logger.debug(
+        "Get User Launch Info: %o",
+        req.query
+      );
+      try {
+        const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
+        const data = await launchServiceInstance.getUserLaunchInfo();
+        return res.status(201).json(data);
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
+
   // This route only used while developing
   route.get(
     "/projects/add",

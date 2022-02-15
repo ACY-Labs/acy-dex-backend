@@ -107,6 +107,17 @@ export default class LaunchService {
       return result2;
     }
   }
+
+  public async getUserLaunchInfo() {
+    this.logger.info("Retreive userLaunch Info!");
+    let data = await this.userLaunchModel.find().exec();
+
+    if (!data)
+      this.logger.info(`Retrieve userLaunch data failed`);
+
+      return data;
+  }
+
   public async getProjectsByID(projectsId: Number) {
     this.logger.info(`Retrieve project from db`);
     let data = await this.launchModel.findOne({ projectID: projectsId }).exec();

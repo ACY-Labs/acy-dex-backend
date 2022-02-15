@@ -3,7 +3,7 @@ import { Container } from "typedi";
 // import ChartService from "../../services/chart";
 import { Logger } from "winston";
 import LaunchChartService from "../../services/launchChart";
-
+import UserLaunchService from "../../models/userLaunch";
 import LaunchChart from "../../models/launchChart";
 
 const route = Router();
