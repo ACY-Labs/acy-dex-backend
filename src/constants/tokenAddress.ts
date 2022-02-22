@@ -30,9 +30,25 @@ const BscMainNetTokenList: Array<TokenInfo> = [
     symbol: 'STORE',
     address: '0x65d9033cff96782394dab5dbef17fa771bbe1732',
     decimals: 18,
-    logoURI: 'https://storageapi.fleek.co/5bec74db-774b-4b8a-b735-f08a5ec1c1e6-bucket/token_STORE.svg',
+    logoURI: 'https://storageapi.fleek.co/5bec74db-774b-4b8a-b735-f08a5ec1c1e6-bucket/tokenlist/bitstore-min.svg',
     idOnCoingecko: "bit-store-coin",
   },
+  {
+    name: 'Owl Analytics',
+    symbol: 'OWLA',
+    address: '0x6E78D6831303A9e53a0F1C92389aA5128Bc38A09',
+    decimals: 18,
+    logoURI: 'https://storageapi.fleek.co/5bec74db-774b-4b8a-b735-f08a5ec1c1e6-bucket/tokenlist/OWLA-min.png',
+    idOnCoingecko: "undefined",
+  },
+  // {
+  //   name: 'DX Spot',
+  //   symbol: 'DXS',
+  //   address: '0xBd9A43BA37a748b89331BD5Df2Ab5BC7815Cc6Bb',
+  //   decimals: 8,
+  //   logoURI: 'https://storageapi.fleek.co/5bec74db-774b-4b8a-b735-f08a5ec1c1e6-bucket/tokenlist/DXSpot-min.png',
+  //   idOnCoingecko: "undefined",
+  // },
   {
     name: 'Binance Coin',
     symbol: 'BNB',
@@ -49,14 +65,14 @@ const BscMainNetTokenList: Array<TokenInfo> = [
     logoURI: 'https://cryptologos.cc/logos/binance-usd-busd-logo.svg?v=014',
     idOnCoingecko: "tether",
   },
-  // {
-  //   name: 'Wrapped BNB',
-  //   symbol: 'WBNB',
-  //   address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
-  //   decimals: 18,
-  //   logoURI: 'https://cryptologos.cc/logos/binance-coin-bnb-logo.svg?v=014',
-  //   idOnCoingecko: "binancecoin",
-  // },
+  {
+    name: 'Wrapped BNB',
+    symbol: 'WBNB',
+    address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+    decimals: 18,
+    logoURI: 'https://cryptologos.cc/logos/binance-coin-bnb-logo.svg?v=014',
+    idOnCoingecko: "binancecoin",
+  },
 
   {
     name: 'Ethereum',
@@ -78,6 +94,15 @@ const BscMainNetTokenList: Array<TokenInfo> = [
 
 const BscTestNetTokenList: Array<TokenInfo> = [
   {
+    name: 'Test Coin',
+    symbol: 'USDT',
+    address: '0xF82eEeC2C58199cb409788E5D5806727cf549F9f',
+    addressOnEth: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+    decimals: 18,
+    logoURI: 'https://storageapi.fleek.co/chwizdo-team-bucket/ACY Token List/USDT.svg',
+    idOnCoingecko: "usd-coin",
+  },
+  {
     name: 'Binance Coin',
     symbol: 'BNB',
     address: '0xae13d989dac2f0debff460ac112a837c89baa7cd',
@@ -95,15 +120,15 @@ const BscTestNetTokenList: Array<TokenInfo> = [
     logoURI: 'https://storageapi.fleek.co/chwizdo-team-bucket/ACY Token List/USDC.svg',
     idOnCoingecko: "usd-coin",
   },
-  // {
-  //   name: 'Wrapped BNB',
-  //   symbol: 'WBNB',
-  //   address: '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd',
-  //   addressOnEth: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-  //   decimals: 18,
-  //   logoURI: 'https://cryptologos.cc/logos/binance-coin-bnb-logo.svg?v=014',
-  //   idOnCoingecko: "binancecoin",
-  // },
+  {
+    name: 'Wrapped BNB',
+    symbol: 'WBNB',
+    address: '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd',
+    addressOnEth: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+    decimals: 18,
+    logoURI: 'https://cryptologos.cc/logos/binance-coin-bnb-logo.svg?v=014',
+    idOnCoingecko: "binancecoin",
+  },
   {
     name: 'ACY',
     symbol: 'ACY',
@@ -325,7 +350,7 @@ const PolygonMainNetTokenList: Array<TokenInfo> = [
     symbol: 'NULS',
     address: '0x8b8e48a8cc52389cd16a162e5d8bd514fabf4ba0',
     decimals: 8,
-    logoURI: 'https://cryptologos.cc/logos/nuls-nuls-logo.svg?v=018',
+    logoURI: 'https://storageapi.fleek.co/5bec74db-774b-4b8a-b735-f08a5ec1c1e6-bucket/tokenlist/NULS-min.svg',
     idOnCoingecko: "nuls",
   },
   {
