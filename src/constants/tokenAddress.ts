@@ -41,14 +41,14 @@ const BscMainNetTokenList: Array<TokenInfo> = [
     logoURI: 'https://storageapi.fleek.co/5bec74db-774b-4b8a-b735-f08a5ec1c1e6-bucket/tokenlist/OWLA-min.png',
     idOnCoingecko: "undefined",
   },
-  // {
-  //   name: 'DX Spot',
-  //   symbol: 'DXS',
-  //   address: '0xBd9A43BA37a748b89331BD5Df2Ab5BC7815Cc6Bb',
-  //   decimals: 8,
-  //   logoURI: 'https://storageapi.fleek.co/5bec74db-774b-4b8a-b735-f08a5ec1c1e6-bucket/tokenlist/DXSpot-min.png',
-  //   idOnCoingecko: "undefined",
-  // },
+  {
+    name: 'DX Spot',
+    symbol: 'DXS',
+    address: '0xB0Df5519F460E96117C12Ea667557b161866189c',
+    decimals: 8,
+    logoURI: 'https://storageapi.fleek.co/5bec74db-774b-4b8a-b735-f08a5ec1c1e6-bucket/tokenlist/DXSpot-min.svg',
+    idOnCoingecko: "undefined",
+  },
   {
     name: 'Binance Coin',
     symbol: 'BNB',
