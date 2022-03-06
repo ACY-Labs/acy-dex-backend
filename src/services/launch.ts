@@ -3,7 +3,7 @@ import Web3 from "web3";
 import { Logger, loggers } from "winston";
 import { ERC20_ABI, FARM_ADDRESS, GAS_TOKEN } from "../constants";
 import TokenListSelector from "../constants/tokenAddress"
-import { sleep, getTokensPrice } from "../util";
+import { sleep, getTokensPrice, recursiveUpdateObject } from "../util";
 import moment from "moment";
 import { Container } from "typedi";
 import UserService from "./user";
@@ -110,7 +110,11 @@ export default class LaunchService {
     let data = await this.launchModel.findOne({ projectID: projectsId }).exec();
     if (!data)
       this.logger.info(`Retrieve data failed`);
-    this.logger.debug("end getProjectsByID");
+
+    // remove unused key
+    data.allocationInfo.processRecords = [];
+
+    this.logger.debug("end getProjectsByID"); 
     return data;
   }
 
@@ -193,6 +197,31 @@ export default class LaunchService {
       }
     })
     return userProject
+  }
+
+  public async updateProjectsByID(projectID: Number, body: Object) {
+    let project = await this.launchModel.findOne({
+      projectID: projectID
+    }).exec();
+
+    recursiveUpdateObject(project, body);
+    console.log(JSON.stringify(project));
+    let block = true;
+    await project.save((err) => {
+      if (err) {
+        this.logger.error(`Mongo saving user record error: ${err}`);
+        return false;
+      } else {
+        this.logger.info(`Project updated, body: ${JSON.stringify(body)}`);
+        block = false;
+      }
+    })
+
+    while (block) {
+      await sleep(10);
+    }
+
+    return true;
   }
 
   public async requireAllocation(walletId: String, projectToken: String) {

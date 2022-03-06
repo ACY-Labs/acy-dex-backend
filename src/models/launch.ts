@@ -8,7 +8,7 @@ const Launch = new mongoose.Schema(
     },
     projectID: {
       type: Number,
-      required: true,
+      required: true
     },
     basicInfo: {
       projectName: {

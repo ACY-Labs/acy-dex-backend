@@ -2,7 +2,6 @@ import { Router, Request, Response, NextFunction } from "express";
 import { Container } from "typedi";
 import LaunchService from "../../services/launch";
 import { Logger } from "winston";
-import { InvalidatedProjectKind } from "typescript";
 
 const route = Router();
 
@@ -63,6 +62,28 @@ export default (app: Router) => {
     }
   );
 
+  route.post(
+    "/projects/update/:projectsId",
+    async (req: Request, res: Response, next: NextFunction) => {
+      logger.debug(
+        "Calling chart POST endpoint /add with query: %o",
+        req.query
+      );
+      try {
+        const {projectsId} = req.params;
+        const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
+        const result = await launchServiceInstance.updateProjectsByID(projectsId, req.body);
+        if(result) {
+          return res.status(201).json({'msg': 'update project success'});
+        } else {
+          return res.status(401).json({'msg': 'update project failed'});
+        }
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
 
   route.get(
     "/allocation/require",

@@ -158,3 +158,17 @@ export async function getTokensPrice(tokenlist) {
   return tokensPrice;
 }
 
+export function recursiveUpdateObject(obj1, obj2) {
+  for(var key in obj1) {
+    if (key in obj2) {
+      if (typeof obj1[key] === "object" && typeof obj2[key] === "object") {
+        recursiveUpdateObject(obj1[key], obj2[key])
+      }
+      if (typeof obj1[key] !== "object" && typeof obj2[key] !== "object") {
+        if (obj1[key] !== obj2[key]) {
+          obj1[key] = obj2[key];
+        }
+      }
+    }
+  }
+}
