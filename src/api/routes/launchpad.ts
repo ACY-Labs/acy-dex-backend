@@ -129,6 +129,25 @@ export default (app: Router) => {
   );
 
   route.get(
+    "/record_wallet",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { walletId, projectToken, recordWalletId } = req.query;
+        if (!walletId || !projectToken || !recordWalletId) {
+          throw new Error("lack of request parameters");
+        }
+        
+        const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
+        const data = await launchServiceInstance.recordWallet(walletId, projectToken, recordWalletId);
+        return res.status(201).json(data);
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
+
+  route.get(
     "/allocation/bonus",
     async (req: Request, res: Response, next: NextFunction) => {
       try {

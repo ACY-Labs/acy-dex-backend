@@ -470,6 +470,26 @@ export default class LaunchService {
     return userProject;
   }
 
+  public async verifyValidWallet(projectToken: String, walletId: String) {
+    console.log('not implemented yet.')
+  }
+
+  public async recordWallet(walletId: String, projectToken: String, recordWalletId: String) {
+    this.logger.info(`recordWallet ${walletId} - ${projectToken} - ${recordWalletId}`);
+    // only allow integer amount
+    let user = await this.userLaunchModel.findOne({
+      walletId: walletId
+    }).exec()
+    let projectIndex = user.projects.findIndex(item => item.projectToken === projectToken);
+    let userProject = user.projects[projectIndex];
+    
+
+    userProject.recordWalletId = recordWalletId;
+    this.logger.info(`userProject ${userProject}`);
+    const res = await user.save();
+    return userProject;
+  }
+
   public async bonusAllocation(walletId: String, bonusName: String, T: Number) {
     this.logger.info(`bonusAllocation ${walletId} - ${bonusName} - ${T}`);
     let user = await this.userLaunchModel.findOne({

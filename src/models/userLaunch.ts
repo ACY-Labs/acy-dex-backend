@@ -31,7 +31,8 @@ const UserLaunch = new mongoose.Schema(
                         vestingTime: { type: Date },
                         vestingAmount: { type: Number }
                     }
-                ]
+                ],
+                recordWalletId: { type: String }
             }
         ],
         assessment: {
