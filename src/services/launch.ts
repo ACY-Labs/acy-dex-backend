@@ -133,7 +133,8 @@ export default class LaunchService {
       allocationInfo.push({ 
         walletId: user.walletId, 
         projectToken: projectToken, 
-        allocationAmount: userProject.allocationAmount 
+        allocationAmount: userProject.allocationAmount,
+        recordWalletId: userProject.recordWalletId
       })
       total_allocation += userProject.allocationAmount;
     }
@@ -141,6 +142,7 @@ export default class LaunchService {
     return {
       total_participants: allocationInfo.length,
       total_allocation: total_allocation,
+      projectToken: projectToken,
       data: allocationInfo
     }
   }
@@ -480,6 +482,11 @@ export default class LaunchService {
     let user = await this.userLaunchModel.findOne({
       walletId: walletId
     }).exec()
+
+    if (user === null) {
+      throw new Error("No such user.")
+    }
+
     let projectIndex = user.projects.findIndex(item => item.projectToken === projectToken);
     let userProject = user.projects[projectIndex];
     
