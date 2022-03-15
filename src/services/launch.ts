@@ -118,6 +118,19 @@ export default class LaunchService {
     return data;
   }
 
+  public async getProjectsByPoolID(poolID: Number) {
+    this.logger.info(`Retrieve project from db`);
+    let data = await this.launchModel.findOne({ "basicInfo.poolID": Number(poolID) }).exec();
+    if (!data)
+      this.logger.info(`Retrieve data failed`);
+
+    // remove unused key
+    data.allocationInfo.processRecords = [];
+
+    this.logger.debug("end getProjectsByID"); 
+    return data;
+  }
+
   public async getAllAllocationInfo(projectToken: String) {
     this.logger.info(`getAllAllocationInfo ${projectToken}`);
     let data = await this.userLaunchModel.find().exec();

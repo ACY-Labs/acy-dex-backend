@@ -62,6 +62,27 @@ export default (app: Router) => {
     }
   );
 
+  route.get(
+    "/projects/get_by_pool/:poolID",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { poolID } = req.params;
+        const launchServiceInstance = new LaunchService(req.models, req.constants, logger);
+
+        if (poolID) {
+          const data = await launchServiceInstance.getProjectsByPoolID(poolID);
+          return res.status(201).json(data);
+        } else {
+          throw new Error("lack of request parameters");
+        }
+        
+      } catch (e) {
+        logger.error("🔥 error: %o", e);
+        return next(e);
+      }
+    }
+  );
+
   route.post(
     "/projects/update/:projectsId",
     async (req: Request, res: Response, next: NextFunction) => {
