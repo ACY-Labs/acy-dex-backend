@@ -22,7 +22,6 @@ export default class FarmService {
     this.chainId = chainId;
     this.logger = logger;
     this.supportedTokens = TokenListSelector(chainId);
-    console.log(this.supportedTokens);
   }
   public getTokenSymbol(address) {
       return this.supportedTokens.find(token => token.address.toLowerCase() == address.toLowerCase()).symbol;

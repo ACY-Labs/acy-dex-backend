@@ -132,6 +132,10 @@ export default class PoolService {
     // check if transaction is successful
     let tryCount = 0;
     let receipt;
+    if(txHash == null && action == "add") {
+      const res = await this.updateUserPoolsDBRecrod(walletId, action, token0, token1);
+      return res;
+    }
     while (!receipt) {
       await this.delay(1000);
       receipt = await this.web3.eth.getTransactionReceipt(txHash);
