@@ -29,6 +29,22 @@ const Launch = new mongoose.Schema(
         type: String,
         required: true
       },
+      mainCoin: {
+        type: String,
+        required: true
+      },
+      chainId: {
+        type: Number,
+        required: true
+      },
+      distributionType: {
+        type: String,
+        required: true
+      },
+      distributionLink: {
+        type: String,
+        required: false
+      }
     },
     saleInfo: {
       tokenPrice: {
