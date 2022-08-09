@@ -3,7 +3,19 @@ import { Container } from "typedi";
 import Web3 from "web3";
 import supportedTokens from "../constants/supportedTokens";
 import axios from 'axios';
-import { FACTORY_ADDRESS, INIT_CODE_HASH, RPC_URL, PAIR_CONTRACT_ABI, CHAINID } from "../constants";
+import { 
+  FACTORY_ADDRESS, 
+  INIT_CODE_HASH, 
+  RPC_URL, 
+  PAIR_CONTRACT_ABI, 
+  CHAINID, 
+  ALP_ABI, 
+  ALP_MANAGER_ABI,
+  ACY_ABI,
+  ALP_CONTRACT_ADDRESS,
+  ALP_MANAGER_CONTRACT_ADDRESS,
+  ACY_CONTRACT_ADDRESS,
+} from "../constants";
 import { JsonRpcProvider } from "@ethersproject/providers"
 import { Token, TokenAmount, Fetcher } from '@acyswap/sdk';
 import { Contract } from '@ethersproject/contracts';
@@ -171,4 +183,48 @@ export function recursiveUpdateObject(obj1, obj2) {
       }
     }
   }
+}
+
+export async function getLPTokenRatio(walletId) {
+  // let web3: Web3 = Container.get("web3");
+  const web3 = new Web3("https://polygontestapi.terminet.io/rpc")
+
+  var AlpContract = new web3.eth.Contract(ALP_ABI,ALP_CONTRACT_ADDRESS)
+  let totalSupply = AlpContract.methods.totalSupply().call().then((value)=>{return value})
+  let balanceOf = AlpContract.methods.balanceOf(walletId).call().then((value)=>{return value})
+  let big_total = BigInt(await totalSupply)
+  let big_balance = BigInt(await balanceOf)
+  let ratio = Number(big_balance*BigInt(100)/big_total)/100
+
+  return ratio
+}
+
+export async function getLPTokenInUsda(ratio:any) {
+  // let web3: Web3 = Container.get("web3");
+  const web3 = new Web3("https://polygontestapi.terminet.io/rpc")
+
+  var AlpManagerContract = new web3.eth.Contract(ALP_MANAGER_ABI,ALP_MANAGER_CONTRACT_ADDRESS)
+  let aumInUsda = AlpManagerContract.methods.getAumInUsda(true).call().then((value)=>{return value})
+  let aum = await aumInUsda
+
+  let lpTokenValue = aum*ratio
+  return lpTokenValue
+}
+
+export async function getAcyToken(walletId) {
+  // let web3: Web3 = Container.get("web3");
+  const web3 = new Web3("https://polygontestapi.terminet.io/rpc")
+  var AcyContract = new web3.eth.Contract(ACY_ABI,ACY_CONTRACT_ADDRESS)
+  let balanceOf = AcyContract.methods.balanceOf(walletId).call().then((value)=>{return value})
+  let balance = await balanceOf
+  return balance
+}
+
+export async function getAcyTokenInUsda(acyToken:any) {
+  const acyTokensPrice = await axios.get(
+    `https://api.coingecko.com/api/v3/simple/price?ids=acy-finance&vs_currencies=usd`
+  ).then((res)=>{return res.data['acy-finance']['usd']})
+
+  let value = acyTokensPrice*acyToken
+  return value
 }

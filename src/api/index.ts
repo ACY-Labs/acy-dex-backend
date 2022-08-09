@@ -10,6 +10,7 @@ import userInfo from "./routes/user";
 import txList from "./routes/txList";
 import tokenPrice from "./routes/tokenPrice";
 import cexPrices from "./routes/cexPrices";
+import vote from "./routes/vote";
 
 // guaranteed to get dependencies
 export default () => {
@@ -25,6 +26,7 @@ export default () => {
   txList(app);
   tokenPrice(app);
   cexPrices(app);
+  vote(app);
 
   return app;
 };
